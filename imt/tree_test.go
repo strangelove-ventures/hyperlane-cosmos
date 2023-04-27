@@ -18,6 +18,7 @@ type MerkleProof struct {
 	Leaf string;
 	Index int;
 	Path []string;
+	ExpectedRoot string;
 }
 
 type MerkleVector struct {
@@ -108,3 +109,63 @@ func TestVectors(t* testing.T) {
 		})
 	}
 }
+
+func TestIncrementalVectors(t* testing.T) {
+	var cases []MerkleVector
+
+	// Open the test cases
+	jsonFile, err := os.Open("incremental_merkle.json")
+	require.Nil(t, err)
+
+	// Read them in
+	byteValue, _ := io.ReadAll(jsonFile)
+	err = json.Unmarshal(byteValue, &cases)
+	require.Nil(t, err)
+
+	// Test them
+	for _, c := range cases {
+		t.Run(fmt.Sprintf("Testing case: %s", c.TestName), func(t *testing.T){
+			// Verify leaves
+			for idx, p := range c.Proofs {
+				i := imt.Tree{}
+				for index := 0; index <= idx; index++ {
+					hash := crypto.Keccak256([]byte(c.Leaves[index]))
+					// Make sure we get the expected digest
+					expectedLeaf, err := hex.DecodeString(c.Proofs[index].Leaf[2:])
+					require.Nil(t, err)
+					require.Equal(t, hash[:], expectedLeaf)
+
+					// Insert into the tree
+					err = i.Insert(hash)
+					require.Nil(t, err)
+				}
+
+				// Make sure we've inserted the correct amount
+				require.Equal(t, i.Count(), idx+1)
+				
+				leaf, err := hex.DecodeString(p.Leaf[2:])
+				require.Nil(t, err)
+				
+				// Make sure we've computed the expected root
+				expectedRoot, err := hex.DecodeString(p.ExpectedRoot[2:])
+				require.Nil(t, err)
+
+				r := i.Root()
+				require.Equal(t, r[:], expectedRoot)
+
+				paths := [imt.TreeDepth][]byte{}
+				for idx, path  := range p.Path {
+					pBytes, err := hex.DecodeString(path[2:])
+					require.Nil(t, err)
+					paths[idx] = pBytes
+				}
+
+				// Make sure we get the expected branch root
+				proofRoot, err := imt.BranchRoot(leaf, paths, p.Index)
+				require.Nil(t, err)
+				require.Equal(t, proofRoot[:], expectedRoot)
+			}
+		})
+	}
+}
+
