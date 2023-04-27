@@ -4,11 +4,12 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
     "testing"
 	"github.com/stretchr/testify/require"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/imt"
 )
@@ -26,6 +27,22 @@ type MerkleVector struct {
 	Proofs []MerkleProof;
 }
 
+func TestFootGuns(t* testing.T) {
+	i := imt.Tree{}
+
+	emptySlice := []byte{}
+	err := i.Insert(emptySlice)
+	require.NotNil(t, err, "nodes must be 32-bytes")
+
+	zeroes_31 := common.FromHex("0x00000000000000000000000000000000000000000000000000000000000000")
+	err = i.Insert(zeroes_31)
+	require.NotNil(t, err, "nodes must be 32-bytes")
+
+	zeroes_33 := common.FromHex("0x000000000000000000000000000000000000000000000000000000000000000000")
+	err = i.Insert(zeroes_33)
+	require.NotNil(t, err, "nodes must be 32-bytes")
+}
+
 func TestVectors(t* testing.T) {
 	var cases []MerkleVector
 
@@ -34,8 +51,9 @@ func TestVectors(t* testing.T) {
 	require.Nil(t, err)
 
 	// Read them in
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-	json.Unmarshal(byteValue, &cases)
+	byteValue, _ := io.ReadAll(jsonFile)
+	err = json.Unmarshal(byteValue, &cases)
+	require.Nil(t, err)
 
 	// Test them
 	for _, c := range cases {
@@ -55,9 +73,9 @@ func TestVectors(t* testing.T) {
 				require.Equal(t, hash[:], expectedLeaf)
 
 				// Insert into the tree
-				var h [32]byte
-				copy(h[:], hash)
-				i.Insert(h)
+				err = i.Insert(hash)
+				require.Nil(t, err)
+
 			}
 
 			// Make sure we've inserted the correct amount
@@ -66,6 +84,7 @@ func TestVectors(t* testing.T) {
 			// Make sure we've computed the expected root
 			expectedRoot, err := hex.DecodeString(c.ExpectedRoot[2:])
 			require.Nil(t, err)
+
 			r := i.Root()
 			require.Equal(t, r[:], expectedRoot)
 
@@ -74,17 +93,16 @@ func TestVectors(t* testing.T) {
 				leaf, err := hex.DecodeString(p.Leaf[2:])
 				require.Nil(t, err)
 
-				paths := [32][32]byte{}
+				paths := [imt.TreeDepth][]byte{}
 				for idx, path  := range p.Path {
 					pBytes, err := hex.DecodeString(path[2:])
 					require.Nil(t, err)
-					copy(paths[idx][:], pBytes)
+					paths[idx] = pBytes
 				}
 
 				// Make sure we get the expected branch root
-				var l [32]byte
-				copy(l[:], leaf)
-				proofRoot := imt.BranchRoot(l, paths, p.Index)
+				proofRoot, err := imt.BranchRoot(leaf, paths, p.Index)
+				require.Nil(t, err)
 				require.Equal(t, proofRoot[:], expectedRoot)
 			}
 		})
