@@ -1,0 +1,21 @@
+syntax = "proto3";
+package hyperlane.mailbox.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types";
+
+// Hyperlane mailbox's keeper genesis state
+message GenesisState {
+  // Each genesis tree entry
+  repeated GenesisTreeEntry tree_entry = 1 [ (gogoproto.nullable) = false ];
+}
+
+// Hyperlane's tree entry
+message GenesisTreeEntry {
+  option (gogoproto.goproto_getters) = false;
+  // index
+  uint32 index = 1;
+  // message
+  bytes message = 2;
+}

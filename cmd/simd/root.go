@@ -32,6 +32,7 @@ import (
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/app"
 	"github.com/strangelove-ventures/hyperlane-cosmos/app/params"
+
 	"github.com/CosmWasm/wasmd/x/wasm"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
