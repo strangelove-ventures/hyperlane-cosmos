@@ -1,0 +1,19 @@
+syntax = "proto3";
+package hyperlane.mailbox.v1;
+
+option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types";
+
+// Msg defines the hyperlane mailbox Msg service.
+service Msg {
+  // SetDefaultIsm defines a rpc handler method for MsgSetDefaultIsm.
+  rpc SetDefaultIsm(MsgSetDefaultIsm) returns (MsgSetDefaultIsmResponse);
+}
+
+// MsgSetDefaultIsm defines the request type for the SetDefaultIsm rpc.
+message MsgSetDefaultIsm {
+  string signer = 1;
+  string ism_hash = 2;
+}
+
+// MsgSetDefaultIsmResponse defines the Msg/SetDefaultIsm response type
+message MsgSetDefaultIsmResponse {}

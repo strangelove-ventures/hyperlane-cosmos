@@ -1,0 +1,25 @@
+syntax = "proto3";
+package hyperlane.mailbox.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types";
+
+// Query service for hyperlane mailbox module
+service Query {
+  // Get current tree metadata
+  rpc CurrentTreeMetadata(QueryCurrentTreeMetadataRequest)
+      returns (QueryCurrentTreeMetadataResponse) {
+    option (google.api.http).get = "/hyperlane/mailbox/v1/tree";
+  }
+}
+
+// QueryCurrentTreeMetadataRequest is the request type for the Query/Tree RPC
+// method.
+message QueryCurrentTreeMetadataRequest {}
+
+// QueryTreeResponse is the response type for the Query/Tree RPC method.
+message QueryCurrentTreeMetadataResponse {
+  bytes root = 1;
+  uint32 count = 2;
+}
