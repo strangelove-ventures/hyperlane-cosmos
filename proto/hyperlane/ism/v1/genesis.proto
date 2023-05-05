@@ -1,0 +1,21 @@
+syntax = "proto3";
+package hyperlane.ism.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types";
+
+// Hyperlane ISM's keeper genesis state
+message GenesisState {
+  // Genesis default ISM
+  GenesisDefaultIsm default_ism = 1 [ (gogoproto.nullable) = false ];
+}
+
+// Hyperlane's default ISM
+message GenesisDefaultIsm {
+  option (gogoproto.goproto_getters) = false;
+  // Validator pub keys
+  repeated bytes validator_pub_keys = 1;
+  // number of validators required
+  uint32 threshold = 2;
+}

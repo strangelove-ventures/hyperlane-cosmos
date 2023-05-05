@@ -128,9 +128,13 @@ import (
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
+	// Hyperlane dependencies
 	mailbox "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox"
 	mailboxkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/keeper"
 	mailboxtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
+	ism "github.com/strangelove-ventures/hyperlane-cosmos/x/ism"
+	ismkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
+	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 )
 
 const appName = "SimApp"
@@ -228,6 +232,7 @@ var (
 		ica.AppModuleBasic{},
 		ibcfee.AppModuleBasic{},
 		mailbox.AppModuleBasic{},
+		ism.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -290,6 +295,7 @@ type SimApp struct {
 	TransferKeeper      ibctransferkeeper.Keeper
 	WasmKeeper          wasm.Keeper
 	MailboxKeeper       mailboxkeeper.Keeper
+	IsmKeeper           ismkeeper.Keeper
 
 	ScopedIBCKeeper           capabilitykeeper.ScopedKeeper
 	ScopedICAHostKeeper       capabilitykeeper.ScopedKeeper
@@ -340,7 +346,7 @@ func NewSimApp(
 		// non sdk store keys
 		ibcexported.StoreKey, ibctransfertypes.StoreKey, ibcfeetypes.StoreKey,
 		wasm.StoreKey, icahosttypes.StoreKey,
-		icacontrollertypes.StoreKey, mailboxtypes.StoreKey,
+		icacontrollertypes.StoreKey, mailboxtypes.StoreKey, ismtypes.StoreKey,
 	)
 
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -613,6 +619,7 @@ func NewSimApp(
 	)
 
 	app.MailboxKeeper = mailboxkeeper.NewKeeper(appCodec, keys[mailboxtypes.StoreKey])
+	app.IsmKeeper = ismkeeper.NewKeeper(appCodec, keys[ismtypes.StoreKey], authtypes.NewModuleAddress(govtypes.ModuleName).String())
 
 	// The gov proposal types can be individually enabled
 	if len(enabledProposals) != 0 {
@@ -693,6 +700,7 @@ func NewSimApp(
 		ibcfee.NewAppModule(app.IBCFeeKeeper),
 		ica.NewAppModule(&app.ICAControllerKeeper, &app.ICAHostKeeper),
 		mailbox.NewAppModule(app.MailboxKeeper),
+		ism.NewAppModule(app.IsmKeeper),
 		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
 	)
 
@@ -714,6 +722,7 @@ func NewSimApp(
 		ibcfeetypes.ModuleName,
 		wasm.ModuleName,
 		mailboxtypes.ModuleName,
+		ismtypes.ModuleName,
 	)
 
 	app.ModuleManager.SetOrderEndBlockers(
@@ -730,6 +739,7 @@ func NewSimApp(
 		ibcfeetypes.ModuleName,
 		wasm.ModuleName,
 		mailboxtypes.ModuleName,
+		ismtypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -754,6 +764,7 @@ func NewSimApp(
 		// wasm after ibc transfer
 		wasm.ModuleName,
 		mailboxtypes.ModuleName,
+		ismtypes.ModuleName,
 	}
 	app.ModuleManager.SetOrderInitGenesis(genesisModuleOrder...)
 	app.ModuleManager.SetOrderExportGenesis(genesisModuleOrder...)
