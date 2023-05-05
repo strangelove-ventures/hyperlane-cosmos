@@ -1,0 +1,36 @@
+syntax = "proto3";
+package hyperlane.ism.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types";
+
+// Query service for hyperlane ISM module
+service Query {
+  // Get current default multisig ISM
+  rpc DefaultIsm(QueryDefaultIsmRequest) returns (QueryDefaultIsmResponse) {
+    option (google.api.http).get = "/hyperlane/ism/v1/default_ism";
+  }
+  // Get contract's ISM
+  rpc ContractIsm(QueryContractIsmRequest) returns (QueryContractIsmResponse) {
+    option (google.api.http).get = "/hyperlane/ism/v1/contract_ism";
+  }
+}
+
+// QueryDefaultIsmRequest is the request type for the DefaultIsm RPC method.
+message QueryDefaultIsmRequest {}
+
+// QueryDefaultIsmResponse is the response type for the DefaultIsm RPC method.
+message QueryDefaultIsmResponse {
+  repeated bytes validator_pub_keys = 1;
+  uint32 threshold = 2;
+}
+
+// QueryContractIsmRequest is the request type for the ContractIsm RPC method.
+message QueryContractIsmRequest { bytes contract_addr = 1; }
+
+// QueryContractIsmResponse is the response type for the ContractIsm RPC method.
+message QueryContractIsmResponse {
+  repeated bytes validator_pub_keys = 1;
+  uint32 threshold = 2;
+}
