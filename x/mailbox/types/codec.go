@@ -13,7 +13,6 @@ func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 		(*sdk.Msg)(nil),
 		&MsgDispatch{},
 		&MsgProcess{},
-		&MsgSetDefaultIsm{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

@@ -17,8 +17,6 @@ service Msg {
   rpc Dispatch(MsgDispatch) returns (MsgDispatchResponse);
   // Process delivers interchain messages
   rpc Process(MsgProcess) returns (MsgProcessResponse);
-  // SetDefaultIsm defines a rpc handler method for MsgSetDefaultIsm.
-  rpc SetDefaultIsm(MsgSetDefaultIsm) returns (MsgSetDefaultIsmResponse);
 }
 
 // MsgDispatch defines the request type for the Dispatch rpc.
@@ -54,12 +52,3 @@ message MsgProcess {
 
 // MsgProcessResponse defines the Process response type.
 message MsgProcessResponse {}
-
-// MsgSetDefaultIsm defines the request type for the SetDefaultIsm rpc.
-message MsgSetDefaultIsm {
-  string signer = 1;
-  string ism_hash = 2;
-}
-
-// MsgSetDefaultIsmResponse defines the Msg/SetDefaultIsm response type
-message MsgSetDefaultIsmResponse {}
