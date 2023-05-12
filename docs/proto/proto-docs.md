@@ -15,6 +15,10 @@
     - [Query](#hyperlane.mailbox.v1.Query)
   
 - [hyperlane/mailbox/v1/tx.proto](#hyperlane/mailbox/v1/tx.proto)
+    - [MsgDispatch](#hyperlane.mailbox.v1.MsgDispatch)
+    - [MsgDispatchResponse](#hyperlane.mailbox.v1.MsgDispatchResponse)
+    - [MsgProcess](#hyperlane.mailbox.v1.MsgProcess)
+    - [MsgProcessResponse](#hyperlane.mailbox.v1.MsgProcessResponse)
     - [MsgSetDefaultIsm](#hyperlane.mailbox.v1.MsgSetDefaultIsm)
     - [MsgSetDefaultIsmResponse](#hyperlane.mailbox.v1.MsgSetDefaultIsmResponse)
   
@@ -131,6 +135,64 @@ Query service for hyperlane mailbox module
 
 
 
+<a name="hyperlane.mailbox.v1.MsgDispatch"></a>
+
+### MsgDispatch
+MsgDispatch defines the request type for the Dispatch rpc.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `destination_domain` | [uint32](#uint32) |  |  |
+| `recpient_address` | [string](#string) |  |  |
+| `message_body` | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="hyperlane.mailbox.v1.MsgDispatchResponse"></a>
+
+### MsgDispatchResponse
+MsgDispatchResponse defines the Dispatch response type.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `message_id` | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="hyperlane.mailbox.v1.MsgProcess"></a>
+
+### MsgProcess
+MsgProcess defines the request type for the Process rpc.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `metadata` | [string](#string) |  |  |
+| `message` | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="hyperlane.mailbox.v1.MsgProcessResponse"></a>
+
+### MsgProcessResponse
+MsgProcessResponse defines the Process response type.
+
+
+
+
+
+
 <a name="hyperlane.mailbox.v1.MsgSetDefaultIsm"></a>
 
 ### MsgSetDefaultIsm
@@ -170,6 +232,8 @@ Msg defines the hyperlane mailbox Msg service.
 
 | Method Name | Request Type | Response Type | Description | HTTP Verb | Endpoint |
 | ----------- | ------------ | ------------- | ------------| ------- | -------- |
+| `Dispatch` | [MsgDispatch](#hyperlane.mailbox.v1.MsgDispatch) | [MsgDispatchResponse](#hyperlane.mailbox.v1.MsgDispatchResponse) | Dispatch sends interchain messages | |
+| `Process` | [MsgProcess](#hyperlane.mailbox.v1.MsgProcess) | [MsgProcessResponse](#hyperlane.mailbox.v1.MsgProcessResponse) | Process delivers interchain messages | |
 | `SetDefaultIsm` | [MsgSetDefaultIsm](#hyperlane.mailbox.v1.MsgSetDefaultIsm) | [MsgSetDefaultIsmResponse](#hyperlane.mailbox.v1.MsgSetDefaultIsmResponse) | SetDefaultIsm defines a rpc handler method for MsgSetDefaultIsm. | |
 
  <!-- end services -->

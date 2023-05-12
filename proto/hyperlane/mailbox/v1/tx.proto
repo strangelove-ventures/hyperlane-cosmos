@@ -1,13 +1,37 @@
 syntax = "proto3";
+
 package hyperlane.mailbox.v1;
 
 option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types";
 
 // Msg defines the hyperlane mailbox Msg service.
 service Msg {
+  // Dispatch sends interchain messages
+  rpc Dispatch(MsgDispatch) returns (MsgDispatchResponse);
+  // Process delivers interchain messages
+  rpc Process(MsgProcess) returns (MsgProcessResponse);
   // SetDefaultIsm defines a rpc handler method for MsgSetDefaultIsm.
   rpc SetDefaultIsm(MsgSetDefaultIsm) returns (MsgSetDefaultIsmResponse);
 }
+
+// MsgDispatch defines the request type for the Dispatch rpc.
+message MsgDispatch {
+  uint32 destination_domain = 1;
+  string recpient_address = 2;
+  string message_body = 3;
+}
+
+// MsgDispatchResponse defines the Dispatch response type.
+message MsgDispatchResponse { string message_id = 1; }
+
+// MsgProcess defines the request type for the Process rpc.
+message MsgProcess {
+  string metadata = 1;
+  string message = 2;
+}
+
+// MsgProcessResponse defines the Process response type.
+message MsgProcessResponse {}
 
 // MsgSetDefaultIsm defines the request type for the SetDefaultIsm rpc.
 message MsgSetDefaultIsm {
