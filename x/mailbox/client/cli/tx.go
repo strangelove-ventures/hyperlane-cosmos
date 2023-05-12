@@ -16,9 +16,9 @@ import (
 func dispatchCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "dispatch <destination-domain> <recipient-address> <message-body>",
-		Short:   "Set default ISM",
-		Long:    "Sets the default ISM for the mailbox",
-		Example: fmt.Sprintf("%s tx %s set-default-ism [ism-hash]", version.AppName, types.ModuleName),
+		Short:   "Dispatch message",
+		Long:    "Dispatch a message via hyperlane",
+		Example: fmt.Sprintf("%s tx %s dispatch <destination-domain> <recipient-address> <message-body>", version.AppName, types.ModuleName),
 		Args:    cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
@@ -37,6 +37,7 @@ func dispatchCmd() *cobra.Command {
 			messageBody := args[2]
 
 			msg := &types.MsgDispatch{
+				Sender:            clientCtx.GetFromAddress().String(),
 				DestinationDomain: destinationDomain,
 				RecipientAddress:  recipientAddress,
 				MessageBody:       messageBody,
@@ -57,22 +58,24 @@ func dispatchCmd() *cobra.Command {
 
 func processCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "set-default-ism [ism-hash]",
-		Short:   "Set default ISM",
-		Long:    "Sets the default ISM for the mailbox",
-		Example: fmt.Sprintf("%s tx %s set-default-ism [ism-hash]", version.AppName, types.ModuleName),
-		Args:    cobra.ExactArgs(1),
+		Use:     "process <metadata> <message>",
+		Short:   "Process message",
+		Long:    "Process a message via hyperlane",
+		Example: fmt.Sprintf("%s tx %s process <metadata> <message>", version.AppName, types.ModuleName),
+		Args:    cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			ismHash := args[0]
+			metadata := args[0]
+			message := args[1]
 
-			msg := &types.MsgSetDefaultIsm{
-				IsmHash: ismHash,
-				Signer:  clientCtx.GetFromAddress().String(),
+			msg := &types.MsgProcess{
+				Sender:   clientCtx.GetFromAddress().String(),
+				Metadata: metadata,
+				Message:  message,
 			}
 
 			if err := msg.ValidateBasic(); err != nil {
