@@ -16,7 +16,7 @@ import (
 
 type MerkleProof struct {
 	Leaf string;
-	Index int;
+	Index uint32;
 	Path []string;
 	ExpectedRoot string;
 }

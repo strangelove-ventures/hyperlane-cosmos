@@ -1,10 +1,11 @@
 package imt
 
 import (
-	"fmt"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/common"
 	"errors"
+	"fmt"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 const (
@@ -81,15 +82,17 @@ func (t* Tree) RootWithContext(zeroes [][]byte) []byte {
 }
 
 // BranchRoot calculates and returns the merkle root for the given leaf item, a merkle branch, and the index of item in the tree
-func BranchRoot(item []byte, branch [TreeDepth][]byte, index int) ([]byte, error) {
+func BranchRoot(item []byte, branch [TreeDepth][]byte, index uint32) ([]byte, error) {
 	if len(item) != 32 {
 		return nil, errors.New("must be 32-bytes")
 	}
 
-	current := item
+	current := make([]byte, 32)
+	copy(current, item)
 	for i := 0; i < TreeDepth; i++ {
 		ithBit := (index >> i) & 0x01
-		next := branch[i]
+		next := make([]byte, 32)
+		copy(next, branch[i])
 
 		var temp []byte
 		if ithBit == 1 {
