@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+<<<<<<< HEAD
 	"github.com/stretchr/testify/require"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
@@ -17,6 +18,18 @@ type MultisigIsmMetadata struct {
 	OriginMailbox []byte
 	Proof         []byte
 	signatures    [][]byte
+=======
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
+	"github.com/stretchr/testify/require"
+)
+
+type MultisigIsmMetadata struct {
+	Root []byte
+	Index uint32
+	OriginMailbox []byte
+	Proof []byte
+	signatures [][]byte
+>>>>>>> da5a6f7... Verify merkle proof working and verify validator signature WIP
 }
 
 func TestMetadataSuccess(t *testing.T) {
@@ -38,8 +51,13 @@ func TestMetadataSuccess(t *testing.T) {
 	metadata = append(metadata, proof...)
 	var signatures [][]byte
 	prefixSig := make([]byte, 64)
+<<<<<<< HEAD
 	for i := 0; i < 5; i++ {
 		signature, err := hex.DecodeString(fmt.Sprintf("2%d", i))
+=======
+	for i := 0; i<5; i++ {
+		signature, err := hex.DecodeString(fmt.Sprintf("2%d",i))
+>>>>>>> da5a6f7... Verify merkle proof working and verify validator signature WIP
 		require.NoError(t, err)
 		signature = append(prefixSig, signature...)
 		signatures = append(signatures, signature)
@@ -58,8 +76,16 @@ func TestMetadataSuccess(t *testing.T) {
 	getProof := types.Proof(metadata)
 	require.Equal(t, proof, getProof)
 
+<<<<<<< HEAD
 	for i := 0; i < 5; i++ {
 		getSig := types.SignatureAt(metadata, uint32(i))
 		require.Equal(t, signatures[i], getSig)
 	}
 }
+=======
+	for i := 0; i<5; i++ {
+		getSig := types.SignatureAt(metadata, uint32(i))
+		require.Equal(t, signatures[i], getSig)
+	}	
+}
+>>>>>>> da5a6f7... Verify merkle proof working and verify validator signature WIP

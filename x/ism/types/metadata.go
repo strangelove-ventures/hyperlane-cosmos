@@ -7,6 +7,7 @@ import (
 // This should be in a common library
 
 const (
+<<<<<<< HEAD
 	MERKLE_ROOT_OFFSET    = 0
 	MERKLE_INDEX_OFFSET   = 32
 	ORIGIN_MAILBOX_OFFSET = 36
@@ -16,6 +17,17 @@ const (
 	SIGNATURE_LENGTH      = 65
 	// SIGNATURES_OFFSET = 1092
 	// SIGNATURE_LENGTH = 65
+=======
+	MERKLE_ROOT_OFFSET = 0
+    MERKLE_INDEX_OFFSET = 32
+    ORIGIN_MAILBOX_OFFSET = 36
+	MERKLE_PROOF_OFFSET = 68
+	THRESHOLD_OFFSET = 1092
+    SIGNATURES_OFFSET = 1093
+    SIGNATURE_LENGTH = 65
+    //SIGNATURES_OFFSET = 1092
+    //SIGNATURE_LENGTH = 65
+>>>>>>> da5a6f7... Verify merkle proof working and verify validator signature WIP
 )
 
 func Root(metadata []byte) []byte {
@@ -32,7 +44,11 @@ func OriginMailbox(metadata []byte) []byte {
 
 func Proof(metadata []byte) []byte {
 	return metadata[MERKLE_PROOF_OFFSET:THRESHOLD_OFFSET]
+<<<<<<< HEAD
 	// return metadata[MERKLE_PROOF_OFFSET:SIGNATURES_OFFSET]
+=======
+	//return metadata[MERKLE_PROOF_OFFSET:SIGNATURES_OFFSET]
+>>>>>>> da5a6f7... Verify merkle proof working and verify validator signature WIP
 }
 
 func Threshold(metadata []byte) uint8 {
@@ -47,4 +63,8 @@ func SignatureAt(metadata []byte, index uint32) []byte {
 		signature[64] = signature[64] - 27
 	}
 	return signature
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> da5a6f7... Verify merkle proof working and verify validator signature WIP

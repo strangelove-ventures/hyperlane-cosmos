@@ -67,7 +67,7 @@ type TestCase struct {
 	expPass  bool
 }
 
-func (suite *KeeperTestSuite) TestVerify(){
+func (suite *KeeperTestSuite) TestVerify() {
 	var (
 		msg    *types.MsgSetDefaultIsm
 		signer string
@@ -81,10 +81,10 @@ func (suite *KeeperTestSuite) TestVerify(){
 		metadata, err := hex.DecodeString(metadatas[i])
 		suite.Require().NoError(err)
 		testCases = append(testCases, TestCase{
-			name: fmt.Sprintf("Message %d", i),
-			message: message,
+			name:     fmt.Sprintf("Message %d", i),
+			message:  message,
 			metadata: metadata,
-			expPass: true,
+			expPass:  true,
 		})
 	}
 
