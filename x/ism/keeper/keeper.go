@@ -2,7 +2,7 @@ package keeper
 
 import (
 	//"encoding/hex"
-	"encoding/hex"
+
 	"fmt"
 	"reflect"
 
@@ -18,15 +18,15 @@ type Keeper struct {
 	// implements gRPC QueryServer interface
 	types.QueryServer
 
-	storeKey  storetypes.StoreKey
-	cdc       codec.BinaryCodec
-	authority string
+	storeKey   storetypes.StoreKey
+	cdc        codec.BinaryCodec
+	authority  string
 	defaultIsm MultiSigIsm
 }
 
 type MultiSigIsm struct {
 	ValPubKeys [][]byte
-	Threshold uint32
+	Threshold  uint32
 }
 
 func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, authority string) Keeper {
@@ -47,9 +47,9 @@ func VerifyMerkleProof(metadata []byte, message []byte) bool {
 	proof := types.Proof(metadata)
 	paths := [imt.TreeDepth][]byte{}
 	for i := 0; i < imt.TreeDepth; i++ {
-		paths[i] = proof[i*32:(i+1)*32]
+		paths[i] = proof[i*32 : (i+1)*32]
 	}
-	
+
 	calculatedRoot, err := imt.BranchRoot(
 		types.Id(message),
 		paths,
@@ -58,7 +58,7 @@ func VerifyMerkleProof(metadata []byte, message []byte) bool {
 	if err != nil {
 		return false
 	}
-	
+
 	return reflect.DeepEqual(calculatedRoot, types.Root(metadata))
 }
 
@@ -72,20 +72,19 @@ func VerifyValidatorSignatures(metadata []byte, message []byte, ism MultiSigIsm)
 	digest := types.Digest(types.Origin(message), types.OriginMailbox(metadata), types.Root(metadata), types.Index(metadata))
 
 	validatorCount := len(ism.ValPubKeys)
-	validatorIndex := 0;
+	validatorIndex := 0
 	// Assumes that signatures are ordered by validator
 	for i := uint32(0); i < ism.Threshold; i++ {
 		// get signer
-		signer, err := crypto.Ecrecover(digest, types.SignatureAt(metadata, i)) 
+		signer, err := crypto.SigToPub(digest, types.SignatureAt(metadata, i))
 		if err != nil {
 			fmt.Println("signer recover error: ", err)
 			return false
 		}
 		//fmt.Println("Signer: ", hex.EncodeToString(signer))
-		signer = crypto.Keccak256(signer)
-		fmt.Println("Signer: ", hex.EncodeToString(signer))
+		signerAddress := crypto.PubkeyToAddress(*signer)
 		// Loop through remaining validators until we find a match
-		for validatorIndex < validatorCount && !reflect.DeepEqual(signer, ism.ValPubKeys[validatorIndex]) {
+		for validatorIndex < validatorCount && !reflect.DeepEqual(signerAddress.Bytes(), ism.ValPubKeys[validatorIndex]) {
 			validatorIndex++
 		}
 		// Fail if we never found a match
