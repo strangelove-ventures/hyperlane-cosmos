@@ -1,6 +1,5 @@
 package keeper_test
 
-
 import (
 	"encoding/hex"
 
@@ -27,7 +26,7 @@ func (suite *KeeperTestSuite) TestGenesis() {
 	}
 
 	suite.SetupTest()
-			
+
 	message, err := hex.DecodeString(messages[0])
 	suite.Require().NoError(err)
 	metadata, err := hex.DecodeString(metadatas[0])
@@ -40,5 +39,4 @@ func (suite *KeeperTestSuite) TestGenesis() {
 
 	pass = suite.keeper.Verify(metadata, message)
 	suite.Require().True(pass)
-
 }
