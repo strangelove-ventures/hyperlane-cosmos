@@ -129,12 +129,12 @@ import (
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
 	// Hyperlane dependencies
-	mailbox "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox"
-	mailboxkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/keeper"
-	mailboxtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 	ism "github.com/strangelove-ventures/hyperlane-cosmos/x/ism"
 	ismkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
+	mailbox "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox"
+	mailboxkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/keeper"
+	mailboxtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
 
 const appName = "SimApp"

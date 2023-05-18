@@ -14,12 +14,12 @@ const (
 )
 
 type Tree struct {
-	branch [TreeDepth][]byte;
-	count int;
+	branch [TreeDepth][]byte
+	count  int
 }
 
 // Insert inserts node into the Merkle Tree
-func (t* Tree) Insert(node []byte) error {
+func (t *Tree) Insert(node []byte) error {
 	if t.count >= MaxLeaves {
 		return errors.New("merkle tree full")
 	}
@@ -44,24 +44,24 @@ func (t* Tree) Insert(node []byte) error {
 }
 
 // Count returns the number of inserts performed on the Tree
-func (t* Tree) Count() int {
+func (t *Tree) Count() int {
 	return t.count
 }
 
 // Print dumps the tree (for debugging)
-func (t* Tree) Print() {
-	for i := 0; i < TreeDepth; i ++ {
+func (t *Tree) Print() {
+	for i := 0; i < TreeDepth; i++ {
 		fmt.Printf("%02d: %X\n", i, t.branch[i])
 	}
 }
 
 // Root calculates and returns Tree's current root
-func (t* Tree) Root() []byte { 
+func (t *Tree) Root() []byte {
 	return t.RootWithContext(ZeroHashes())
 }
 
 // RootWithCtx calculates and returns Tree's current root given array of zeroes
-func (t* Tree) RootWithContext(zeroes [][]byte) []byte {
+func (t *Tree) RootWithContext(zeroes [][]byte) []byte {
 	index := t.count
 
 	// We start with a 32-bit zero slice

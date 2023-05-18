@@ -6,16 +6,17 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 )
 
 type MultisigIsmMetadata struct {
-	Root []byte
-	Index uint32
+	Root          []byte
+	Index         uint32
 	OriginMailbox []byte
-	Proof []byte
-	signatures [][]byte
+	Proof         []byte
+	signatures    [][]byte
 }
 
 func TestMetadataSuccess(t *testing.T) {
@@ -37,8 +38,8 @@ func TestMetadataSuccess(t *testing.T) {
 	metadata = append(metadata, proof...)
 	var signatures [][]byte
 	prefixSig := make([]byte, 64)
-	for i := 0; i<5; i++ {
-		signature, err := hex.DecodeString(fmt.Sprintf("2%d",i))
+	for i := 0; i < 5; i++ {
+		signature, err := hex.DecodeString(fmt.Sprintf("2%d", i))
 		require.NoError(t, err)
 		signature = append(prefixSig, signature...)
 		signatures = append(signatures, signature)
@@ -57,8 +58,8 @@ func TestMetadataSuccess(t *testing.T) {
 	getProof := types.Proof(metadata)
 	require.Equal(t, proof, getProof)
 
-	for i := 0; i<5; i++ {
+	for i := 0; i < 5; i++ {
 		getSig := types.SignatureAt(metadata, uint32(i))
 		require.Equal(t, signatures[i], getSig)
-	}	
+	}
 }

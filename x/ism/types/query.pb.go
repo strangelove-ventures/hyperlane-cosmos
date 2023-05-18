@@ -32,22 +32,24 @@ var (
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // QueryDefaultIsmRequest is the request type for the DefaultIsm RPC method.
-type QueryDefaultIsmRequest struct{}
+type QueryOriginsDefaultIsmRequest struct {
+	Origin uint32 `protobuf:"varint,1,opt,name=origin,proto3" json:"origin,omitempty"`
+}
 
-func (m *QueryDefaultIsmRequest) Reset()         { *m = QueryDefaultIsmRequest{} }
-func (m *QueryDefaultIsmRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryDefaultIsmRequest) ProtoMessage()    {}
-func (*QueryDefaultIsmRequest) Descriptor() ([]byte, []int) {
+func (m *QueryOriginsDefaultIsmRequest) Reset()         { *m = QueryOriginsDefaultIsmRequest{} }
+func (m *QueryOriginsDefaultIsmRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryOriginsDefaultIsmRequest) ProtoMessage()    {}
+func (*QueryOriginsDefaultIsmRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_4dfd752fcec82ce5, []int{0}
 }
 
-func (m *QueryDefaultIsmRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryOriginsDefaultIsmRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
 
-func (m *QueryDefaultIsmRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryOriginsDefaultIsmRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryDefaultIsmRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryOriginsDefaultIsmRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -58,40 +60,46 @@ func (m *QueryDefaultIsmRequest) XXX_Marshal(b []byte, deterministic bool) ([]by
 	}
 }
 
-func (m *QueryDefaultIsmRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryDefaultIsmRequest.Merge(m, src)
+func (m *QueryOriginsDefaultIsmRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryOriginsDefaultIsmRequest.Merge(m, src)
 }
 
-func (m *QueryDefaultIsmRequest) XXX_Size() int {
+func (m *QueryOriginsDefaultIsmRequest) XXX_Size() int {
 	return m.Size()
 }
 
-func (m *QueryDefaultIsmRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryDefaultIsmRequest.DiscardUnknown(m)
+func (m *QueryOriginsDefaultIsmRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryOriginsDefaultIsmRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryDefaultIsmRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryOriginsDefaultIsmRequest proto.InternalMessageInfo
+
+func (m *QueryOriginsDefaultIsmRequest) GetOrigin() uint32 {
+	if m != nil {
+		return m.Origin
+	}
+	return 0
+}
 
 // QueryDefaultIsmResponse is the response type for the DefaultIsm RPC method.
-type QueryDefaultIsmResponse struct {
-	ValidatorPubKeys [][]byte `protobuf:"bytes,1,rep,name=validator_pub_keys,json=validatorPubKeys,proto3" json:"validator_pub_keys,omitempty"`
-	Threshold        uint32   `protobuf:"varint,2,opt,name=threshold,proto3" json:"threshold,omitempty"`
+type QueryOriginsDefaultIsmResponse struct {
+	DefaultIsm *MultiSigIsm `protobuf:"bytes,1,opt,name=default_ism,json=defaultIsm,proto3" json:"default_ism,omitempty"`
 }
 
-func (m *QueryDefaultIsmResponse) Reset()         { *m = QueryDefaultIsmResponse{} }
-func (m *QueryDefaultIsmResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryDefaultIsmResponse) ProtoMessage()    {}
-func (*QueryDefaultIsmResponse) Descriptor() ([]byte, []int) {
+func (m *QueryOriginsDefaultIsmResponse) Reset()         { *m = QueryOriginsDefaultIsmResponse{} }
+func (m *QueryOriginsDefaultIsmResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryOriginsDefaultIsmResponse) ProtoMessage()    {}
+func (*QueryOriginsDefaultIsmResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_4dfd752fcec82ce5, []int{1}
 }
 
-func (m *QueryDefaultIsmResponse) XXX_Unmarshal(b []byte) error {
+func (m *QueryOriginsDefaultIsmResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
 
-func (m *QueryDefaultIsmResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryOriginsDefaultIsmResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryDefaultIsmResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryOriginsDefaultIsmResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -102,53 +110,45 @@ func (m *QueryDefaultIsmResponse) XXX_Marshal(b []byte, deterministic bool) ([]b
 	}
 }
 
-func (m *QueryDefaultIsmResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryDefaultIsmResponse.Merge(m, src)
+func (m *QueryOriginsDefaultIsmResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryOriginsDefaultIsmResponse.Merge(m, src)
 }
 
-func (m *QueryDefaultIsmResponse) XXX_Size() int {
+func (m *QueryOriginsDefaultIsmResponse) XXX_Size() int {
 	return m.Size()
 }
 
-func (m *QueryDefaultIsmResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryDefaultIsmResponse.DiscardUnknown(m)
+func (m *QueryOriginsDefaultIsmResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryOriginsDefaultIsmResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryDefaultIsmResponse proto.InternalMessageInfo
+var xxx_messageInfo_QueryOriginsDefaultIsmResponse proto.InternalMessageInfo
 
-func (m *QueryDefaultIsmResponse) GetValidatorPubKeys() [][]byte {
+func (m *QueryOriginsDefaultIsmResponse) GetDefaultIsm() *MultiSigIsm {
 	if m != nil {
-		return m.ValidatorPubKeys
+		return m.DefaultIsm
 	}
 	return nil
 }
 
-func (m *QueryDefaultIsmResponse) GetThreshold() uint32 {
-	if m != nil {
-		return m.Threshold
-	}
-	return 0
-}
+// QueryAllDefaultIsmRequest is the request type for the AllDefaultIsms RPC
+// method.
+type QueryAllDefaultIsmsRequest struct{}
 
-// QueryContractIsmRequest is the request type for the ContractIsm RPC method.
-type QueryContractIsmRequest struct {
-	ContractAddr []byte `protobuf:"bytes,1,opt,name=contract_addr,json=contractAddr,proto3" json:"contract_addr,omitempty"`
-}
-
-func (m *QueryContractIsmRequest) Reset()         { *m = QueryContractIsmRequest{} }
-func (m *QueryContractIsmRequest) String() string { return proto.CompactTextString(m) }
-func (*QueryContractIsmRequest) ProtoMessage()    {}
-func (*QueryContractIsmRequest) Descriptor() ([]byte, []int) {
+func (m *QueryAllDefaultIsmsRequest) Reset()         { *m = QueryAllDefaultIsmsRequest{} }
+func (m *QueryAllDefaultIsmsRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryAllDefaultIsmsRequest) ProtoMessage()    {}
+func (*QueryAllDefaultIsmsRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_4dfd752fcec82ce5, []int{2}
 }
 
-func (m *QueryContractIsmRequest) XXX_Unmarshal(b []byte) error {
+func (m *QueryAllDefaultIsmsRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
 
-func (m *QueryContractIsmRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryAllDefaultIsmsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryContractIsmRequest.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryAllDefaultIsmsRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -159,47 +159,40 @@ func (m *QueryContractIsmRequest) XXX_Marshal(b []byte, deterministic bool) ([]b
 	}
 }
 
-func (m *QueryContractIsmRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryContractIsmRequest.Merge(m, src)
+func (m *QueryAllDefaultIsmsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAllDefaultIsmsRequest.Merge(m, src)
 }
 
-func (m *QueryContractIsmRequest) XXX_Size() int {
+func (m *QueryAllDefaultIsmsRequest) XXX_Size() int {
 	return m.Size()
 }
 
-func (m *QueryContractIsmRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryContractIsmRequest.DiscardUnknown(m)
+func (m *QueryAllDefaultIsmsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAllDefaultIsmsRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryContractIsmRequest proto.InternalMessageInfo
+var xxx_messageInfo_QueryAllDefaultIsmsRequest proto.InternalMessageInfo
 
-func (m *QueryContractIsmRequest) GetContractAddr() []byte {
-	if m != nil {
-		return m.ContractAddr
-	}
-	return nil
+// QueryAllDefaultIsmResponse is the response type for the AllDefaultIsms RPC
+// method.
+type QueryAllDefaultIsmsResponse struct {
+	DefaultIsms []*OriginsMultiSigIsm `protobuf:"bytes,1,rep,name=default_isms,json=defaultIsms,proto3" json:"default_isms,omitempty"`
 }
 
-// QueryContractIsmResponse is the response type for the ContractIsm RPC method.
-type QueryContractIsmResponse struct {
-	ValidatorPubKeys [][]byte `protobuf:"bytes,1,rep,name=validator_pub_keys,json=validatorPubKeys,proto3" json:"validator_pub_keys,omitempty"`
-	Threshold        uint32   `protobuf:"varint,2,opt,name=threshold,proto3" json:"threshold,omitempty"`
-}
-
-func (m *QueryContractIsmResponse) Reset()         { *m = QueryContractIsmResponse{} }
-func (m *QueryContractIsmResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryContractIsmResponse) ProtoMessage()    {}
-func (*QueryContractIsmResponse) Descriptor() ([]byte, []int) {
+func (m *QueryAllDefaultIsmsResponse) Reset()         { *m = QueryAllDefaultIsmsResponse{} }
+func (m *QueryAllDefaultIsmsResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryAllDefaultIsmsResponse) ProtoMessage()    {}
+func (*QueryAllDefaultIsmsResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_4dfd752fcec82ce5, []int{3}
 }
 
-func (m *QueryContractIsmResponse) XXX_Unmarshal(b []byte) error {
+func (m *QueryAllDefaultIsmsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
 
-func (m *QueryContractIsmResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryAllDefaultIsmsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryContractIsmResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryAllDefaultIsmsResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -210,70 +203,64 @@ func (m *QueryContractIsmResponse) XXX_Marshal(b []byte, deterministic bool) ([]
 	}
 }
 
-func (m *QueryContractIsmResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryContractIsmResponse.Merge(m, src)
+func (m *QueryAllDefaultIsmsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAllDefaultIsmsResponse.Merge(m, src)
 }
 
-func (m *QueryContractIsmResponse) XXX_Size() int {
+func (m *QueryAllDefaultIsmsResponse) XXX_Size() int {
 	return m.Size()
 }
 
-func (m *QueryContractIsmResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryContractIsmResponse.DiscardUnknown(m)
+func (m *QueryAllDefaultIsmsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAllDefaultIsmsResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryContractIsmResponse proto.InternalMessageInfo
+var xxx_messageInfo_QueryAllDefaultIsmsResponse proto.InternalMessageInfo
 
-func (m *QueryContractIsmResponse) GetValidatorPubKeys() [][]byte {
+func (m *QueryAllDefaultIsmsResponse) GetDefaultIsms() []*OriginsMultiSigIsm {
 	if m != nil {
-		return m.ValidatorPubKeys
+		return m.DefaultIsms
 	}
 	return nil
 }
 
-func (m *QueryContractIsmResponse) GetThreshold() uint32 {
-	if m != nil {
-		return m.Threshold
-	}
-	return 0
-}
-
 func init() {
-	proto.RegisterType((*QueryDefaultIsmRequest)(nil), "hyperlane.ism.v1.QueryDefaultIsmRequest")
-	proto.RegisterType((*QueryDefaultIsmResponse)(nil), "hyperlane.ism.v1.QueryDefaultIsmResponse")
-	proto.RegisterType((*QueryContractIsmRequest)(nil), "hyperlane.ism.v1.QueryContractIsmRequest")
-	proto.RegisterType((*QueryContractIsmResponse)(nil), "hyperlane.ism.v1.QueryContractIsmResponse")
+	proto.RegisterType((*QueryOriginsDefaultIsmRequest)(nil), "hyperlane.ism.v1.QueryOriginsDefaultIsmRequest")
+	proto.RegisterType((*QueryOriginsDefaultIsmResponse)(nil), "hyperlane.ism.v1.QueryOriginsDefaultIsmResponse")
+	proto.RegisterType((*QueryAllDefaultIsmsRequest)(nil), "hyperlane.ism.v1.QueryAllDefaultIsmsRequest")
+	proto.RegisterType((*QueryAllDefaultIsmsResponse)(nil), "hyperlane.ism.v1.QueryAllDefaultIsmsResponse")
 }
 
 func init() { proto.RegisterFile("hyperlane/ism/v1/query.proto", fileDescriptor_4dfd752fcec82ce5) }
 
 var fileDescriptor_4dfd752fcec82ce5 = []byte{
-	// 396 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x92, 0x3f, 0xab, 0xd4, 0x40,
-	0x14, 0xc5, 0x77, 0x56, 0x14, 0x1c, 0xf7, 0xc1, 0x63, 0x0a, 0x0d, 0xcb, 0x1a, 0x43, 0x44, 0x89,
-	0xe2, 0xcb, 0xf0, 0xb4, 0x15, 0xc1, 0x3f, 0x8d, 0xd8, 0x68, 0x0a, 0x0b, 0x9b, 0x30, 0x49, 0xee,
-	0x4b, 0x06, 0x93, 0x99, 0xec, 0xdc, 0x49, 0x30, 0xad, 0x95, 0x85, 0x85, 0xe0, 0x27, 0xf0, 0xdb,
-	0x58, 0x2e, 0xd8, 0x58, 0xca, 0xae, 0x1f, 0x44, 0xcc, 0xae, 0xbb, 0x8b, 0x51, 0xd8, 0xe2, 0xb5,
-	0xf7, 0x9c, 0x9b, 0xf3, 0xcb, 0xb9, 0x43, 0x67, 0x45, 0x57, 0x83, 0x29, 0x85, 0x02, 0x2e, 0xb1,
-	0xe2, 0xed, 0x29, 0x9f, 0x37, 0x60, 0xba, 0xb0, 0x36, 0xda, 0x6a, 0x76, 0xbc, 0x55, 0x43, 0x89,
-	0x55, 0xd8, 0x9e, 0x4e, 0x67, 0xb9, 0xd6, 0x79, 0x09, 0x5c, 0xd4, 0x92, 0x0b, 0xa5, 0xb4, 0x15,
-	0x56, 0x6a, 0x85, 0x6b, 0xbf, 0xef, 0xd0, 0xab, 0xaf, 0x7e, 0xaf, 0x3f, 0x83, 0x33, 0xd1, 0x94,
-	0xf6, 0x39, 0x56, 0x11, 0xcc, 0x1b, 0x40, 0xeb, 0x03, 0xbd, 0x36, 0x50, 0xb0, 0xd6, 0x0a, 0x81,
-	0xdd, 0xa3, 0xac, 0x15, 0xa5, 0xcc, 0x84, 0xd5, 0x26, 0xae, 0x9b, 0x24, 0x7e, 0x0b, 0x1d, 0x3a,
-	0xc4, 0xbb, 0x10, 0x4c, 0xa2, 0xe3, 0xad, 0xf2, 0xb2, 0x49, 0x5e, 0x40, 0x87, 0x6c, 0x46, 0x2f,
-	0xdb, 0xc2, 0x00, 0x16, 0xba, 0xcc, 0x9c, 0xb1, 0x47, 0x82, 0xa3, 0x68, 0x37, 0xf0, 0x1f, 0x6d,
-	0x62, 0x9e, 0x6a, 0x65, 0x8d, 0x48, 0xf7, 0x08, 0xd8, 0x4d, 0x7a, 0x94, 0x6e, 0xa6, 0xb1, 0xc8,
-	0x32, 0xe3, 0x10, 0x8f, 0x04, 0x93, 0x68, 0xf2, 0x67, 0xf8, 0x38, 0xcb, 0x8c, 0x7f, 0x46, 0x9d,
-	0xe1, 0xfe, 0xf9, 0x73, 0xde, 0xff, 0x32, 0xa6, 0x17, 0xfb, 0x20, 0xf6, 0x81, 0x50, 0xba, 0x2b,
-	0x85, 0x05, 0xe1, 0xdf, 0x95, 0x87, 0xff, 0x6e, 0x74, 0x7a, 0xe7, 0x00, 0xe7, 0x9a, 0xdc, 0xbf,
-	0xf5, 0xfe, 0xdb, 0xcf, 0xcf, 0xe3, 0x1b, 0xec, 0x3a, 0x1f, 0x5c, 0x3b, 0x5b, 0xbb, 0x63, 0x89,
-	0x15, 0xfb, 0x48, 0xe8, 0x95, 0xbd, 0x1f, 0x67, 0xff, 0x4b, 0x18, 0x96, 0x3b, 0xbd, 0x7b, 0x88,
-	0x75, 0x43, 0x73, 0xbb, 0xa7, 0xf1, 0x98, 0x3b, 0xa4, 0xd9, 0x1e, 0x48, 0x62, 0xf5, 0xe4, 0xf5,
-	0xd7, 0xa5, 0x4b, 0x16, 0x4b, 0x97, 0xfc, 0x58, 0xba, 0xe4, 0xd3, 0xca, 0x1d, 0x2d, 0x56, 0xee,
-	0xe8, 0xfb, 0xca, 0x1d, 0xbd, 0x79, 0x98, 0x4b, 0x5b, 0x34, 0x49, 0x98, 0xea, 0x8a, 0xa3, 0x35,
-	0x42, 0xe5, 0x50, 0xea, 0x16, 0x4e, 0x5a, 0x50, 0xb6, 0x31, 0x80, 0xbb, 0x0f, 0x9f, 0xa4, 0x1a,
-	0x2b, 0x8d, 0xfc, 0x5d, 0x9f, 0x60, 0xbb, 0x1a, 0x30, 0xb9, 0xd4, 0xbf, 0xd5, 0x07, 0xbf, 0x02,
-	0x00, 0x00, 0xff, 0xff, 0x1a, 0x1e, 0xe1, 0x14, 0xfb, 0x02, 0x00, 0x00,
+	// 411 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x92, 0x41, 0x8b, 0xd3, 0x40,
+	0x14, 0xc7, 0x3b, 0x15, 0x7b, 0x98, 0xa8, 0xe8, 0x1c, 0xa4, 0xc4, 0x36, 0x96, 0x50, 0xb1, 0x88,
+	0xc9, 0xd8, 0x7a, 0xf0, 0x22, 0x82, 0x22, 0x88, 0x07, 0x11, 0x2b, 0x78, 0xf0, 0x52, 0xd3, 0x76,
+	0x9a, 0x0e, 0x4c, 0x66, 0xd2, 0xbc, 0x49, 0xb0, 0x57, 0x3f, 0x81, 0xb0, 0xa7, 0xfd, 0x00, 0xfb,
+	0x5d, 0x16, 0xf6, 0x52, 0xd8, 0xcb, 0x1e, 0x97, 0x76, 0x3f, 0xc8, 0xd2, 0x24, 0xb4, 0xd9, 0x4d,
+	0xbb, 0xf4, 0x98, 0xbc, 0xf7, 0xfe, 0xff, 0xdf, 0xff, 0xbd, 0xc1, 0x8d, 0xe9, 0x3c, 0x64, 0x91,
+	0xf0, 0x24, 0xa3, 0x1c, 0x02, 0x9a, 0x74, 0xe9, 0x2c, 0x66, 0xd1, 0xdc, 0x0d, 0x23, 0xa5, 0x15,
+	0x79, 0xbc, 0xa9, 0xba, 0x1c, 0x02, 0x37, 0xe9, 0x9a, 0x0d, 0x5f, 0x29, 0x5f, 0x30, 0xea, 0x85,
+	0x9c, 0x7a, 0x52, 0x2a, 0xed, 0x69, 0xae, 0x24, 0x64, 0xfd, 0xe6, 0xf3, 0x92, 0x5a, 0x10, 0x0b,
+	0xcd, 0x81, 0xfb, 0x59, 0x83, 0xfd, 0x0e, 0x37, 0x7f, 0xac, 0xf5, 0xbf, 0x47, 0xdc, 0xe7, 0x12,
+	0x3e, 0xb3, 0x89, 0x17, 0x0b, 0xfd, 0x15, 0x82, 0x3e, 0x9b, 0xc5, 0x0c, 0x34, 0x79, 0x8a, 0x6b,
+	0x2a, 0xad, 0xd5, 0x51, 0x0b, 0x75, 0x1e, 0xf6, 0xf3, 0x2f, 0xfb, 0x0f, 0xb6, 0xf6, 0x0d, 0x42,
+	0xa8, 0x24, 0x30, 0xf2, 0x01, 0x1b, 0xe3, 0xec, 0xef, 0x80, 0x43, 0x90, 0x8e, 0x1b, 0xbd, 0xa6,
+	0x7b, 0x3b, 0x81, 0xfb, 0x6d, 0x4d, 0xf4, 0x93, 0xfb, 0xeb, 0x59, 0x3c, 0xde, 0xe8, 0xd8, 0x0d,
+	0x6c, 0xa6, 0x0e, 0x1f, 0x85, 0xd8, 0xaa, 0x43, 0xce, 0x65, 0x4f, 0xf0, 0xb3, 0x9d, 0xd5, 0xdc,
+	0xfc, 0x0b, 0x7e, 0x50, 0x30, 0x87, 0x3a, 0x6a, 0xdd, 0xeb, 0x18, 0xbd, 0x76, 0xd9, 0x3d, 0xe7,
+	0x2f, 0x42, 0x18, 0x5b, 0x08, 0xe8, 0x9d, 0x55, 0xf1, 0xfd, 0xd4, 0x88, 0x9c, 0x20, 0xfc, 0xa4,
+	0x94, 0x96, 0xd0, 0xb2, 0xe4, 0x9d, 0x0b, 0x35, 0xdf, 0x1c, 0x3e, 0x90, 0x65, 0xb1, 0x9d, 0x7f,
+	0xe7, 0x57, 0x47, 0xd5, 0x97, 0xe4, 0x05, 0x2d, 0x5d, 0x33, 0x3b, 0x06, 0x0c, 0x0a, 0x59, 0xc9,
+	0x31, 0xc2, 0x8f, 0x6e, 0x6e, 0x85, 0xbc, 0xde, 0xe3, 0xb9, 0x73, 0xb5, 0xa6, 0x73, 0x60, 0x77,
+	0x8e, 0xf7, 0x2a, 0xc5, 0x6b, 0x13, 0xbb, 0x8c, 0xe7, 0x09, 0x51, 0x44, 0x83, 0x4f, 0xbf, 0x4e,
+	0x97, 0x16, 0x5a, 0x2c, 0x2d, 0x74, 0xb9, 0xb4, 0xd0, 0xff, 0x95, 0x55, 0x59, 0xac, 0xac, 0xca,
+	0xc5, 0xca, 0xaa, 0xfc, 0x7e, 0xef, 0x73, 0x3d, 0x8d, 0x87, 0xee, 0x48, 0x05, 0x14, 0x74, 0xe4,
+	0x49, 0x9f, 0x09, 0x95, 0x30, 0x27, 0x61, 0x52, 0xc7, 0x11, 0x83, 0xad, 0xb8, 0x33, 0x52, 0x10,
+	0x28, 0xa0, 0x7f, 0x53, 0x17, 0x3d, 0x0f, 0x19, 0x0c, 0x6b, 0xe9, 0x6b, 0x7e, 0x7b, 0x1d, 0x00,
+	0x00, 0xff, 0xff, 0x4d, 0xfb, 0xa3, 0xc8, 0x3e, 0x03, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -290,10 +277,10 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type QueryClient interface {
-	// Get current default multisig ISM
-	DefaultIsm(ctx context.Context, in *QueryDefaultIsmRequest, opts ...grpc.CallOption) (*QueryDefaultIsmResponse, error)
-	// Get contract's ISM
-	ContractIsm(ctx context.Context, in *QueryContractIsmRequest, opts ...grpc.CallOption) (*QueryContractIsmResponse, error)
+	// Get current default multisig ISM for an origin
+	OriginsDefaultIsm(ctx context.Context, in *QueryOriginsDefaultIsmRequest, opts ...grpc.CallOption) (*QueryOriginsDefaultIsmResponse, error)
+	// Get all current default multisig ISMs
+	AllDefaultIsms(ctx context.Context, in *QueryAllDefaultIsmsRequest, opts ...grpc.CallOption) (*QueryAllDefaultIsmsResponse, error)
 }
 
 type queryClient struct {
@@ -304,18 +291,18 @@ func NewQueryClient(cc grpc1.ClientConn) QueryClient {
 	return &queryClient{cc}
 }
 
-func (c *queryClient) DefaultIsm(ctx context.Context, in *QueryDefaultIsmRequest, opts ...grpc.CallOption) (*QueryDefaultIsmResponse, error) {
-	out := new(QueryDefaultIsmResponse)
-	err := c.cc.Invoke(ctx, "/hyperlane.ism.v1.Query/DefaultIsm", in, out, opts...)
+func (c *queryClient) OriginsDefaultIsm(ctx context.Context, in *QueryOriginsDefaultIsmRequest, opts ...grpc.CallOption) (*QueryOriginsDefaultIsmResponse, error) {
+	out := new(QueryOriginsDefaultIsmResponse)
+	err := c.cc.Invoke(ctx, "/hyperlane.ism.v1.Query/OriginsDefaultIsm", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *queryClient) ContractIsm(ctx context.Context, in *QueryContractIsmRequest, opts ...grpc.CallOption) (*QueryContractIsmResponse, error) {
-	out := new(QueryContractIsmResponse)
-	err := c.cc.Invoke(ctx, "/hyperlane.ism.v1.Query/ContractIsm", in, out, opts...)
+func (c *queryClient) AllDefaultIsms(ctx context.Context, in *QueryAllDefaultIsmsRequest, opts ...grpc.CallOption) (*QueryAllDefaultIsmsResponse, error) {
+	out := new(QueryAllDefaultIsmsResponse)
+	err := c.cc.Invoke(ctx, "/hyperlane.ism.v1.Query/AllDefaultIsms", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -324,59 +311,59 @@ func (c *queryClient) ContractIsm(ctx context.Context, in *QueryContractIsmReque
 
 // QueryServer is the server API for Query service.
 type QueryServer interface {
-	// Get current default multisig ISM
-	DefaultIsm(context.Context, *QueryDefaultIsmRequest) (*QueryDefaultIsmResponse, error)
-	// Get contract's ISM
-	ContractIsm(context.Context, *QueryContractIsmRequest) (*QueryContractIsmResponse, error)
+	// Get current default multisig ISM for an origin
+	OriginsDefaultIsm(context.Context, *QueryOriginsDefaultIsmRequest) (*QueryOriginsDefaultIsmResponse, error)
+	// Get all current default multisig ISMs
+	AllDefaultIsms(context.Context, *QueryAllDefaultIsmsRequest) (*QueryAllDefaultIsmsResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
 type UnimplementedQueryServer struct{}
 
-func (*UnimplementedQueryServer) DefaultIsm(ctx context.Context, req *QueryDefaultIsmRequest) (*QueryDefaultIsmResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DefaultIsm not implemented")
+func (*UnimplementedQueryServer) OriginsDefaultIsm(ctx context.Context, req *QueryOriginsDefaultIsmRequest) (*QueryOriginsDefaultIsmResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method OriginsDefaultIsm not implemented")
 }
 
-func (*UnimplementedQueryServer) ContractIsm(ctx context.Context, req *QueryContractIsmRequest) (*QueryContractIsmResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ContractIsm not implemented")
+func (*UnimplementedQueryServer) AllDefaultIsms(ctx context.Context, req *QueryAllDefaultIsmsRequest) (*QueryAllDefaultIsmsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AllDefaultIsms not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
 	s.RegisterService(&_Query_serviceDesc, srv)
 }
 
-func _Query_DefaultIsm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryDefaultIsmRequest)
+func _Query_OriginsDefaultIsm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryOriginsDefaultIsmRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).DefaultIsm(ctx, in)
+		return srv.(QueryServer).OriginsDefaultIsm(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/hyperlane.ism.v1.Query/DefaultIsm",
+		FullMethod: "/hyperlane.ism.v1.Query/OriginsDefaultIsm",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).DefaultIsm(ctx, req.(*QueryDefaultIsmRequest))
+		return srv.(QueryServer).OriginsDefaultIsm(ctx, req.(*QueryOriginsDefaultIsmRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_ContractIsm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryContractIsmRequest)
+func _Query_AllDefaultIsms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryAllDefaultIsmsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).ContractIsm(ctx, in)
+		return srv.(QueryServer).AllDefaultIsms(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/hyperlane.ism.v1.Query/ContractIsm",
+		FullMethod: "/hyperlane.ism.v1.Query/AllDefaultIsms",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).ContractIsm(ctx, req.(*QueryContractIsmRequest))
+		return srv.(QueryServer).AllDefaultIsms(ctx, req.(*QueryAllDefaultIsmsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -386,19 +373,19 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*QueryServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "DefaultIsm",
-			Handler:    _Query_DefaultIsm_Handler,
+			MethodName: "OriginsDefaultIsm",
+			Handler:    _Query_OriginsDefaultIsm_Handler,
 		},
 		{
-			MethodName: "ContractIsm",
-			Handler:    _Query_ContractIsm_Handler,
+			MethodName: "AllDefaultIsms",
+			Handler:    _Query_AllDefaultIsms_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "hyperlane/ism/v1/query.proto",
 }
 
-func (m *QueryDefaultIsmRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryOriginsDefaultIsmRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -408,57 +395,25 @@ func (m *QueryDefaultIsmRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryDefaultIsmRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryOriginsDefaultIsmRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryDefaultIsmRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryOriginsDefaultIsmRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryDefaultIsmResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryDefaultIsmResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryDefaultIsmResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.Threshold != 0 {
-		i = encodeVarintQuery(dAtA, i, uint64(m.Threshold))
+	if m.Origin != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.Origin))
 		i--
-		dAtA[i] = 0x10
-	}
-	if len(m.ValidatorPubKeys) > 0 {
-		for iNdEx := len(m.ValidatorPubKeys) - 1; iNdEx >= 0; iNdEx-- {
-			i -= len(m.ValidatorPubKeys[iNdEx])
-			copy(dAtA[i:], m.ValidatorPubKeys[iNdEx])
-			i = encodeVarintQuery(dAtA, i, uint64(len(m.ValidatorPubKeys[iNdEx])))
-			i--
-			dAtA[i] = 0xa
-		}
+		dAtA[i] = 0x8
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryContractIsmRequest) Marshal() (dAtA []byte, err error) {
+func (m *QueryOriginsDefaultIsmResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -468,27 +423,32 @@ func (m *QueryContractIsmRequest) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryContractIsmRequest) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryOriginsDefaultIsmResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryContractIsmRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryOriginsDefaultIsmResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.ContractAddr) > 0 {
-		i -= len(m.ContractAddr)
-		copy(dAtA[i:], m.ContractAddr)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.ContractAddr)))
+	if m.DefaultIsm != nil {
+		{
+			size, err := m.DefaultIsm.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
 		i--
 		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryContractIsmResponse) Marshal() (dAtA []byte, err error) {
+func (m *QueryAllDefaultIsmsRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -498,26 +458,49 @@ func (m *QueryContractIsmResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryContractIsmResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryAllDefaultIsmsRequest) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryContractIsmResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryAllDefaultIsmsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.Threshold != 0 {
-		i = encodeVarintQuery(dAtA, i, uint64(m.Threshold))
-		i--
-		dAtA[i] = 0x10
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryAllDefaultIsmsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
 	}
-	if len(m.ValidatorPubKeys) > 0 {
-		for iNdEx := len(m.ValidatorPubKeys) - 1; iNdEx >= 0; iNdEx-- {
-			i -= len(m.ValidatorPubKeys[iNdEx])
-			copy(dAtA[i:], m.ValidatorPubKeys[iNdEx])
-			i = encodeVarintQuery(dAtA, i, uint64(len(m.ValidatorPubKeys[iNdEx])))
+	return dAtA[:n], nil
+}
+
+func (m *QueryAllDefaultIsmsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAllDefaultIsmsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.DefaultIsms) > 0 {
+		for iNdEx := len(m.DefaultIsms) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.DefaultIsms[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
 			i--
 			dAtA[i] = 0xa
 		}
@@ -537,60 +520,51 @@ func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	return base
 }
 
-func (m *QueryDefaultIsmRequest) Size() (n int) {
+func (m *QueryOriginsDefaultIsmRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	return n
-}
-
-func (m *QueryDefaultIsmResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if len(m.ValidatorPubKeys) > 0 {
-		for _, b := range m.ValidatorPubKeys {
-			l = len(b)
-			n += 1 + l + sovQuery(uint64(l))
-		}
-	}
-	if m.Threshold != 0 {
-		n += 1 + sovQuery(uint64(m.Threshold))
+	if m.Origin != 0 {
+		n += 1 + sovQuery(uint64(m.Origin))
 	}
 	return n
 }
 
-func (m *QueryContractIsmRequest) Size() (n int) {
+func (m *QueryOriginsDefaultIsmResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.ContractAddr)
-	if l > 0 {
+	if m.DefaultIsm != nil {
+		l = m.DefaultIsm.Size()
 		n += 1 + l + sovQuery(uint64(l))
 	}
 	return n
 }
 
-func (m *QueryContractIsmResponse) Size() (n int) {
+func (m *QueryAllDefaultIsmsRequest) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if len(m.ValidatorPubKeys) > 0 {
-		for _, b := range m.ValidatorPubKeys {
-			l = len(b)
+	return n
+}
+
+func (m *QueryAllDefaultIsmsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.DefaultIsms) > 0 {
+		for _, e := range m.DefaultIsms {
+			l = e.Size()
 			n += 1 + l + sovQuery(uint64(l))
 		}
-	}
-	if m.Threshold != 0 {
-		n += 1 + sovQuery(uint64(m.Threshold))
 	}
 	return n
 }
@@ -603,7 +577,7 @@ func sozQuery(x uint64) (n int) {
 	return sovQuery(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
 
-func (m *QueryDefaultIsmRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryOriginsDefaultIsmRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -626,100 +600,17 @@ func (m *QueryDefaultIsmRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryDefaultIsmRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryOriginsDefaultIsmRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryDefaultIsmRequest: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-
-func (m *QueryDefaultIsmResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryDefaultIsmResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryDefaultIsmResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryOriginsDefaultIsmRequest: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ValidatorPubKeys", wireType)
-			}
-			var byteLen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				byteLen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if byteLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + byteLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.ValidatorPubKeys = append(m.ValidatorPubKeys, make([]byte, postIndex-iNdEx))
-			copy(m.ValidatorPubKeys[len(m.ValidatorPubKeys)-1], dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Threshold", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Origin", wireType)
 			}
-			m.Threshold = 0
+			m.Origin = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowQuery
@@ -729,7 +620,7 @@ func (m *QueryDefaultIsmResponse) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Threshold |= uint32(b&0x7F) << shift
+				m.Origin |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -756,7 +647,7 @@ func (m *QueryDefaultIsmResponse) Unmarshal(dAtA []byte) error {
 	return nil
 }
 
-func (m *QueryContractIsmRequest) Unmarshal(dAtA []byte) error {
+func (m *QueryOriginsDefaultIsmResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -779,17 +670,17 @@ func (m *QueryContractIsmRequest) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryContractIsmRequest: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryOriginsDefaultIsmResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryContractIsmRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryOriginsDefaultIsmResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ContractAddr", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field DefaultIsm", wireType)
 			}
-			var byteLen int
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowQuery
@@ -799,24 +690,26 @@ func (m *QueryContractIsmRequest) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				byteLen |= int(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if byteLen < 0 {
+			if msglen < 0 {
 				return ErrInvalidLengthQuery
 			}
-			postIndex := iNdEx + byteLen
+			postIndex := iNdEx + msglen
 			if postIndex < 0 {
 				return ErrInvalidLengthQuery
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.ContractAddr = append(m.ContractAddr[:0], dAtA[iNdEx:postIndex]...)
-			if m.ContractAddr == nil {
-				m.ContractAddr = []byte{}
+			if m.DefaultIsm == nil {
+				m.DefaultIsm = &MultiSigIsm{}
+			}
+			if err := m.DefaultIsm.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
 			}
 			iNdEx = postIndex
 		default:
@@ -841,7 +734,7 @@ func (m *QueryContractIsmRequest) Unmarshal(dAtA []byte) error {
 	return nil
 }
 
-func (m *QueryContractIsmResponse) Unmarshal(dAtA []byte) error {
+func (m *QueryAllDefaultIsmsRequest) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -864,17 +757,68 @@ func (m *QueryContractIsmResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryContractIsmResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryAllDefaultIsmsRequest: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryContractIsmResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryAllDefaultIsmsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+
+func (m *QueryAllDefaultIsmsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAllDefaultIsmsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAllDefaultIsmsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ValidatorPubKeys", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field DefaultIsms", wireType)
 			}
-			var byteLen int
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowQuery
@@ -884,43 +828,26 @@ func (m *QueryContractIsmResponse) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				byteLen |= int(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if byteLen < 0 {
+			if msglen < 0 {
 				return ErrInvalidLengthQuery
 			}
-			postIndex := iNdEx + byteLen
+			postIndex := iNdEx + msglen
 			if postIndex < 0 {
 				return ErrInvalidLengthQuery
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.ValidatorPubKeys = append(m.ValidatorPubKeys, make([]byte, postIndex-iNdEx))
-			copy(m.ValidatorPubKeys[len(m.ValidatorPubKeys)-1], dAtA[iNdEx:postIndex])
+			m.DefaultIsms = append(m.DefaultIsms, &OriginsMultiSigIsm{})
+			if err := m.DefaultIsms[len(m.DefaultIsms)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
-		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Threshold", wireType)
-			}
-			m.Threshold = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Threshold |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipQuery(dAtA[iNdEx:])

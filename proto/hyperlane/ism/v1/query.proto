@@ -2,35 +2,36 @@ syntax = "proto3";
 package hyperlane.ism.v1;
 
 import "google/api/annotations.proto";
+import "hyperlane/ism/v1/multisig.proto";
 
 option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types";
 
 // Query service for hyperlane ISM module
 service Query {
-  // Get current default multisig ISM
-  rpc DefaultIsm(QueryDefaultIsmRequest) returns (QueryDefaultIsmResponse) {
-    option (google.api.http).get = "/hyperlane/ism/v1/default_ism";
+  // Get current default multisig ISM for an origin
+  rpc OriginsDefaultIsm(QueryOriginsDefaultIsmRequest)
+      returns (QueryOriginsDefaultIsmResponse) {
+    option (google.api.http).get = "/hyperlane/ism/v1/origins_default_ism";
   }
-  // Get contract's ISM
-  rpc ContractIsm(QueryContractIsmRequest) returns (QueryContractIsmResponse) {
-    option (google.api.http).get = "/hyperlane/ism/v1/contract_ism";
+  // Get all current default multisig ISMs
+  rpc AllDefaultIsms(QueryAllDefaultIsmsRequest)
+      returns (QueryAllDefaultIsmsResponse) {
+    option (google.api.http).get = "/hyperlane/ism/v1/all_default_isms";
   }
 }
 
 // QueryDefaultIsmRequest is the request type for the DefaultIsm RPC method.
-message QueryDefaultIsmRequest {}
+message QueryOriginsDefaultIsmRequest { uint32 origin = 1; }
 
 // QueryDefaultIsmResponse is the response type for the DefaultIsm RPC method.
-message QueryDefaultIsmResponse {
-  repeated bytes validator_pub_keys = 1;
-  uint32 threshold = 2;
-}
+message QueryOriginsDefaultIsmResponse { MultiSigIsm default_ism = 1; }
 
-// QueryContractIsmRequest is the request type for the ContractIsm RPC method.
-message QueryContractIsmRequest { bytes contract_addr = 1; }
+// QueryAllDefaultIsmRequest is the request type for the AllDefaultIsms RPC
+// method.
+message QueryAllDefaultIsmsRequest {}
 
-// QueryContractIsmResponse is the response type for the ContractIsm RPC method.
-message QueryContractIsmResponse {
-  repeated bytes validator_pub_keys = 1;
-  uint32 threshold = 2;
+// QueryAllDefaultIsmResponse is the response type for the AllDefaultIsms RPC
+// method.
+message QueryAllDefaultIsmsResponse {
+  repeated OriginsMultiSigIsm default_isms = 1;
 }

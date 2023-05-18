@@ -1,8 +1,9 @@
 package types
 
 import (
-	"fmt"
 	"encoding/binary"
+	"fmt"
+
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
@@ -20,7 +21,7 @@ func Digest(origin uint32, originMailbox []byte, root []byte, index uint32) []by
 
 	packedHash := crypto.Keccak256(packed)
 	msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(packedHash), packedHash)
-	return crypto.Keccak256([]byte(msg)) 
+	return crypto.Keccak256([]byte(msg))
 }
 
 func DomainHash(origin uint32, originMailbox []byte) []byte {
@@ -31,6 +32,6 @@ func DomainHash(origin uint32, originMailbox []byte) []byte {
 	packed = append(packed, originBytes...)
 	packed = append(packed, originMailbox...)
 	packed = append(packed, []byte("HYPERLANE")...)
-	
+
 	return crypto.Keccak256(packed)
 }

@@ -1,0 +1,18 @@
+syntax = "proto3";
+package hyperlane.ism.v1;
+
+option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types";
+
+// Hyperlane's default ISM
+message OriginsMultiSigIsm {
+  uint32 origin = 1;
+  MultiSigIsm ism = 2;
+}
+
+// MultiSig ISM for a specific origin
+message MultiSigIsm {
+  // Validator pub keys
+  repeated bytes validator_pub_keys = 1;
+  // number of validators required
+  uint32 threshold = 2;
+}

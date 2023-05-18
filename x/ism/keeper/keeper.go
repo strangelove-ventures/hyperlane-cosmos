@@ -21,12 +21,7 @@ type Keeper struct {
 	storeKey   storetypes.StoreKey
 	cdc        codec.BinaryCodec
 	authority  string
-	defaultIsm MultiSigIsm
-}
-
-type MultiSigIsm struct {
-	ValPubKeys [][]byte
-	Threshold  uint32
+	defaultIsm map[uint32]types.MultiSigIsm
 }
 
 func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, authority string) Keeper {
@@ -34,12 +29,13 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, authority string)
 		cdc:       cdc,
 		storeKey:  key,
 		authority: authority,
+		defaultIsm: map[uint32]types.MultiSigIsm{},
 	}
 }
 
 func (k Keeper) Verify(metadata, message []byte) bool {
 	// Look up recipient contract's ISM, if 0, use default multi sig (just use default for now)
-	ism := k.defaultIsm
+	ism := k.defaultIsm[types.Origin(message)]
 	return VerifyMerkleProof(metadata, message) && VerifyValidatorSignatures(metadata, message, ism)
 }
 
@@ -62,8 +58,7 @@ func VerifyMerkleProof(metadata []byte, message []byte) bool {
 	return reflect.DeepEqual(calculatedRoot, types.Root(metadata))
 }
 
-func VerifyValidatorSignatures(metadata []byte, message []byte, ism MultiSigIsm) bool {
-
+func VerifyValidatorSignatures(metadata []byte, message []byte, ism types.MultiSigIsm) bool {
 	if ism.Threshold == 0 {
 		return false
 	}
@@ -71,7 +66,7 @@ func VerifyValidatorSignatures(metadata []byte, message []byte, ism MultiSigIsm)
 	// checkpoint digest
 	digest := types.Digest(types.Origin(message), types.OriginMailbox(metadata), types.Root(metadata), types.Index(metadata))
 
-	validatorCount := len(ism.ValPubKeys)
+	validatorCount := len(ism.ValidatorPubKeys)
 	validatorIndex := 0
 	// Assumes that signatures are ordered by validator
 	for i := uint32(0); i < ism.Threshold; i++ {
@@ -81,10 +76,10 @@ func VerifyValidatorSignatures(metadata []byte, message []byte, ism MultiSigIsm)
 			fmt.Println("signer recover error: ", err)
 			return false
 		}
-		//fmt.Println("Signer: ", hex.EncodeToString(signer))
+		// fmt.Println("Signer: ", hex.EncodeToString(signer))
 		signerAddress := crypto.PubkeyToAddress(*signer)
 		// Loop through remaining validators until we find a match
-		for validatorIndex < validatorCount && !reflect.DeepEqual(signerAddress.Bytes(), ism.ValPubKeys[validatorIndex]) {
+		for validatorIndex < validatorCount && !reflect.DeepEqual(signerAddress.Bytes(), ism.ValidatorPubKeys[validatorIndex]) {
 			validatorIndex++
 		}
 		// Fail if we never found a match
