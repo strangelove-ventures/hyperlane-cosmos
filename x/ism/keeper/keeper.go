@@ -8,6 +8,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/imt"
@@ -26,9 +27,9 @@ type Keeper struct {
 
 func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, authority string) Keeper {
 	return Keeper{
-		cdc:       cdc,
-		storeKey:  key,
-		authority: authority,
+		cdc:        cdc,
+		storeKey:   key,
+		authority:  authority,
 		defaultIsm: map[uint32]types.MultiSigIsm{},
 	}
 }
@@ -79,7 +80,8 @@ func VerifyValidatorSignatures(metadata []byte, message []byte, ism types.MultiS
 		// fmt.Println("Signer: ", hex.EncodeToString(signer))
 		signerAddress := crypto.PubkeyToAddress(*signer)
 		// Loop through remaining validators until we find a match
-		for validatorIndex < validatorCount && !reflect.DeepEqual(signerAddress.Bytes(), ism.ValidatorPubKeys[validatorIndex]) {
+		for validatorIndex < validatorCount &&
+		    hexutil.Encode(signerAddress.Bytes()) == ism.ValidatorPubKeys[validatorIndex] {
 			validatorIndex++
 		}
 		// Fail if we never found a match

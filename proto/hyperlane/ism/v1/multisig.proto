@@ -12,7 +12,7 @@ message OriginsMultiSigIsm {
 // MultiSig ISM for a specific origin
 message MultiSigIsm {
   // Validator pub keys
-  repeated bytes validator_pub_keys = 1;
+  repeated string validator_pub_keys = 1;
   // number of validators required
   uint32 threshold = 2;
 }

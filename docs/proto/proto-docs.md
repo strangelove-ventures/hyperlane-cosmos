@@ -4,95 +4,58 @@
 
 ## Table of Contents
 
-- [hyperlane/ism/v1/multisig.proto](#hyperlane/ism/v1/multisig.proto)
-    - [MultiSigIsm](#hyperlane.ism.v1.MultiSigIsm)
-    - [OriginsMultiSigIsm](#hyperlane.ism.v1.OriginsMultiSigIsm)
+- [hyperlane/mailbox/v1/genesis.proto](#hyperlane/mailbox/v1/genesis.proto)
+    - [GenesisState](#hyperlane.mailbox.v1.GenesisState)
+    - [GenesisTreeEntry](#hyperlane.mailbox.v1.GenesisTreeEntry)
   
-- [hyperlane/ism/v1/genesis.proto](#hyperlane/ism/v1/genesis.proto)
-    - [GenesisState](#hyperlane.ism.v1.GenesisState)
+- [hyperlane/mailbox/v1/query.proto](#hyperlane/mailbox/v1/query.proto)
+    - [QueryCurrentTreeMetadataRequest](#hyperlane.mailbox.v1.QueryCurrentTreeMetadataRequest)
+    - [QueryCurrentTreeMetadataResponse](#hyperlane.mailbox.v1.QueryCurrentTreeMetadataResponse)
   
-- [hyperlane/ism/v1/query.proto](#hyperlane/ism/v1/query.proto)
-    - [QueryAllDefaultIsmsRequest](#hyperlane.ism.v1.QueryAllDefaultIsmsRequest)
-    - [QueryAllDefaultIsmsResponse](#hyperlane.ism.v1.QueryAllDefaultIsmsResponse)
-    - [QueryOriginsDefaultIsmRequest](#hyperlane.ism.v1.QueryOriginsDefaultIsmRequest)
-    - [QueryOriginsDefaultIsmResponse](#hyperlane.ism.v1.QueryOriginsDefaultIsmResponse)
+    - [Query](#hyperlane.mailbox.v1.Query)
   
-    - [Query](#hyperlane.ism.v1.Query)
+- [hyperlane/mailbox/v1/tx.proto](#hyperlane/mailbox/v1/tx.proto)
+    - [MsgSetDefaultIsm](#hyperlane.mailbox.v1.MsgSetDefaultIsm)
+    - [MsgSetDefaultIsmResponse](#hyperlane.mailbox.v1.MsgSetDefaultIsmResponse)
   
-- [hyperlane/ism/v1/tx.proto](#hyperlane/ism/v1/tx.proto)
-    - [MsgSetDefaultIsm](#hyperlane.ism.v1.MsgSetDefaultIsm)
-    - [MsgSetDefaultIsmResponse](#hyperlane.ism.v1.MsgSetDefaultIsmResponse)
-  
-    - [Msg](#hyperlane.ism.v1.Msg)
+    - [Msg](#hyperlane.mailbox.v1.Msg)
   
 - [Scalar Value Types](#scalar-value-types)
 
 
 
-<a name="hyperlane/ism/v1/multisig.proto"></a>
+<a name="hyperlane/mailbox/v1/genesis.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/ism/v1/multisig.proto
+## hyperlane/mailbox/v1/genesis.proto
 
 
 
-<a name="hyperlane.ism.v1.MultiSigIsm"></a>
-
-### MultiSigIsm
-MultiSig ISM for a specific origin
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `validator_pub_keys` | [bytes](#bytes) | repeated | Validator pub keys |
-| `threshold` | [uint32](#uint32) |  | number of validators required |
-
-
-
-
-
-
-<a name="hyperlane.ism.v1.OriginsMultiSigIsm"></a>
-
-### OriginsMultiSigIsm
-Hyperlane's default ISM
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `origin` | [uint32](#uint32) |  |  |
-| `ism` | [MultiSigIsm](#hyperlane.ism.v1.MultiSigIsm) |  |  |
-
-
-
-
-
- <!-- end messages -->
-
- <!-- end enums -->
-
- <!-- end HasExtensions -->
-
- <!-- end services -->
-
-
-
-<a name="hyperlane/ism/v1/genesis.proto"></a>
-<p align="right"><a href="#top">Top</a></p>
-
-## hyperlane/ism/v1/genesis.proto
-
-
-
-<a name="hyperlane.ism.v1.GenesisState"></a>
+<a name="hyperlane.mailbox.v1.GenesisState"></a>
 
 ### GenesisState
-Hyperlane ISM's keeper genesis state
+Hyperlane mailbox's keeper genesis state
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `default_ism` | [OriginsMultiSigIsm](#hyperlane.ism.v1.OriginsMultiSigIsm) | repeated | Genesis default ISM |
+| `tree_entry` | [GenesisTreeEntry](#hyperlane.mailbox.v1.GenesisTreeEntry) | repeated | Each genesis tree entry |
+
+
+
+
+
+
+<a name="hyperlane.mailbox.v1.GenesisTreeEntry"></a>
+
+### GenesisTreeEntry
+Hyperlane's tree entry
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `index` | [uint32](#uint32) |  | index |
+| `message` | [bytes](#bytes) |  | message |
 
 
 
@@ -108,17 +71,17 @@ Hyperlane ISM's keeper genesis state
 
 
 
-<a name="hyperlane/ism/v1/query.proto"></a>
+<a name="hyperlane/mailbox/v1/query.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/ism/v1/query.proto
+## hyperlane/mailbox/v1/query.proto
 
 
 
-<a name="hyperlane.ism.v1.QueryAllDefaultIsmsRequest"></a>
+<a name="hyperlane.mailbox.v1.QueryCurrentTreeMetadataRequest"></a>
 
-### QueryAllDefaultIsmsRequest
-QueryAllDefaultIsmRequest is the request type for the AllDefaultIsms RPC
+### QueryCurrentTreeMetadataRequest
+QueryCurrentTreeMetadataRequest is the request type for the Query/Tree RPC
 method.
 
 
@@ -126,46 +89,16 @@ method.
 
 
 
-<a name="hyperlane.ism.v1.QueryAllDefaultIsmsResponse"></a>
+<a name="hyperlane.mailbox.v1.QueryCurrentTreeMetadataResponse"></a>
 
-### QueryAllDefaultIsmsResponse
-QueryAllDefaultIsmResponse is the response type for the AllDefaultIsms RPC
-method.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `default_isms` | [OriginsMultiSigIsm](#hyperlane.ism.v1.OriginsMultiSigIsm) | repeated |  |
-
-
-
-
-
-
-<a name="hyperlane.ism.v1.QueryOriginsDefaultIsmRequest"></a>
-
-### QueryOriginsDefaultIsmRequest
-QueryDefaultIsmRequest is the request type for the DefaultIsm RPC method.
+### QueryCurrentTreeMetadataResponse
+QueryTreeResponse is the response type for the Query/Tree RPC method.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `origin` | [uint32](#uint32) |  |  |
-
-
-
-
-
-
-<a name="hyperlane.ism.v1.QueryOriginsDefaultIsmResponse"></a>
-
-### QueryOriginsDefaultIsmResponse
-QueryDefaultIsmResponse is the response type for the DefaultIsm RPC method.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `default_ism` | [MultiSigIsm](#hyperlane.ism.v1.MultiSigIsm) |  |  |
+| `root` | [bytes](#bytes) |  |  |
+| `count` | [uint32](#uint32) |  |  |
 
 
 
@@ -178,28 +111,27 @@ QueryDefaultIsmResponse is the response type for the DefaultIsm RPC method.
  <!-- end HasExtensions -->
 
 
-<a name="hyperlane.ism.v1.Query"></a>
+<a name="hyperlane.mailbox.v1.Query"></a>
 
 ### Query
-Query service for hyperlane ISM module
+Query service for hyperlane mailbox module
 
 | Method Name | Request Type | Response Type | Description | HTTP Verb | Endpoint |
 | ----------- | ------------ | ------------- | ------------| ------- | -------- |
-| `OriginsDefaultIsm` | [QueryOriginsDefaultIsmRequest](#hyperlane.ism.v1.QueryOriginsDefaultIsmRequest) | [QueryOriginsDefaultIsmResponse](#hyperlane.ism.v1.QueryOriginsDefaultIsmResponse) | Get current default multisig ISM for an origin | GET|/hyperlane/ism/v1/origins_default_ism|
-| `AllDefaultIsms` | [QueryAllDefaultIsmsRequest](#hyperlane.ism.v1.QueryAllDefaultIsmsRequest) | [QueryAllDefaultIsmsResponse](#hyperlane.ism.v1.QueryAllDefaultIsmsResponse) | Get all current default multisig ISMs | GET|/hyperlane/ism/v1/all_default_isms|
+| `CurrentTreeMetadata` | [QueryCurrentTreeMetadataRequest](#hyperlane.mailbox.v1.QueryCurrentTreeMetadataRequest) | [QueryCurrentTreeMetadataResponse](#hyperlane.mailbox.v1.QueryCurrentTreeMetadataResponse) | Get current tree metadata | GET|/hyperlane/mailbox/v1/tree|
 
  <!-- end services -->
 
 
 
-<a name="hyperlane/ism/v1/tx.proto"></a>
+<a name="hyperlane/mailbox/v1/tx.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/ism/v1/tx.proto
+## hyperlane/mailbox/v1/tx.proto
 
 
 
-<a name="hyperlane.ism.v1.MsgSetDefaultIsm"></a>
+<a name="hyperlane.mailbox.v1.MsgSetDefaultIsm"></a>
 
 ### MsgSetDefaultIsm
 MsgSetDefaultIsm defines the request type for the SetDefaultIsm rpc.
@@ -208,14 +140,14 @@ MsgSetDefaultIsm defines the request type for the SetDefaultIsm rpc.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | `signer` | [string](#string) |  |  |
-| `isms` | [OriginsMultiSigIsm](#hyperlane.ism.v1.OriginsMultiSigIsm) | repeated |  |
+| `ism_hash` | [string](#string) |  |  |
 
 
 
 
 
 
-<a name="hyperlane.ism.v1.MsgSetDefaultIsmResponse"></a>
+<a name="hyperlane.mailbox.v1.MsgSetDefaultIsmResponse"></a>
 
 ### MsgSetDefaultIsmResponse
 MsgSetDefaultIsmResponse defines the Msg/SetDefaultIsm response type
@@ -231,14 +163,14 @@ MsgSetDefaultIsmResponse defines the Msg/SetDefaultIsm response type
  <!-- end HasExtensions -->
 
 
-<a name="hyperlane.ism.v1.Msg"></a>
+<a name="hyperlane.mailbox.v1.Msg"></a>
 
 ### Msg
-Msg defines the hyperlane ISM Msg service.
+Msg defines the hyperlane mailbox Msg service.
 
 | Method Name | Request Type | Response Type | Description | HTTP Verb | Endpoint |
 | ----------- | ------------ | ------------- | ------------| ------- | -------- |
-| `SetDefaultIsm` | [MsgSetDefaultIsm](#hyperlane.ism.v1.MsgSetDefaultIsm) | [MsgSetDefaultIsmResponse](#hyperlane.ism.v1.MsgSetDefaultIsmResponse) | SetDefaultIsm defines a rpc handler method for MsgSetDefaultIsm. | |
+| `SetDefaultIsm` | [MsgSetDefaultIsm](#hyperlane.mailbox.v1.MsgSetDefaultIsm) | [MsgSetDefaultIsmResponse](#hyperlane.mailbox.v1.MsgSetDefaultIsmResponse) | SetDefaultIsm defines a rpc handler method for MsgSetDefaultIsm. | |
 
  <!-- end services -->
 

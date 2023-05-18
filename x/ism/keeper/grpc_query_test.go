@@ -3,6 +3,7 @@ package keeper_test
 import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 )
 
@@ -61,7 +62,6 @@ func (suite *KeeperTestSuite) TestQueryOriginsDefaultIsm() {
 			tc.malleate()
 
 			res, err := suite.queryClient.OriginsDefaultIsm(suite.ctx, req)
-			
 
 			if tc.expPass {
 				suite.Require().NoError(err)

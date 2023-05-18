@@ -9,8 +9,8 @@ var _ sdk.Msg = (*MsgSetDefaultIsm)(nil)
 // NewMsgSetDefaultIsm creates a new MsgSetDefaultIsm instance
 func NewMsgSetDefaultIsm(signer string, isms []*OriginsMultiSigIsm) *MsgSetDefaultIsm {
 	return &MsgSetDefaultIsm{
-		Signer:  signer,
-		Isms:    isms,
+		Signer: signer,
+		Isms:   isms,
 	}
 }
 

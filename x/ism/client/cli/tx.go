@@ -63,12 +63,12 @@ Where ism.json contains:
 			if err != nil {
 				return err
 			}
-			
+
 			contents, err := os.ReadFile(args[0])
 			if err != nil {
 				return err
 			}
-		
+
 			var msg types.MsgSetDefaultIsm
 			err = json.Unmarshal(contents, &msg)
 			if err != nil {
@@ -76,7 +76,7 @@ Where ism.json contains:
 			}
 
 			msg.Signer = clientCtx.GetFromAddress().String()
-			
+
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}

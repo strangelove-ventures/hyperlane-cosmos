@@ -23,7 +23,6 @@ func (k Keeper) OriginsDefaultIsm(c context.Context, req *types.QueryOriginsDefa
 	return &types.QueryOriginsDefaultIsmResponse{
 		DefaultIsm: &defaultIsm,
 	}, nil
-
 }
 
 // AllDefaultIsms implements the Query all default ISMs gRPC method
@@ -37,7 +36,7 @@ func (k Keeper) AllDefaultIsms(c context.Context, req *types.QueryAllDefaultIsms
 		ism := k.defaultIsm[origin]
 		allDefaultIsms.DefaultIsms = append(allDefaultIsms.DefaultIsms, &types.OriginsMultiSigIsm{
 			Origin: origin,
-			Ism: &ism,
+			Ism:    &ism,
 		})
 	}
 	return &allDefaultIsms, nil

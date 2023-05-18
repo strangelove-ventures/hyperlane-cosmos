@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"encoding/json"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -25,26 +26,36 @@ func (k Keeper) SetDefaultIsm(goCtx context.Context, msg *types.MsgSetDefaultIsm
 		return nil, sdkerrors.Wrapf(govtypes.ErrInvalidSigner, "invalid authority: expected %s, got %s", k.authority, msg.Signer)
 	}
 
-	store := ctx.KVStore(k.storeKey)
+	ismMap := map[uint32][]byte{}
 	for _, originIsm := range msg.Isms {
-		k.defaultIsm[originIsm.Origin] = *originIsm.Ism
 		ism, err := k.cdc.Marshal(originIsm.Ism)
 		if err != nil {
 			return &types.MsgSetDefaultIsmResponse{}, err
 		}
-		store.Set(types.OriginKey(originIsm.Origin), ism)
+		ismMap[originIsm.Origin] = ism
 	}
 
-	/*ctx.EventManager().EmitEvents(sdk.Events{
+	eventValue, err := json.Marshal(msg.Isms)
+	if err != nil {
+		return &types.MsgSetDefaultIsmResponse{}, err
+	}
+
+	store := ctx.KVStore(k.storeKey)
+	for _, originIsm := range msg.Isms {
+		k.defaultIsm[originIsm.Origin] = *originIsm.Ism
+		store.Set(types.OriginKey(originIsm.Origin), ismMap[originIsm.Origin])
+	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			EventTypeSetDefaultIsm,
-			sdk.NewAttribute(AttributeKeySetDefaultIsm, hex.EncodeToString(ismHash)),
+			types.EventTypeSetDefaultIsm,
+			sdk.NewAttribute(types.AttributeKeySetDefaultIsm, string(eventValue)),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 		),
-	})*/
+	})
 
 	return &types.MsgSetDefaultIsmResponse{}, nil
 }

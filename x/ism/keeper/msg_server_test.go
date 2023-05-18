@@ -1,8 +1,10 @@
 package keeper_test
 
 import (
+	"encoding/json"
+	"fmt"
 
-	//sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
@@ -46,27 +48,36 @@ func (suite *KeeperTestSuite) TestMsgSetDefaultIsm() {
 			tc.malleate()
 
 			res, err := suite.msgServer.SetDefaultIsm(suite.ctx, msg)
-			//events := ctx.EventManager().Events()
+			events := suite.ctx.EventManager().Events()
 
 			if tc.expPass {
 				suite.Require().NoError(err)
 				suite.Require().NotNil(res)
 
+				eventValue, err := json.Marshal(defaultIsms)
+				suite.Require().NoError(err)
+
+				fmt.Println("EventValue: ", string(eventValue))
+
 				// Verify events
-				/*expectedEvents := sdk.Events{
+				expectedEvents := sdk.Events{
 					sdk.NewEvent(
-						"store_wasm_code",
-						sdk.NewAttribute(clienttypes.AttributeKeyWasmCodeID, hex.EncodeToString(res.CodeId)),
+						types.EventTypeSetDefaultIsm,
+						sdk.NewAttribute(types.AttributeKeySetDefaultIsm, string(eventValue)),
+					),
+					sdk.NewEvent(
+						sdk.EventTypeMessage,
+						sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 					),
 				}
 
 				for _, evt := range expectedEvents {
 					suite.Require().Contains(events, evt)
-				}*/
+				}
 			} else {
 				suite.Require().Error(err)
 				suite.Require().Nil(res)
-				//suite.Require().Empty(events)
+				suite.Require().Empty(events)
 			}
 		})
 	}
