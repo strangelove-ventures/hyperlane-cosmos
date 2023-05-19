@@ -24,7 +24,7 @@ func (m MsgSetDefaultIsm) ValidateBasic() error {
 			return ErrInvalidThreshold
 		}
 		for _, validator := range originIsm.Ism.ValidatorPubKeys {
-			if len(validator) != 32 {
+			if len(validator) != 66 {
 				return ErrInvalidValSet
 			}
 		}

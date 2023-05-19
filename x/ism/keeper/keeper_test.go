@@ -1,12 +1,10 @@
 package keeper_test
 
 import (
-	//"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"testing"
 
-	//"github.com/ethereum/go-ethereum/crypto"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	tmtime "github.com/cometbft/cometbft/types/time"
 	"github.com/cosmos/cosmos-sdk/baseapp"
