@@ -18,8 +18,8 @@ func GetQueryCmd() *cobra.Command {
 	}
 
 	queryCmd.AddCommand(
-		getDefaultIsmCmd(),
-		getContractIsmCmd(),
+		getOriginsDefaultIsmCmd(),
+		getAllDefaultIsmsCmd(),
 	)
 
 	return queryCmd

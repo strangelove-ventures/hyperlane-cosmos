@@ -29,12 +29,12 @@ var (
 // a no-op.
 type AppModuleBasic struct{}
 
-// Name returns the hyperlane mailbox module name.
+// Name returns the hyperlane ISM module name.
 func (AppModuleBasic) Name() string {
 	return types.ModuleName
 }
 
-// RegisterLegacyAminoCodec performs a no-op. Hyperlane mailbox does not support amino.
+// RegisterLegacyAminoCodec performs a no-op. Hyperlane ISM does not support amino.
 func (AppModuleBasic) RegisterLegacyAminoCodec(*codec.LegacyAmino) {}
 
 // RegisterInterfaces registers module concrete types into protobuf Any.
@@ -45,7 +45,7 @@ func (AppModuleBasic) RegisterInterfaces(registry codectypes.InterfaceRegistry) 
 // DefaultGenesis returns an empty state
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(&types.GenesisState{
-		DefaultIsm: types.GenesisDefaultIsm{},
+		DefaultIsm: []types.OriginsMultiSigIsm{},
 	})
 }
 

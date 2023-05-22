@@ -1,6 +1,8 @@
 syntax = "proto3";
 package hyperlane.ism.v1;
 
+import "hyperlane/ism/v1/multisig.proto";
+
 option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types";
 
 // Msg defines the hyperlane ISM Msg service.
@@ -12,8 +14,7 @@ service Msg {
 // MsgSetDefaultIsm defines the request type for the SetDefaultIsm rpc.
 message MsgSetDefaultIsm {
   string signer = 1;
-  repeated bytes validator_pub_keys = 2;
-  uint32 threshold = 3;
+  repeated OriginsMultiSigIsm isms = 2;
 }
 
 // MsgSetDefaultIsmResponse defines the Msg/SetDefaultIsm response type

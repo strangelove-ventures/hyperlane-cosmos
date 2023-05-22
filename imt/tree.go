@@ -1,10 +1,11 @@
 package imt
 
 import (
-	"fmt"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/common"
 	"errors"
+	"fmt"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 const (
@@ -13,12 +14,12 @@ const (
 )
 
 type Tree struct {
-	branch [TreeDepth][]byte;
-	count int;
+	branch [TreeDepth][]byte
+	count  int
 }
 
 // Insert inserts node into the Merkle Tree
-func (t* Tree) Insert(node []byte) error {
+func (t *Tree) Insert(node []byte) error {
 	if t.count >= MaxLeaves {
 		return errors.New("merkle tree full")
 	}
@@ -43,24 +44,24 @@ func (t* Tree) Insert(node []byte) error {
 }
 
 // Count returns the number of inserts performed on the Tree
-func (t* Tree) Count() int {
+func (t *Tree) Count() int {
 	return t.count
 }
 
 // Print dumps the tree (for debugging)
-func (t* Tree) Print() {
-	for i := 0; i < TreeDepth; i ++ {
+func (t *Tree) Print() {
+	for i := 0; i < TreeDepth; i++ {
 		fmt.Printf("%02d: %X\n", i, t.branch[i])
 	}
 }
 
 // Root calculates and returns Tree's current root
-func (t* Tree) Root() []byte { 
+func (t *Tree) Root() []byte {
 	return t.RootWithContext(ZeroHashes())
 }
 
 // RootWithCtx calculates and returns Tree's current root given array of zeroes
-func (t* Tree) RootWithContext(zeroes [][]byte) []byte {
+func (t *Tree) RootWithContext(zeroes [][]byte) []byte {
 	index := t.count
 
 	// We start with a 32-bit zero slice
@@ -81,15 +82,17 @@ func (t* Tree) RootWithContext(zeroes [][]byte) []byte {
 }
 
 // BranchRoot calculates and returns the merkle root for the given leaf item, a merkle branch, and the index of item in the tree
-func BranchRoot(item []byte, branch [TreeDepth][]byte, index int) ([]byte, error) {
+func BranchRoot(item []byte, branch [TreeDepth][]byte, index uint32) ([]byte, error) {
 	if len(item) != 32 {
 		return nil, errors.New("must be 32-bytes")
 	}
 
-	current := item
+	current := make([]byte, 32)
+	copy(current, item)
 	for i := 0; i < TreeDepth; i++ {
 		ithBit := (index >> i) & 0x01
-		next := branch[i]
+		next := make([]byte, 32)
+		copy(next, branch[i])
 
 		var temp []byte
 		if ithBit == 1 {

@@ -2,8 +2,8 @@ package cli
 
 import (
 	"context"
-	"encoding/hex"
 	"fmt"
+	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -13,14 +13,14 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 )
 
-// getDefaultIsmCmd defines the command to query the default ISM
-func getDefaultIsmCmd() *cobra.Command {
+// getOriginsDefaultIsmCmd defines the command to query the default ISM
+func getOriginsDefaultIsmCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "default-ism",
-		Short:   "Query default ISM",
-		Long:    "Query default ISM",
-		Example: fmt.Sprintf("%s query %s default-ism", version.AppName, types.ModuleName),
-		Args:    cobra.ExactArgs(0),
+		Use:     "default-ism [origin]",
+		Short:   "Query default ISM for origin",
+		Long:    "Query default ISM for a specific origin",
+		Example: fmt.Sprintf("%s query %s default-ism [origin]", version.AppName, types.ModuleName),
+		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -28,9 +28,16 @@ func getDefaultIsmCmd() *cobra.Command {
 			}
 			queryClient := types.NewQueryClient(clientCtx)
 
-			req := types.QueryDefaultIsmRequest{}
+			origin, err := strconv.ParseUint(args[0], 10, 32)
+			if err != nil {
+				return err
+			}
 
-			res, err := queryClient.DefaultIsm(context.Background(), &req)
+			req := types.QueryOriginsDefaultIsmRequest{
+				Origin: uint32(origin),
+			}
+
+			res, err := queryClient.OriginsDefaultIsm(context.Background(), &req)
 			if err != nil {
 				return err
 			}
@@ -44,14 +51,14 @@ func getDefaultIsmCmd() *cobra.Command {
 	return cmd
 }
 
-// getContractIsmCmd defines the command to query the contract ISM
-func getContractIsmCmd() *cobra.Command {
+// getAllDefaultIsmCmd defines the command to query the default ISM
+func getAllDefaultIsmsCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "contract-ism [contract-addr]",
-		Short:   "Query contract ISM",
-		Long:    "Query contract ISM",
-		Example: fmt.Sprintf("%s query %s contract-ism [contract-addr]", version.AppName, types.ModuleName),
-		Args:    cobra.ExactArgs(1),
+		Use:     "all-default-isms",
+		Short:   "Query all default ISMs",
+		Long:    "Query all default ISMs",
+		Example: fmt.Sprintf("%s query %s all-default-isms", version.AppName, types.ModuleName),
+		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -59,17 +66,9 @@ func getContractIsmCmd() *cobra.Command {
 			}
 			queryClient := types.NewQueryClient(clientCtx)
 
-			contractAddrHex := args[0]
-			contractAddr, err := hex.DecodeString(contractAddrHex)
-			if err != nil {
-				return err
-			}
+			req := types.QueryAllDefaultIsmsRequest{}
 
-			req := types.QueryContractIsmRequest{
-				ContractAddr: contractAddr,
-			}
-
-			res, err := queryClient.ContractIsm(context.Background(), &req)
+			res, err := queryClient.AllDefaultIsms(context.Background(), &req)
 			if err != nil {
 				return err
 			}

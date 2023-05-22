@@ -6,29 +6,30 @@ import (
 	"fmt"
 	"io"
 	"os"
-    "testing"
-	"github.com/stretchr/testify/require"
-	"github.com/ethereum/go-ethereum/crypto"
+	"testing"
+
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/stretchr/testify/require"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/imt"
 )
 
 type MerkleProof struct {
-	Leaf string;
-	Index int;
-	Path []string;
-	ExpectedRoot string;
+	Leaf         string
+	Index        uint32
+	Path         []string
+	ExpectedRoot string
 }
 
 type MerkleVector struct {
-	TestName string;
-	ExpectedRoot string;
-	Leaves []string;
-	Proofs []MerkleProof;
+	TestName     string
+	ExpectedRoot string
+	Leaves       []string
+	Proofs       []MerkleProof
 }
 
-func TestFootGuns(t* testing.T) {
+func TestFootGuns(t *testing.T) {
 	i := imt.Tree{}
 
 	emptySlice := []byte{}
@@ -44,7 +45,7 @@ func TestFootGuns(t* testing.T) {
 	require.NotNil(t, err, "nodes must be 32-bytes")
 }
 
-func TestVectors(t* testing.T) {
+func TestVectors(t *testing.T) {
 	var cases []MerkleVector
 
 	// Open the test cases
@@ -58,13 +59,13 @@ func TestVectors(t* testing.T) {
 
 	// Test them
 	for _, c := range cases {
-		t.Run(fmt.Sprintf("Testing case: %s", c.TestName), func(t *testing.T){
+		t.Run(fmt.Sprintf("Testing case: %s", c.TestName), func(t *testing.T) {
 			i := imt.Tree{}
 
 			// Insert all of the leaves
 			for idx, l := range c.Leaves {
-				//Test Vectors used 'ethers.utils.hashMessage(leaf)'
-				//to compute the value to insert.
+				// Test Vectors used 'ethers.utils.hashMessage(leaf)'
+				// to compute the value to insert.
 				msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(l), l)
 				hash := crypto.Keccak256([]byte(msg))
 
@@ -95,7 +96,7 @@ func TestVectors(t* testing.T) {
 				require.Nil(t, err)
 
 				paths := [imt.TreeDepth][]byte{}
-				for idx, path  := range p.Path {
+				for idx, path := range p.Path {
 					pBytes, err := hex.DecodeString(path[2:])
 					require.Nil(t, err)
 					paths[idx] = pBytes
@@ -110,7 +111,7 @@ func TestVectors(t* testing.T) {
 	}
 }
 
-func TestIncrementalVectors(t* testing.T) {
+func TestIncrementalVectors(t *testing.T) {
 	var cases []MerkleVector
 
 	// Open the test cases
@@ -124,7 +125,7 @@ func TestIncrementalVectors(t* testing.T) {
 
 	// Test them
 	for _, c := range cases {
-		t.Run(fmt.Sprintf("Testing case: %s", c.TestName), func(t *testing.T){
+		t.Run(fmt.Sprintf("Testing case: %s", c.TestName), func(t *testing.T) {
 			// Verify leaves
 			for idx, p := range c.Proofs {
 				i := imt.Tree{}
@@ -142,10 +143,10 @@ func TestIncrementalVectors(t* testing.T) {
 
 				// Make sure we've inserted the correct amount
 				require.Equal(t, i.Count(), idx+1)
-				
+
 				leaf, err := hex.DecodeString(p.Leaf[2:])
 				require.Nil(t, err)
-				
+
 				// Make sure we've computed the expected root
 				expectedRoot, err := hex.DecodeString(p.ExpectedRoot[2:])
 				require.Nil(t, err)
@@ -154,7 +155,7 @@ func TestIncrementalVectors(t* testing.T) {
 				require.Equal(t, r[:], expectedRoot)
 
 				paths := [imt.TreeDepth][]byte{}
-				for idx, path  := range p.Path {
+				for idx, path := range p.Path {
 					pBytes, err := hex.DecodeString(path[2:])
 					require.Nil(t, err)
 					paths[idx] = pBytes
@@ -168,4 +169,3 @@ func TestIncrementalVectors(t* testing.T) {
 		})
 	}
 }
-

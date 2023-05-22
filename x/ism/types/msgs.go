@@ -6,24 +6,28 @@ import (
 
 var _ sdk.Msg = (*MsgSetDefaultIsm)(nil)
 
-// MsgStoreCode creates a new MsgStoreCode instance
-//
-//nolint:interfacer
-func NewMsgSetDefaultIsm(signer string, validator_pub_keys [][]byte, threshold uint32) *MsgSetDefaultIsm {
+// NewMsgSetDefaultIsm creates a new MsgSetDefaultIsm instance
+func NewMsgSetDefaultIsm(signer string, isms []*OriginsMultiSigIsm) *MsgSetDefaultIsm {
 	return &MsgSetDefaultIsm{
-		Signer:  signer,
-		ValidatorPubKeys: validator_pub_keys,
-		Threshold: threshold,
+		Signer: signer,
+		Isms:   isms,
 	}
 }
 
 // ValidateBasic implements sdk.Msg
 func (m MsgSetDefaultIsm) ValidateBasic() error {
-	if len(m.ValidatorPubKeys) == 0 {
-		return ErrInvalidValSet
+	if len(m.Isms) == 0 {
+		return ErrInvalidIsmSet
 	}
-	if m.Threshold == 0 {
-		return ErrInvalidThreshold
+	for _, originIsm := range m.Isms {
+		if originIsm.Ism.Threshold == 0 {
+			return ErrInvalidThreshold
+		}
+		for _, validator := range originIsm.Ism.ValidatorPubKeys {
+			if len(validator) != 66 {
+				return ErrInvalidValSet
+			}
+		}
 	}
 
 	return nil
