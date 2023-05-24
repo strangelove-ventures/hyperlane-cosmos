@@ -6,6 +6,7 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
+	"github.com/strangelove-ventures/hyperlane-cosmos/imt"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
 
@@ -16,9 +17,12 @@ type Keeper struct {
 	storeKey  storetypes.StoreKey
 	cdc       codec.BinaryCodec
 	authority string
+	domain    uint32
+	tree      imt.Tree
+	delivered map[string]bool
 }
 
-func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey) Keeper {
+func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, domain uint32) Keeper {
 	// governance authority
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
 
@@ -26,5 +30,6 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey) Keeper {
 		cdc:       cdc,
 		storeKey:  key,
 		authority: authority.String(),
+		domain:    domain,
 	}
 }
