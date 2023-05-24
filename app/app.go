@@ -618,7 +618,9 @@ func NewSimApp(
 		wasmOpts...,
 	)
 
-	app.MailboxKeeper = mailboxkeeper.NewKeeper(appCodec, keys[mailboxtypes.StoreKey])
+	domain := uint32(12345)
+
+	app.MailboxKeeper = mailboxkeeper.NewKeeper(appCodec, keys[mailboxtypes.StoreKey], domain)
 	app.IsmKeeper = ismkeeper.NewKeeper(appCodec, keys[ismtypes.StoreKey], authtypes.NewModuleAddress(govtypes.ModuleName).String())
 
 	// The gov proposal types can be individually enabled

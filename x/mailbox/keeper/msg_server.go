@@ -8,7 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	ism "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
+	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
 
@@ -62,14 +62,14 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	}
 	message = append(message, messageBytes...)
 
-	// Insert the message into the tree
-	err := k.tree.Insert(message)
+	// Get the message ID
+	id := ismtypes.Id(message)
+
+	// Insert the message id into the tree
+	err := k.tree.Insert(id)
 	if err != nil {
 		return nil, err
 	}
-
-	// Get the message ID
-	id := ism.Id(message)
 
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -93,5 +93,61 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 
 // Process defines a rpc handler method for MsgProcess
 func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.MsgProcessResponse, error) {
-	panic("Implement me")
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	messageBytes := hexutil.MustDecode(msg.Message)
+	if ismtypes.Version(messageBytes) != k.version {
+		return nil, types.ErrMsgInvalidVersion
+	}
+
+	if ismtypes.Destination(messageBytes) != k.domain {
+		return nil, types.ErrMsgInvalidDomain
+	}
+
+	idBytes := ismtypes.Id(messageBytes)
+	id := hexutil.Encode(idBytes)
+
+	// Let's make sure we've not already delivered the message
+	// TODO: Load from Store
+	val, ok := k.delivered[id]
+	if ok && val {
+		return nil, types.ErrMsgDelivered
+	}
+
+	// TODO: Store
+	k.delivered[id] = true
+
+	// TODO: GetRecipientISM
+	i := k.getRecipientISM()
+
+	metadataBytes := hexutil.MustDecode(msg.Metadata)
+	if !i.Verify(metadataBytes, messageBytes) {
+		return nil, types.ErrMsgVerificationFailed
+	}
+
+	origin := ismtypes.Origin(messageBytes)
+	sender := ismtypes.Recipient(messageBytes)
+	recipient := ismtypes.Recipient(messageBytes)
+	body := hexutil.Encode(ismtypes.Body(messageBytes))
+
+	err := k.HandleMessage(origin, sender, recipient, body)
+	if err != nil {
+		return nil, types.ErrMsgHandling
+	}
+
+	// Emit the events
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeProcess,
+			sdk.NewAttribute(types.AttributeKeyOrigin, strconv.FormatUint(uint64(origin), 10)),
+			sdk.NewAttribute(types.AttributeKeySender, sender),
+			sdk.NewAttribute(types.AttributeKeyRecipientAddress, recipient),
+			sdk.NewAttribute(types.AttributeKeyMessage, body),
+		),
+		sdk.NewEvent(
+			types.EventTypeProcessId,
+			sdk.NewAttribute(types.AttributeKeyID, id),
+		),
+	})
+	return &types.MsgProcessResponse{}, nil
 }
