@@ -128,9 +128,10 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 	origin := ismtypes.Origin(messageBytes)
 	sender := ismtypes.Recipient(messageBytes)
 	recipient := ismtypes.Recipient(messageBytes)
-	body := hexutil.Encode(ismtypes.Body(messageBytes))
+	body := ismtypes.Body(messageBytes)
 
-	err := k.HandleMessage(origin, sender, recipient, body)
+	// TODO: Do we need to do anything with the data?
+	_, err := k.HandleMessage(goCtx, origin, sender, recipient, string(body))
 	if err != nil {
 		return nil, types.ErrMsgHandling
 	}
@@ -142,7 +143,7 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 			sdk.NewAttribute(types.AttributeKeyOrigin, strconv.FormatUint(uint64(origin), 10)),
 			sdk.NewAttribute(types.AttributeKeySender, sender),
 			sdk.NewAttribute(types.AttributeKeyRecipientAddress, recipient),
-			sdk.NewAttribute(types.AttributeKeyMessage, body),
+			sdk.NewAttribute(types.AttributeKeyMessage, string(body)),
 		),
 		sdk.NewEvent(
 			types.EventTypeProcessId,

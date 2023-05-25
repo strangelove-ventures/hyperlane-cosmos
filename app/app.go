@@ -618,9 +618,10 @@ func NewSimApp(
 		wasmOpts...,
 	)
 
+	// TODO: How are the domains registered selected.. using 12345 as a placeholder
 	domain := uint32(12345)
 
-	app.MailboxKeeper = mailboxkeeper.NewKeeper(appCodec, keys[mailboxtypes.StoreKey], domain)
+	app.MailboxKeeper = mailboxkeeper.NewKeeper(appCodec, keys[mailboxtypes.StoreKey], &app.WasmKeeper, domain)
 	app.IsmKeeper = ismkeeper.NewKeeper(appCodec, keys[ismtypes.StoreKey], authtypes.NewModuleAddress(govtypes.ModuleName).String())
 
 	// The gov proposal types can be individually enabled
