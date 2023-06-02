@@ -8,6 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
+
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
@@ -15,6 +16,11 @@ import (
 var _ types.MsgServer = (*Keeper)(nil)
 
 const MAX_MESSAGE_BODY_BYTES = 2_000
+
+// NewMsgServerImpl return an implementation of the mailbox MsgServer interface for the provided keeper
+func NewMsgServerImpl(keeper Keeper) types.MsgServer {
+	return keeper
+}
 
 // Dispatch defines a rpc handler method for MsgDispatch
 func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.MsgDispatchResponse, error) {
@@ -56,7 +62,8 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	message = append(message, recipient.Bytes()...)
 
 	// Get the Message Body
-	messageBytes := hexutil.MustDecode(msg.MessageBody)
+	messageBytes := []byte(msg.MessageBody)
+	//messageBytes := hexutil.MustDecode(msg.MessageBody)
 	if len(messageBytes) > MAX_MESSAGE_BODY_BYTES {
 		return nil, types.ErrMsgTooLong
 	}
@@ -81,8 +88,12 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 			sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
 		),
 		sdk.NewEvent(
-			types.EventTypeDispatch,
+			types.EventTypeDispatchId,
 			sdk.NewAttribute(types.AttributeKeyID, string(hexutil.Encode(id))),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 		),
 	})
 

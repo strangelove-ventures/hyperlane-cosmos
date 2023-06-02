@@ -12,6 +12,7 @@ import (
 
 	cosmwasm "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	cwtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+
 	"github.com/strangelove-ventures/hyperlane-cosmos/imt"
 	ism "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
@@ -52,7 +53,6 @@ func (k Keeper) getRecipientISM() ism.Keeper {
 }
 
 func (k Keeper) HandleMessage(goCtx context.Context, origin uint32, sender, recipient, body string) ([]byte, error) {
-
 	senderAddr, err := sdk.AccAddressFromBech32(sender)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "sender")

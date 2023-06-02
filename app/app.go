@@ -135,6 +135,7 @@ import (
 	mailbox "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox"
 	mailboxkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/keeper"
 	mailboxtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
+	mailboxbindings "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/bindings"
 )
 
 const appName = "SimApp"
@@ -594,6 +595,9 @@ func NewSimApp(
 	if err != nil {
 		panic(fmt.Sprintf("error while reading wasm config: %s", err))
 	}
+
+	mailboxOpts := mailboxbindings.RegisterCustomPlugins(&app.MailboxKeeper)
+	wasmOpts = append(wasmOpts, mailboxOpts...)
 
 	// The last arguments can contain custom message handlers, and custom query handlers,
 	// if we want to allow any custom callbacks

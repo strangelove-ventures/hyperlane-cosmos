@@ -12,9 +12,9 @@ var (
 // NewMsgDispatch creates a new MsgStoreCode instance
 //
 //nolint:interfacer
-func NewMsgDispatch(sender sdk.AccAddress, destinationDomain uint32, recipientAddress string, messageBody string) *MsgDispatch {
+func NewMsgDispatch(sender string, destinationDomain uint32, recipientAddress string, messageBody string) *MsgDispatch {
 	return &MsgDispatch{
-		Sender:            sender.String(),
+		Sender:            sender,
 		DestinationDomain: destinationDomain,
 		RecipientAddress:  recipientAddress,
 		MessageBody:       messageBody,

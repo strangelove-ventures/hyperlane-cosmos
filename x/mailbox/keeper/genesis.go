@@ -9,7 +9,8 @@ import (
 // InitGenesis initializes the hyperlane mailbox module's state from a provided genesis
 // state.
 func (k Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
-	panic("Implement me")
+	//panic("Implement me")
+	return nil
 }
 
 // ExportGenesis returns the hyperlane mailbox module's exported genesis.
