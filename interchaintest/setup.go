@@ -9,8 +9,8 @@ import (
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	// mailboxtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 
-	"github.com/icza/dyno"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
+	"github.com/icza/dyno"
 
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
@@ -33,7 +33,7 @@ func hyperlaneEncoding() *testutil.TestEncodingConfig {
 
 	// register custom types
 	wasmtypes.RegisterInterfaces(cfg.InterfaceRegistry)
-	//mailboxtypes.RegisterInterfaces(cfg.InterfaceRegistry)
+	// mailboxtypes.RegisterInterfaces(cfg.InterfaceRegistry)
 
 	return &cfg
 }
@@ -67,8 +67,8 @@ func CreateSingleHyperlaneSimd(t *testing.T) []ibc.Chain {
 				TrustingPeriod: "112h",
 				NoHostMount:    false,
 				// ConfigFileOverrides: nil,
-				EncodingConfig:      hyperlaneEncoding(),
-				ModifyGenesis: ModifyGenesisProposalTime(votingPeriod, maxDepositPeriod),
+				EncodingConfig:         hyperlaneEncoding(),
+				ModifyGenesis:          ModifyGenesisProposalTime(votingPeriod, maxDepositPeriod),
 				UsingNewGenesisCommand: true,
 			},
 		},

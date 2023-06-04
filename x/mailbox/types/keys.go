@@ -9,9 +9,14 @@ const (
 	// StoreKey is the store key string for hyperlane mailbox
 	StoreKey = ModuleName
 
-	KeyMailboxIMT = "imt"
+	KeyMailboxIMT       = "imt"
+	KeyMailboxDelivered = "delivered"
 )
 
-func MailboxIMTKey(address string) []byte {
-	return []byte(fmt.Sprintf("%s/%s", KeyMailboxIMT, address))
+func MailboxIMTKey(index uint32) []byte {
+	return []byte(fmt.Sprintf("%s/%d", KeyMailboxIMT, index))
+}
+
+func MailboxDeliveredKey(id string) []byte {
+	return []byte(fmt.Sprintf("%s/%s", KeyMailboxDelivered, id))
 }

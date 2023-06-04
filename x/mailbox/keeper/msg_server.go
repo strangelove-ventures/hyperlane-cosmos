@@ -3,9 +3,11 @@ package keeper
 import (
 	"context"
 	"encoding/binary"
+	"encoding/json"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
@@ -16,6 +18,12 @@ import (
 var _ types.MsgServer = (*Keeper)(nil)
 
 const MAX_MESSAGE_BODY_BYTES = 2_000
+
+type ContractProcessMsg struct {
+	Origin uint32 `json:"origin"`
+	Sender string `json:"sender"`
+	Msg    string `json:"msg"`
+}
 
 // NewMsgServerImpl return an implementation of the mailbox MsgServer interface for the provided keeper
 func NewMsgServerImpl(keeper Keeper) types.MsgServer {
@@ -34,7 +42,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	message = append(message, version...)
 
 	// Nonce is the tree count.
-	nonce := uint32(k.tree.Count())
+	nonce := uint32(k.Tree.Count())
 	nonceBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(nonceBytes, nonce)
 	message = append(message, nonceBytes...)
@@ -70,7 +78,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	message = append(message, recipient...)
 
 	// Get the Message Body
-	//messageBytes := []byte(msg.MessageBody)
+	// messageBytes := []byte(msg.MessageBody)
 	messageBytes := hexutil.MustDecode(msg.MessageBody)
 	if len(messageBytes) > MAX_MESSAGE_BODY_BYTES {
 		return nil, types.ErrMsgTooLong
@@ -81,10 +89,13 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	id := ismtypes.Id(message)
 
 	// Insert the message id into the tree
-	err := k.tree.Insert(id)
+	err := k.Tree.Insert(id)
 	if err != nil {
 		return nil, err
 	}
+	// Store that the leaf
+	store := ctx.KVStore(k.storeKey)
+	store.Set(types.MailboxIMTKey(k.Tree.Count()-1), id)
 
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -115,63 +126,69 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	messageBytes := hexutil.MustDecode(msg.Message)
-	if ismtypes.Version(messageBytes) != k.version {
-		return nil, types.ErrMsgInvalidVersion
+	id, err := k.VerifyMessage(messageBytes)
+	if err != nil {
+		return nil, err
 	}
-
-	if ismtypes.Destination(messageBytes) != k.domain {
-		return nil, types.ErrMsgInvalidDomain
-	}
-
-	idBytes := ismtypes.Id(messageBytes)
-	id := hexutil.Encode(idBytes)
-
-	// Let's make sure we've not already delivered the message
-	// TODO: Load from Store
-	val, ok := k.delivered[id]
-	if ok && val {
-		return nil, types.ErrMsgDelivered
-	}
-
-	// TODO: Store
-	k.delivered[id] = true
-
-	// TODO: GetRecipientISM
-	i := k.getRecipientISM()
 
 	metadataBytes := hexutil.MustDecode(msg.Metadata)
-	if !i.Verify(metadataBytes, messageBytes) {
+	// Verify message signatures
+	if !k.ismKeeper.Verify(metadataBytes, messageBytes) {
 		return nil, types.ErrMsgVerificationFailed
 	}
 
-	origin := ismtypes.Origin(messageBytes)
-	sender := ismtypes.Recipient(messageBytes)
-	recipient := ismtypes.Recipient(messageBytes)
-	body := ismtypes.Body(messageBytes)
-
-	// TODO: Do we need to do anything with the data?
-	_, err := k.HandleMessage(goCtx, origin, sender, recipient, string(body))
+	// Parse the recipient and get the contract address
+	recipientBytes := ismtypes.Recipient(messageBytes)
+	recipient := sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), recipientBytes)
+	contractAddr, err := sdk.AccAddressFromBech32(recipient)
 	if err != nil {
-		return nil, types.ErrMsgHandling
+		return nil, sdkerrors.Wrap(err, "contract")
 	}
+
+	// Parse origin, sender, and body for the contract msg
+	origin := ismtypes.Origin(messageBytes)
+	senderBytes := ismtypes.Sender(messageBytes)
+	senderHex := hexutil.Encode(senderBytes)
+	body := ismtypes.Body(messageBytes)
+	contractMsg := ContractProcessMsg{
+		Origin: origin,
+		Sender: senderHex,
+		Msg:    string(body),
+	}
+	encodedMsg, err := json.Marshal(contractMsg)
+	if err != nil {
+		return nil, err
+	}
+
+	// Call the recipient contract
+	_, err = k.pcwKeeper.Execute(ctx, contractAddr, k.mailboxAddr, encodedMsg, sdk.NewCoins())
+	if err != nil {
+		return nil, err
+	}
+
+	// Store that the message was delivered
+	store := ctx.KVStore(k.storeKey)
+	store.Set(types.MailboxDeliveredKey(id), []byte{1})
+	k.Delivered[id] = true
 
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
-			types.EventTypeProcess,
-			sdk.NewAttribute(types.AttributeKeyOrigin, strconv.FormatUint(uint64(origin), 10)),
-			sdk.NewAttribute(types.AttributeKeySender, sender),
-			sdk.NewAttribute(types.AttributeKeyRecipientAddress, recipient),
-			sdk.NewAttribute(types.AttributeKeyMessage, string(body)),
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 		),
 		sdk.NewEvent(
 			types.EventTypeProcessId,
 			sdk.NewAttribute(types.AttributeKeyID, id),
 		),
 		sdk.NewEvent(
-			sdk.EventTypeMessage,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			types.EventTypeProcess,
+			sdk.NewAttribute(types.AttributeKeyOrigin, strconv.FormatUint(uint64(origin), 10)),
+			sdk.NewAttribute(types.AttributeKeySender, senderHex),
+			sdk.NewAttribute(types.AttributeKeyRecipientAddress, recipient),
+			sdk.NewAttribute(types.AttributeKeyMessage, string(body)),
 		),
 	})
+
 	return &types.MsgProcessResponse{}, nil
 }

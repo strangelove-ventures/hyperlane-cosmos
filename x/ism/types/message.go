@@ -3,7 +3,6 @@ package types
 import (
 	"encoding/binary"
 
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
@@ -35,16 +34,16 @@ func Origin(message []byte) uint32 {
 	return binary.BigEndian.Uint32(message[ORIGIN_OFFSET:SENDER_OFFSET])
 }
 
-func Sender(message []byte) string {
-	return hexutil.Encode(message[SENDER_OFFSET:DESTINATION_OFFSET])
+func Sender(message []byte) []byte {
+	return message[SENDER_OFFSET:DESTINATION_OFFSET]
 }
 
 func Destination(message []byte) uint32 {
 	return binary.BigEndian.Uint32(message[DESTINATION_OFFSET:RECIPIENT_OFFSET])
 }
 
-func Recipient(message []byte) string {
-	return hexutil.Encode(message[RECIPIENT_OFFSET:BODY_OFFSET])
+func Recipient(message []byte) []byte {
+	return message[RECIPIENT_OFFSET:BODY_OFFSET]
 }
 
 func Body(message []byte) []byte {

@@ -24,7 +24,7 @@ type ExecuteMsg struct {
 	ChangeContractOwner *ChangeContractOwner `json:"change_contract_owner,omitempty"`
 }
 
-type ExecuteRsp struct {}
+type ExecuteRsp struct{}
 
 type DispatchMsg struct {
 	DestinationAddr uint32 `json:"destination_address"`

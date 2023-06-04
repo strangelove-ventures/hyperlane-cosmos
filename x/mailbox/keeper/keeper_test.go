@@ -42,6 +42,7 @@ func (suite *KeeperTestSuite) SetupTest() {
 		encCfg.Codec,
 		key,
 		nil,
+		nil,
 		10, // Use test data from Optimism(10), could be any other chain with their respective test data
 	)
 

@@ -12,8 +12,8 @@ import (
 
 func (suite *KeeperTestSuite) TestDispatch() {
 	var (
-		msg    *types.MsgDispatch
-		id     string
+		msg *types.MsgDispatch
+		id  string
 	)
 
 	testCases := []struct {
@@ -101,12 +101,12 @@ func (suite *KeeperTestSuite) TestDispatch() {
 
 			res, err := suite.msgServer.Dispatch(suite.ctx, msg)
 			events := suite.ctx.EventManager().Events()
-			
+
 			suite.Require().NoError(err)
 			suite.Require().NotNil(res)
 
 			fmt.Println("ID: ", res.MessageId)
-			
+
 			// Verify events
 			expectedEvents := sdk.Events{
 				sdk.NewEvent(

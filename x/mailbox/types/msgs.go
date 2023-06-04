@@ -3,6 +3,7 @@ package types
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 )
 

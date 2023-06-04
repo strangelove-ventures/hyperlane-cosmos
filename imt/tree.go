@@ -10,12 +10,12 @@ import (
 
 const (
 	TreeDepth = 32
-	MaxLeaves = int(^uint32(0))
+	MaxLeaves = uint32(^uint32(0))
 )
 
 type Tree struct {
 	branch [TreeDepth][]byte
-	count  int
+	count  uint32
 }
 
 // Insert inserts node into the Merkle Tree
@@ -44,7 +44,7 @@ func (t *Tree) Insert(node []byte) error {
 }
 
 // Count returns the number of inserts performed on the Tree
-func (t *Tree) Count() int {
+func (t *Tree) Count() uint32 {
 	return t.count
 }
 

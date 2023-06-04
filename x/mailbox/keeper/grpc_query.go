@@ -6,8 +6,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	// sdk "github.com/cosmos/cosmos-sdk/types"
-	// sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
 
@@ -19,5 +17,8 @@ func (k Keeper) CurrentTreeMetadata(c context.Context, req *types.QueryCurrentTr
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	panic("Implement me")
+	return &types.QueryCurrentTreeMetadataResponse{
+		Root:  k.Tree.Root(),
+		Count: k.Tree.Count(),
+	}, nil
 }

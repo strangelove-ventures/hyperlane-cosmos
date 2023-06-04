@@ -17,15 +17,15 @@ import (
 func CustomMessageDecorator(mailbox *mailboxkeeper.Keeper) func(wasmkeeper.Messenger) wasmkeeper.Messenger {
 	return func(old wasmkeeper.Messenger) wasmkeeper.Messenger {
 		return &CustomMessenger{
-			wrapped:      old,
-			mailbox:      mailbox,
+			wrapped: old,
+			mailbox: mailbox,
 		}
 	}
 }
 
 type CustomMessenger struct {
-	wrapped      wasmkeeper.Messenger
-	mailbox      *mailboxkeeper.Keeper
+	wrapped wasmkeeper.Messenger
+	mailbox *mailboxkeeper.Keeper
 }
 
 var _ wasmkeeper.Messenger = (*CustomMessenger)(nil)
@@ -38,7 +38,7 @@ func (m *CustomMessenger) DispatchMsg(ctx sdk.Context, contractAddr sdk.AccAddre
 		if err := json.Unmarshal(msg.Custom, &contractMsg); err != nil {
 			return nil, nil, sdkerrors.Wrap(err, "mailbox msg")
 		}
-		
+
 		if contractMsg.MsgDispatch != nil {
 			return m.msgDispatch(ctx, contractAddr, contractMsg.MsgDispatch)
 		}

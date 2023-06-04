@@ -1,0 +1,31 @@
+syntax = "proto3";
+package hyperlane.mailbox.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types";
+
+// Hyperlane's tree
+message Tree {
+  option (gogoproto.goproto_getters) = false;
+  // Count of items inserted to tree
+  uint32 count = 1;
+  // Each item inserted
+  repeated TreeEntry tree_entries = 2;
+}
+
+// Hyperlane's tree entry
+message TreeEntry {
+  option (gogoproto.goproto_getters) = false;
+  // index
+  uint32 index = 1;
+  // message
+  bytes message = 2;
+}
+
+// Mailbox delivered message
+message MessageDelivered {
+  option (gogoproto.goproto_getters) = false;
+  // Message id (hash)
+  string id = 1;
+}
