@@ -1,9 +1,11 @@
 package keeper_test
 
 import (
+	"fmt"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
@@ -11,6 +13,7 @@ import (
 func (suite *KeeperTestSuite) TestDispatch() {
 	var (
 		msg    *types.MsgDispatch
+		id     string
 	)
 
 	testCases := []struct {
@@ -19,24 +22,75 @@ func (suite *KeeperTestSuite) TestDispatch() {
 		expPass  bool
 	}{
 		{
-			"success",
+			"success with contract as sender",
 			func() {
+				id = "0x806d81a5b017cc51297bb545bc037f39ceecefab8041766c9b733900c9a01242"
 				sender := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
-				//sender := "cosmos17lklk2z0gevmdx4tvjac7g7t9prqczg6p6nuw9"
-				recipient := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
+				recipientBech32 := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
+				recipientBytes := sdk.MustAccAddressFromBech32(recipientBech32).Bytes()
+				recipientHex := hexutil.Encode(recipientBytes)
 				domain := uint32(12)
-				msgBody := "Hello"
-				msg = types.NewMsgDispatch(sender, domain, recipient, msgBody)
+				msgBody := hexutil.Encode([]byte("Hello!"))
+				msg = types.NewMsgDispatch(sender, domain, recipientHex, msgBody)
 			},
 			true,
 		},
-		/*{
-			"fails with unauthorized signer",
+		{
+			"success with account as sender",
 			func() {
-				msg = types.NewMsgSetDefaultIsm(signer, defaultIsms)
+				id = "0x0c4024fb3262d8852b1fc5caa9f73f91b9375a1cbe51f6da52d192d272623fd1"
+				sender := "cosmos17lklk2z0gevmdx4tvjac7g7t9prqczg6p6nuw9"
+				recipientBech32 := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
+				recipientBytes := sdk.MustAccAddressFromBech32(recipientBech32).Bytes()
+				recipientHex := hexutil.Encode(recipientBytes)
+				domain := uint32(12)
+				msgBody := hexutil.Encode([]byte("Hello!"))
+				msg = types.NewMsgDispatch(sender, domain, recipientHex, msgBody)
+			},
+			true,
+		},
+		{
+			"success with hyperlane explorer data w/ sender/recipient padding",
+			func() {
+				id = "0x82fbf348d68e34903627d1f57fa3227211e35134e2a613ce6b78ce2d42e17198"
+				senderHex := "0x0000000000000000000000002b0860e52244f03e59f12cfe413d6a29bc30b893"
+				senderBytes := hexutil.MustDecode(senderHex)
+				senderBech32 := sdk.MustBech32ifyAddressBytes("cosmos", senderBytes)
+				recipient := "0x00000000000000000000000076a2f655352752af6ce9b03932b9090009dc5d0c"
+				domain := uint32(43114)
+				msgBody := hexutil.Encode([]byte("Hello!"))
+				msg = types.NewMsgDispatch(senderBech32, domain, recipient, msgBody)
+			},
+			true,
+		},
+		{
+			"success with hyperlane explorer data w/o sender/recipient padding",
+			func() {
+				id = "0x82fbf348d68e34903627d1f57fa3227211e35134e2a613ce6b78ce2d42e17198"
+				senderHex := "0x2b0860e52244f03e59f12cfe413d6a29bc30b893"
+				senderBytes := hexutil.MustDecode(senderHex)
+				senderBech32 := sdk.MustBech32ifyAddressBytes("cosmos", senderBytes)
+				recipient := "0x76a2f655352752af6ce9b03932b9090009dc5d0c"
+				domain := uint32(43114)
+				msgBody := hexutil.Encode([]byte("Hello!"))
+				msg = types.NewMsgDispatch(senderBech32, domain, recipient, msgBody)
+			},
+			true,
+		},
+		{
+			"fails with wrong id match",
+			func() {
+				id = "0x82fbf348d68e34903627d1f57fa3227211e35134e2a613ce6b78ce2d42e17198"
+				senderHex := "0x2b0860e52244f03e59f12cfe413d6a29bc30b893"
+				senderBytes := hexutil.MustDecode(senderHex)
+				senderBech32 := sdk.MustBech32ifyAddressBytes("cosmos", senderBytes)
+				recipient := "0x76a2f655352752af6ce9b03932b9090009dc5d0c"
+				domain := uint32(43114)
+				msgBody := hexutil.Encode([]byte("Hello")) // Removed !
+				msg = types.NewMsgDispatch(senderBech32, domain, recipient, msgBody)
 			},
 			false,
-		},*/
+		},
 	}
 
 	for _, tc := range testCases {
@@ -47,37 +101,38 @@ func (suite *KeeperTestSuite) TestDispatch() {
 
 			res, err := suite.msgServer.Dispatch(suite.ctx, msg)
 			events := suite.ctx.EventManager().Events()
+			
+			suite.Require().NoError(err)
+			suite.Require().NotNil(res)
 
+			fmt.Println("ID: ", res.MessageId)
+			
+			// Verify events
+			expectedEvents := sdk.Events{
+				sdk.NewEvent(
+					types.EventTypeDispatch,
+					sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
+					sdk.NewAttribute(types.AttributeKeyDestinationDomain, strconv.FormatUint(uint64(msg.DestinationDomain), 10)),
+					sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
+					sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
+				),
+				sdk.NewEvent(
+					types.EventTypeDispatchId,
+					sdk.NewAttribute(types.AttributeKeyID, res.MessageId),
+				),
+				sdk.NewEvent(
+					sdk.EventTypeMessage,
+					sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+				),
+			}
+
+			for _, evt := range expectedEvents {
+				suite.Require().Contains(events, evt)
+			}
 			if tc.expPass {
-				suite.Require().NoError(err)
-				suite.Require().NotNil(res)
-
-				// Verify events
-				expectedEvents := sdk.Events{
-					sdk.NewEvent(
-						types.EventTypeDispatch,
-						sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
-						sdk.NewAttribute(types.AttributeKeyDestinationDomain, strconv.FormatUint(uint64(msg.DestinationDomain), 10)),
-						sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
-						sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
-					),
-					sdk.NewEvent(
-						types.EventTypeDispatchId,
-						sdk.NewAttribute(types.AttributeKeyID, res.MessageId),
-					),
-					sdk.NewEvent(
-						sdk.EventTypeMessage,
-						sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-					),
-				}
-
-				for _, evt := range expectedEvents {
-					suite.Require().Contains(events, evt)
-				}
+				suite.Require().Equal(id, res.MessageId)
 			} else {
-				suite.Require().Error(err)
-				suite.Require().Nil(res)
-				suite.Require().Empty(events)
+				suite.Require().NotEqual(id, res.MessageId)
 			}
 		})
 	}

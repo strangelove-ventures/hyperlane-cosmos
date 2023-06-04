@@ -46,9 +46,13 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	message = append(message, originBytes...)
 
 	// Get the Sender address
-	// TODO: How to handle various address types?
-	sender := sdk.MustAccAddressFromBech32(msg.Sender)
-	message = append(message, sender.Bytes()...)
+	// Since this is a cosmos chain, sender will be a bech32 address
+	sender := sdk.MustAccAddressFromBech32(msg.Sender).Bytes()
+	for len(sender) < (ismtypes.DESTINATION_OFFSET - ismtypes.SENDER_OFFSET) {
+		padding := make([]byte, 1)
+		sender = append(padding, sender...)
+	}
+	message = append(message, sender...)
 
 	// Get the Destination Domain
 	destination := msg.DestinationDomain
@@ -57,13 +61,17 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	message = append(message, destinationBytes...)
 
 	// Get the Recipient address
-	// TODO: How to handle various address types?
-	recipient := sdk.MustAccAddressFromBech32(msg.RecipientAddress)
-	message = append(message, recipient.Bytes()...)
+	// Since the recipient could be any destination change, the address must be in hex, non-bech32 format
+	recipient := hexutil.MustDecode(msg.RecipientAddress)
+	for len(recipient) < (ismtypes.BODY_OFFSET - ismtypes.RECIPIENT_OFFSET) {
+		padding := make([]byte, 1)
+		recipient = append(padding, recipient...)
+	}
+	message = append(message, recipient...)
 
 	// Get the Message Body
-	messageBytes := []byte(msg.MessageBody)
-	//messageBytes := hexutil.MustDecode(msg.MessageBody)
+	//messageBytes := []byte(msg.MessageBody)
+	messageBytes := hexutil.MustDecode(msg.MessageBody)
 	if len(messageBytes) > MAX_MESSAGE_BODY_BYTES {
 		return nil, types.ErrMsgTooLong
 	}
@@ -159,6 +167,10 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 		sdk.NewEvent(
 			types.EventTypeProcessId,
 			sdk.NewAttribute(types.AttributeKeyID, id),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 		),
 	})
 	return &types.MsgProcessResponse{}, nil
