@@ -55,21 +55,11 @@ func TestHyperlaneMailbox(t *testing.T) {
 	// Process message
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 
-
-	/*processMsgStruct := helpers.ExecuteMsg{
-		ProcessMsg: &helpers.ProcessMsg{
-			Msg: "MsgProcessedByContract",
-		},
-	}
-	processMsg, err := json.Marshal(processMsgStruct)
-	require.NoError(t, err)
-	simd.ExecuteContract(ctx, user.KeyName(), contract, string(processMsg))*/
-
 	dispatchMsgStruct := helpers.ExecuteMsg{
 		DispatchMsg: &helpers.DispatchMsg{
 			DestinationAddr: 1,
-			RecipientAddr:   "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5",
-			MessageBody:     "MsgDispatchedByContract",
+			RecipientAddr:   "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7",
+			MessageBody:     hexutil.Encode([]byte("MsgDispatchedByContract")),
 		},
 	}
 	dipatchMsg, err := json.Marshal(dispatchMsgStruct)
