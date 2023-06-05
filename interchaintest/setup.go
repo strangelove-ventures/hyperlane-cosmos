@@ -1,4 +1,4 @@
-package interchaintest
+package ictest
 
 import (
 	"context"
@@ -7,7 +7,8 @@ import (
 	"testing"
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
-	// mailboxtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
+	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
+	mailboxtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/icza/dyno"
@@ -33,7 +34,8 @@ func hyperlaneEncoding() *testutil.TestEncodingConfig {
 
 	// register custom types
 	wasmtypes.RegisterInterfaces(cfg.InterfaceRegistry)
-	// mailboxtypes.RegisterInterfaces(cfg.InterfaceRegistry)
+	mailboxtypes.RegisterInterfaces(cfg.InterfaceRegistry)
+	ismtypes.RegisterInterfaces(cfg.InterfaceRegistry)
 
 	return &cfg
 }

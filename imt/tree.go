@@ -14,7 +14,7 @@ const (
 )
 
 type Tree struct {
-	branch [TreeDepth][]byte
+	Branch [TreeDepth][]byte
 	count  uint32
 }
 
@@ -32,10 +32,10 @@ func (t *Tree) Insert(node []byte) error {
 	size := t.count
 	for i := 0; i < TreeDepth; i++ {
 		if (size & 1) == 1 {
-			t.branch[i] = node
+			t.Branch[i] = node
 			return nil
 		}
-		temp := append(t.branch[i][:], node...)
+		temp := append(t.Branch[i][:], node...)
 		node = crypto.Keccak256(temp)
 		size /= 2
 	}
@@ -51,7 +51,7 @@ func (t *Tree) Count() uint32 {
 // Print dumps the tree (for debugging)
 func (t *Tree) Print() {
 	for i := 0; i < TreeDepth; i++ {
-		fmt.Printf("%02d: %X\n", i, t.branch[i])
+		fmt.Printf("%02d: %X\n", i, t.Branch[i])
 	}
 }
 
@@ -68,7 +68,7 @@ func (t *Tree) RootWithContext(zeroes [][]byte) []byte {
 	current := make([]byte, 32)
 	for i := 0; i < TreeDepth; i++ {
 		ithBit := (index >> i) & 0x01
-		next := t.branch[i]
+		next := t.Branch[i]
 
 		var temp []byte
 		if ithBit == 1 {

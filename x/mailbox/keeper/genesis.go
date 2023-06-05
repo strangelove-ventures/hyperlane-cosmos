@@ -10,6 +10,8 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
 
+// TODO: replace tracking each item with tracking only the count and branches (major improvement)
+
 // InitGenesis initializes the hyperlane mailbox module's state from a provided genesis
 // state.
 func (k Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {

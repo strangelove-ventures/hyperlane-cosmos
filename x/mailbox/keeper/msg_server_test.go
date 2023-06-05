@@ -137,3 +137,41 @@ func (suite *KeeperTestSuite) TestDispatch() {
 		})
 	}
 }
+
+/*func (suite *KeeperTestSuite) TestProcessMsg() {
+	counterChain := helpers.CreateCounterChain(suite.T(), 112)
+	// Set default ISM
+	signer := authtypes.NewModuleAddress(govtypes.ModuleName).String()
+	var valSet []string
+	for _, val := range counterChain.ValSet.Vals {
+		valSet = append(valSet, val.Addr)
+	}
+	msg := ismtypes.NewMsgSetDefaultIsm(signer, []*ismtypes.OriginsMultiSigIsm{
+		{
+			Origin: 112,
+			Ism: &ismtypes.MultiSigIsm{
+				Threshold: 2,
+				ValidatorPubKeys: valSet,
+			},
+		},
+	})
+	_, err := suite.ismkeeper.SetDefaultIsm(suite.ismctx, msg)
+	suite.Require().NoError(err)
+
+	sender := "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7"
+	contract := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
+	destDomain := uint32(10)
+	message, proof := counterChain.CreateMessage(sender, destDomain, contract, "Hello!")
+	// Create metadata
+	metadata := counterChain.CreateMetadata(message, proof)
+	// Process message
+	res, err := suite.msgServer.Process(suite.ctx, &types.MsgProcess{
+		Sender: "cosmos108tuxfep73qjru5qsf5wxpz5hmujg53lyq0edg",
+		Metadata: hexutil.Encode(metadata),
+		Message: hexutil.Encode(message),
+	})
+	suite.Require().NoError(err)
+
+	fmt.Println("Res: ", res)
+
+}*/

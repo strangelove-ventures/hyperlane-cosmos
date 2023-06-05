@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -18,6 +19,10 @@ import (
 var _ types.MsgServer = (*Keeper)(nil)
 
 const MAX_MESSAGE_BODY_BYTES = 2_000
+
+type ContractMsg struct {
+	ContractProcessMsg ContractProcessMsg `json:"process_msg,omitempty"`
+}
 
 type ContractProcessMsg struct {
 	Origin uint32 `json:"origin"`
@@ -134,6 +139,7 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 	metadataBytes := hexutil.MustDecode(msg.Metadata)
 	// Verify message signatures
 	if !k.ismKeeper.Verify(metadataBytes, messageBytes) {
+		fmt.Println("ISM verify failed") // TODO: remove, debug only
 		return nil, types.ErrMsgVerificationFailed
 	}
 
@@ -150,10 +156,12 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 	senderBytes := ismtypes.Sender(messageBytes)
 	senderHex := hexutil.Encode(senderBytes)
 	body := ismtypes.Body(messageBytes)
-	contractMsg := ContractProcessMsg{
-		Origin: origin,
-		Sender: senderHex,
-		Msg:    string(body),
+	contractMsg := ContractMsg{
+		ContractProcessMsg: ContractProcessMsg{
+			Origin: origin,
+			Sender: senderHex,
+			Msg:    string(body),
+		},
 	}
 	encodedMsg, err := json.Marshal(contractMsg)
 	if err != nil {
@@ -163,6 +171,7 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 	// Call the recipient contract
 	_, err = k.pcwKeeper.Execute(ctx, contractAddr, k.mailboxAddr, encodedMsg, sdk.NewCoins())
 	if err != nil {
+		fmt.Println("Contract err: ", err) // TODO: remove, debug only
 		return nil, err
 	}
 

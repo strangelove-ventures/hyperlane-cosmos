@@ -8,6 +8,7 @@ require (
 	cosmossdk.io/math v1.0.1
 	cosmossdk.io/tools/rosetta v0.2.1
 	github.com/CosmWasm/wasmd v0.40.0-rc.1.0.20230424144037-55647a1fd1f9
+	github.com/CosmWasm/wasmvm v1.2.3
 	github.com/cometbft/cometbft v0.37.1
 	github.com/cometbft/cometbft-db v0.7.0
 	github.com/cosmos/cosmos-proto v1.0.0-beta.2
@@ -22,7 +23,7 @@ require (
 	github.com/spf13/cast v1.5.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/viper v1.15.0
-	github.com/strangelove-ventures/interchaintest/v7 v7.0.0-20230602205259-3c63f8c536cd
+	github.com/strangelove-ventures/interchaintest/v7 v7.0.0-20230605195517-c0989e954796
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.24.0
 	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
@@ -45,7 +46,6 @@ require (
 	github.com/ChainSafe/go-schnorrkel v1.0.0 // indirect
 	github.com/ChainSafe/go-schnorrkel/1 v0.0.0-00010101000000-000000000000 // indirect
 	github.com/ComposableFi/go-subkey/v2 v2.0.0-tm03420 // indirect
-	github.com/CosmWasm/wasmvm v1.2.3 // indirect
 	github.com/FactomProject/basen v0.0.0-20150613233007-fe3947df716e // indirect
 	github.com/FactomProject/btcutilecc v0.0.0-20130527213604-d3a63a5752ec // indirect
 	github.com/Microsoft/go-winio v0.6.0 // indirect

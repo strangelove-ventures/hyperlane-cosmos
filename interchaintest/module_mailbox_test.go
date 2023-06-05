@@ -1,4 +1,4 @@
-package interchaintest
+package ictest
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
@@ -27,7 +28,7 @@ func TestHyperlaneMailbox(t *testing.T) {
 	simd := chains[0].(*cosmos.CosmosChain)
 	t.Log("simd.GetHostRPCAddress()", simd.GetHostRPCAddress())
 
-	users := interchaintest.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000), simd)
+	users := interchaintest.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd)
 	user := users[0]
 
 	msg := fmt.Sprintf(`{}`)
@@ -36,14 +37,33 @@ func TestHyperlaneMailbox(t *testing.T) {
 
 	verifyContractEntryPoints(t, ctx, simd, user, contract)
 
-	processMsgStruct := helpers.ExecuteMsg{
+	counterChain := helpers.CreateCounterChain(t, 1)
+	helpers.SetDefaultIsm(t, ctx, simd, user.KeyName(), counterChain)
+	res := helpers.QueryDefaultIsm(t, ctx, simd)
+
+	require.Equal(t, counterChain.ValSet.Threshold, uint8(res.DefaultIsms[0].Ism.Threshold))
+	for i, val := range counterChain.ValSet.Vals {
+		require.Equal(t, val.Addr, res.DefaultIsms[0].Ism.ValidatorPubKeys[i])
+	}
+
+	// Create message
+	sender := "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7"
+	destDomain := uint32(12345)
+	message, proof := counterChain.CreateMessage(sender, destDomain, contract, "Hello!")
+	// Create metadata
+	metadata := counterChain.CreateMetadata(message, proof)
+	// Process message
+	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
+
+
+	/*processMsgStruct := helpers.ExecuteMsg{
 		ProcessMsg: &helpers.ProcessMsg{
 			Msg: "MsgProcessedByContract",
 		},
 	}
 	processMsg, err := json.Marshal(processMsgStruct)
 	require.NoError(t, err)
-	simd.ExecuteContract(ctx, user.KeyName(), contract, string(processMsg))
+	simd.ExecuteContract(ctx, user.KeyName(), contract, string(processMsg))*/
 
 	dispatchMsgStruct := helpers.ExecuteMsg{
 		DispatchMsg: &helpers.DispatchMsg{
