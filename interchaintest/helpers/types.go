@@ -27,7 +27,7 @@ type ExecuteMsg struct {
 type ExecuteRsp struct{}
 
 type DispatchMsg struct {
-	DestinationAddr uint32 `json:"destination"`
+	DestinationAddr uint32 `json:"destination_domain"`
 	RecipientAddr   string `json:"recipient_address"`
 	MessageBody     string `json:"message_body"`
 }
