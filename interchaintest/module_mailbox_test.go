@@ -55,6 +55,18 @@ func TestHyperlaneMailbox(t *testing.T) {
 	// Process message
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 
+	message, proof = counterChain.CreateMessage(sender, destDomain, contract, "Hello!2")
+	// Create metadata
+	metadata = counterChain.CreateMetadata(message, proof)
+	// Process message
+	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
+	
+	message, proof = counterChain.CreateMessage(sender, destDomain, contract, "Hello!3")
+	// Create metadata
+	metadata = counterChain.CreateMetadata(message, proof)
+	// Process message
+	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
+
 	dispatchMsgStruct := helpers.ExecuteMsg{
 		DispatchMsg: &helpers.DispatchMsg{
 			DestinationAddr: 1,

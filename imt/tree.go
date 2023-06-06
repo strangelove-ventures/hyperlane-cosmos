@@ -105,6 +105,21 @@ func BranchRoot(item []byte, branch [TreeDepth][]byte, index uint32) ([]byte, er
 	return current, nil
 }
 
+// Returns the proof for the next index
+func (t *Tree) GetProofForNexIndex() (proof [TreeDepth][32]byte) {
+	zeroHashes := ZeroHashes()
+	index := t.count
+	for i := 0; i < TreeDepth; i++ {
+		ithBit := (index >> i) & 0x01
+		if ithBit == 1 {
+			copy(proof[i][:], t.Branch[i])
+		} else {
+			copy(proof[i][:], zeroHashes[i])
+		}
+	}
+	return proof
+}
+
 // ZeroHashes returns the array of TreeDepth zero hashes
 func ZeroHashes() [][]byte {
 	zeroes := [][]byte{

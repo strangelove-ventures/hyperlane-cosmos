@@ -77,17 +77,7 @@ func (c *CounterChain) CreateMessage(sender string, destDomain uint32, recipient
 	// Get the message ID
 	id := ismtypes.Id(message)
 
-	// Get proof/path before insertion
-	if c.Tree.Count() != uint32(0) {
-		for i := 0; i<imt.TreeDepth; i++ {
-			copy(proof[i][:], c.Tree.Branch[i][:])
-		}
-	} else {
-		zeroHashes := imt.ZeroHashes()
-		for i := 0; i<imt.TreeDepth; i++ {
-			copy(proof[i][:], zeroHashes[i][:])
-		}
-	}
+	proof = c.Tree.GetProofForNexIndex()
 
 	// Insert the message id into the tree
 	err := c.Tree.Insert(id)

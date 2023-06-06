@@ -142,7 +142,7 @@ func TestIncrementalVectors(t *testing.T) {
 				}
 
 				// Make sure we've inserted the correct amount
-				require.Equal(t, i.Count(), idx+1)
+				require.Equal(t, i.Count(), uint32(idx+1))
 
 				leaf, err := hex.DecodeString(p.Leaf[2:])
 				require.Nil(t, err)
@@ -165,6 +165,7 @@ func TestIncrementalVectors(t *testing.T) {
 				proofRoot, err := imt.BranchRoot(leaf, paths, p.Index)
 				require.Nil(t, err)
 				require.Equal(t, proofRoot[:], expectedRoot)
+
 			}
 		})
 	}
