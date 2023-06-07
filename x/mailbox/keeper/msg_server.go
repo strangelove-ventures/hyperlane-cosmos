@@ -12,7 +12,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
+	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
 
@@ -61,7 +61,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	// Get the Sender address
 	// Since this is a cosmos chain, sender will be a bech32 address
 	sender := sdk.MustAccAddressFromBech32(msg.Sender).Bytes()
-	for len(sender) < (ismtypes.DESTINATION_OFFSET - ismtypes.SENDER_OFFSET) {
+	for len(sender) < (common.DESTINATION_OFFSET - common.SENDER_OFFSET) {
 		padding := make([]byte, 1)
 		sender = append(padding, sender...)
 	}
@@ -76,7 +76,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	// Get the Recipient address
 	// Since the recipient could be any destination change, the address must be in hex, non-bech32 format
 	recipient := hexutil.MustDecode(msg.RecipientAddress)
-	for len(recipient) < (ismtypes.BODY_OFFSET - ismtypes.RECIPIENT_OFFSET) {
+	for len(recipient) < (common.BODY_OFFSET - common.RECIPIENT_OFFSET) {
 		padding := make([]byte, 1)
 		recipient = append(padding, recipient...)
 	}
@@ -91,7 +91,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	message = append(message, messageBytes...)
 
 	// Get the message ID
-	id := ismtypes.Id(message)
+	id := common.Id(message)
 
 	// Insert the message id into the tree
 	err := k.Tree.Insert(id)
@@ -144,7 +144,7 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 	}
 
 	// Parse the recipient and get the contract address
-	recipientBytes := ismtypes.Recipient(messageBytes)
+	recipientBytes := common.Recipient(messageBytes)
 	recipient := sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), recipientBytes)
 	contractAddr, err := sdk.AccAddressFromBech32(recipient)
 	if err != nil {
@@ -152,10 +152,10 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 	}
 
 	// Parse origin, sender, and body for the contract msg
-	origin := ismtypes.Origin(messageBytes)
-	senderBytes := ismtypes.Sender(messageBytes)
+	origin := common.Origin(messageBytes)
+	senderBytes := common.Sender(messageBytes)
 	senderHex := hexutil.Encode(senderBytes)
-	body := ismtypes.Body(messageBytes)
+	body := common.Body(messageBytes)
 	contractMsg := ContractMsg{
 		ContractProcessMsg: ContractProcessMsg{
 			Origin: origin,

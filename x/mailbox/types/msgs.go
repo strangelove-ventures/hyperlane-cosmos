@@ -4,7 +4,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
-	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
+	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
+	legacy "github.com/strangelove-ventures/hyperlane-cosmos/x/common_legacy"
 )
 
 var (
@@ -77,11 +78,11 @@ func (m MsgProcess) ValidateBasic() error {
 		return ErrMsgProcessInvalidSender
 	}
 	// Verify metadata
-	if len(m.Metadata) < ismtypes.SIGNATURES_OFFSET {
+	if len(m.Metadata) < legacy.SIGNATURES_OFFSET {
 		return ErrMsgProcessInvalidMetadata
 	}
 	// Verify message
-	if len(m.Message) < ismtypes.BODY_OFFSET {
+	if len(m.Message) < common.BODY_OFFSET {
 		return ErrMsgProcessInvalidMessage
 	}
 	return nil

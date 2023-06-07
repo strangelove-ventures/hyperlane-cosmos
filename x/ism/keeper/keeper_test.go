@@ -14,6 +14,7 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
+	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 
@@ -134,7 +135,7 @@ func TestVerifyValidatorSignatures(t *testing.T) {
 		metadata, err := hex.DecodeString(metadatas[i])
 		require.NoError(t, err)
 
-		result := keeper.VerifyValidatorSignatures(metadata, message, ismMap[types.Origin(message)])
+		result := keeper.VerifyValidatorSignatures(metadata, message, ismMap[common.Origin(message)])
 		require.True(t, result)
 	}
 }

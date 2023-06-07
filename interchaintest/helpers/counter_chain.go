@@ -7,8 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 	imt "github.com/strangelove-ventures/hyperlane-cosmos/imt"
-	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -49,7 +49,7 @@ func (c *CounterChain) CreateMessage(sender string, destDomain uint32, recipient
 	// Get the Sender address
 	// Remote chain is unknown, so this must be a hex string
 	senderBytes := hexutil.MustDecode(sender)
-	for len(senderBytes) < (ismtypes.DESTINATION_OFFSET - ismtypes.SENDER_OFFSET) {
+	for len(senderBytes) < (common.DESTINATION_OFFSET - common.SENDER_OFFSET) {
 		padding := make([]byte, 1)
 		senderBytes = append(padding, senderBytes...)
 	}
@@ -64,7 +64,7 @@ func (c *CounterChain) CreateMessage(sender string, destDomain uint32, recipient
 	// Get the Recipient address
 	// Recipient is a cosmos contract address, so it must be a bech32 address
 	recipientBytes := sdk.MustAccAddressFromBech32(recipient).Bytes()
-	for len(recipientBytes) < (ismtypes.BODY_OFFSET - ismtypes.RECIPIENT_OFFSET) {
+	for len(recipientBytes) < (common.BODY_OFFSET - common.RECIPIENT_OFFSET) {
 		padding := make([]byte, 1)
 		recipientBytes = append(padding, recipientBytes...)
 	}
@@ -75,7 +75,7 @@ func (c *CounterChain) CreateMessage(sender string, destDomain uint32, recipient
 	message = append(message, messageBytes...)
 
 	// Get the message ID
-	id := ismtypes.Id(message)
+	id := common.Id(message)
 
 	proof = c.Tree.GetProofForNexIndex()
 
@@ -90,7 +90,7 @@ func (c *CounterChain) CreateMetadata(message []byte, proof [imt.TreeDepth][32]b
 	merkleRoot := c.Tree.Root()
 	metadata = append(metadata, merkleRoot...)
 
-	index := ismtypes.Nonce(message)
+	index := common.Nonce(message)
 	indexBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(indexBytes, index)
 	metadata = append(metadata, indexBytes...)
@@ -105,7 +105,7 @@ func (c *CounterChain) CreateMetadata(message []byte, proof [imt.TreeDepth][32]b
 
 	metadata = append(metadata, c.ValSet.Threshold)
 
-	id := ismtypes.Id(message)
+	id := common.Id(message)
 	for i := uint8(0); i < c.ValSet.Threshold; i++ {
 		sig, err := crypto.Sign(id, c.ValSet.Vals[i].Priv)
 		require.NoError(c.T, err)
