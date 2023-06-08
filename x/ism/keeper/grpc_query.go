@@ -18,13 +18,16 @@ func (k Keeper) OriginsDefaultIsm(c context.Context, req *types.QueryOriginsDefa
 	}
 
 	defaultIsm := k.defaultIsm[req.Origin]
-	ismAny, err := types.PackAbstractIsm(defaultIsm)
-	if err != nil {
-		return nil, err
+	if defaultIsm != nil {
+		ismAny, err := types.PackAbstractIsm(defaultIsm)
+		if err != nil {
+			return nil, err
+		}
+		return &types.QueryOriginsDefaultIsmResponse{
+			DefaultIsm: ismAny,
+		}, nil
 	}
-	return &types.QueryOriginsDefaultIsmResponse{
-		DefaultIsm: ismAny,
-	}, nil
+	return &types.QueryOriginsDefaultIsmResponse{}, nil
 }
 
 // AllDefaultIsms implements the Query all default ISMs gRPC method
@@ -47,3 +50,5 @@ func (k Keeper) AllDefaultIsms(c context.Context, req *types.QueryAllDefaultIsms
 	}
 	return &allDefaultIsms, nil
 }
+
+// TODO: do these queries need UnpackInterfaces? See: https://github.com/cosmos/cosmos-sdk/issues/8327

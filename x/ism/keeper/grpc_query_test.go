@@ -47,6 +47,7 @@ func (suite *KeeperTestSuite) TestQueryOriginsDefaultIsm() {
 			},
 			false,
 		},
+		// TODO: add test case with invalid origin / no default ISM set
 	}
 
 	for _, tc := range testCases {
@@ -74,3 +75,5 @@ func (suite *KeeperTestSuite) TestQueryOriginsDefaultIsm() {
 		})
 	}
 }
+
+// TODO: add test case for querying all ISMs

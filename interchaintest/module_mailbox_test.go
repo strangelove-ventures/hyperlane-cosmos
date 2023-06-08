@@ -42,7 +42,9 @@ func TestHyperlaneMailbox(t *testing.T) {
 	helpers.SetDefaultIsm(t, ctx, simd, user.KeyName(), counterChain)
 	res := helpers.QueryAllDefaultIsms(t, ctx, simd)
 
-	abstractIsm := ismtypes.MustUnpackAbstractIsm(res.DefaultIsms[0].AbstractIsm)
+	var abstractIsm ismtypes.AbstractIsm
+	err := simd.Config().EncodingConfig.InterfaceRegistry.UnpackAny(res.DefaultIsms[0].AbstractIsm, &abstractIsm)
+	require.NoError(t, err)
 	merkleRootMultiSig := abstractIsm.(*ismtypes.MerkleRootMultiSig)
 	require.Equal(t, counterChain.ValSet.Threshold, uint8(merkleRootMultiSig.Threshold))
 	for i, val := range counterChain.ValSet.Vals {
