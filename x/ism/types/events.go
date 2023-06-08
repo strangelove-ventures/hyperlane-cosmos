@@ -8,7 +8,7 @@ const (
 // Hyperlane ISM attribute keys
 const (
 	AttributeKeySetDefaultIsm = "updated_ism"
-	AttributeKeyOrigin = "origin"
-	AttributeKeyThreshold = "threshold"
-	AttributeKeyValidator = "validator"
+	AttributeKeyOrigin        = "origin"
+	AttributeKeyThreshold     = "threshold"
+	AttributeKeyValidator     = "validator"
 )

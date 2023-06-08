@@ -1,4 +1,4 @@
-package types_test
+package legacy_test
 
 import (
 	"encoding/binary"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	types "github.com/strangelove-ventures/hyperlane-cosmos/x/common_legacy"
+	types "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig/legacy"
 )
 
 type MultisigIsmMetadata struct {

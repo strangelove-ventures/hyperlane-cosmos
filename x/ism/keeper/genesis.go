@@ -43,8 +43,8 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) types.GenesisState {
 		}
 		ismAny, err := types.PackAbstractIsm(ism)
 		genesisState.DefaultIsm = append(genesisState.DefaultIsm, types.Ism{
-			Origin: uint32(origin),
-			AbstractIsm:    ismAny,
+			Origin:      uint32(origin),
+			AbstractIsm: ismAny,
 		})
 	}
 

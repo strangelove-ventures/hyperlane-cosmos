@@ -5,7 +5,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
-	legacy "github.com/strangelove-ventures/hyperlane-cosmos/x/common_legacy"
 )
 
 var (
@@ -77,10 +76,7 @@ func (m MsgProcess) ValidateBasic() error {
 	if err != nil {
 		return ErrMsgProcessInvalidSender
 	}
-	// Verify metadata
-	if len(m.Metadata) < legacy.SIGNATURES_OFFSET {
-		return ErrMsgProcessInvalidMetadata
-	}
+	// Verify metadata? With different types, what to verify?
 	// Verify message
 	if len(m.Message) < common.BODY_OFFSET {
 		return ErrMsgProcessInvalidMessage

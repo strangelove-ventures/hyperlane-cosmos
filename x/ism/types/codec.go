@@ -14,8 +14,6 @@ func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 	registry.RegisterInterface(
 		"hyperlane.ism.v1.AbstractIsm",
 		(*AbstractIsm)(nil),
-		&MessageIdMultiSig{},
-		&MerkleRootMultiSig{},
 	)
 	/*registry.RegisterImplementations(
 		(*Ism)(nil),

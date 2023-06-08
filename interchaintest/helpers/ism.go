@@ -2,8 +2,8 @@ package helpers
 
 import (
 	"context"
-	"testing"
 	"fmt"
+	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc"
 
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig"
 )
 
 func SetDefaultIsm(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain, keyName string, counterChain *CounterChain) {
@@ -35,7 +36,7 @@ func SetDefaultIsm(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain,
 			{
 				Origin: 1, // Ethereum origin
 				AbstractIsm: ismtypes.MustPackAbstractIsm(
-					&ismtypes.MerkleRootMultiSig{
+					&merkle_root_multisig.MerkleRootMultiSig{
 						Threshold:        2,
 						ValidatorPubKeys: valSet,
 					},

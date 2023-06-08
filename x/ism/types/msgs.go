@@ -1,12 +1,14 @@
 package types
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-var _ sdk.Msg = (*MsgSetDefaultIsm)(nil)
-var _ codectypes.UnpackInterfacesMessage = (*MsgSetDefaultIsm)(nil)
+var (
+	_ sdk.Msg                            = (*MsgSetDefaultIsm)(nil)
+	_ codectypes.UnpackInterfacesMessage = (*MsgSetDefaultIsm)(nil)
+)
 
 // NewMsgSetDefaultIsm creates a new MsgSetDefaultIsm instance
 func NewMsgSetDefaultIsm(signer string, isms []*Ism) *MsgSetDefaultIsm {

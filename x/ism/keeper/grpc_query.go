@@ -44,8 +44,8 @@ func (k Keeper) AllDefaultIsms(c context.Context, req *types.QueryAllDefaultIsms
 			return nil, err
 		}
 		allDefaultIsms.DefaultIsms = append(allDefaultIsms.DefaultIsms, &types.Ism{
-			Origin: origin,
-			AbstractIsm:    ismAny,
+			Origin:      origin,
+			AbstractIsm: ismAny,
 		})
 	}
 	return &allDefaultIsms, nil

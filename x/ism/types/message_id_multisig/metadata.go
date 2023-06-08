@@ -1,4 +1,4 @@
-package types
+package message_id_multisig
 
 import (
 	"encoding/binary"

@@ -1,51 +1,48 @@
-package types
+package merkle_root_multisig
 
 import (
 	"fmt"
 	"reflect"
 	"strconv"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/imt"
 	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
-	legacy "github.com/strangelove-ventures/hyperlane-cosmos/x/common_legacy"
+	legacy "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig/legacy"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 )
 
-var _ AbstractIsm = (*MerkleRootMultiSig)(nil)
-
-func (i *MerkleRootMultiSig) IsmType() string {
-	return MerkleRootMultiSigType
-}
+var _ types.AbstractIsm = (*MerkleRootMultiSig)(nil)
 
 func (i *MerkleRootMultiSig) Event(origin uint32) sdk.Event {
 	originStr := strconv.FormatUint(uint64(origin), 10)
 	thresholdStr := strconv.FormatUint(uint64(i.Threshold), 10)
 	eventAttributes := []sdk.Attribute{}
-	eventAttributes = append(eventAttributes, sdk.NewAttribute(AttributeKeyOrigin, originStr))
-	eventAttributes = append(eventAttributes, sdk.NewAttribute(AttributeKeyThreshold, thresholdStr))
+	eventAttributes = append(eventAttributes, sdk.NewAttribute(types.AttributeKeyOrigin, originStr))
+	eventAttributes = append(eventAttributes, sdk.NewAttribute(types.AttributeKeyThreshold, thresholdStr))
 	for index := 0; index < len(i.ValidatorPubKeys); index++ {
 		eventAttributes = append(eventAttributes, sdk.NewAttribute(
-			AttributeKeyValidator,
+			types.AttributeKeyValidator,
 			i.ValidatorPubKeys[index],
 		))
 	}
 	return sdk.NewEvent(
-		EventTypeSetDefaultIsm,
-		eventAttributes...
+		types.EventTypeSetDefaultIsm,
+		eventAttributes...,
 	)
 }
 
 func (i *MerkleRootMultiSig) Validate() error {
 	if i.Threshold == 0 {
-		return ErrInvalidThreshold
+		return types.ErrInvalidThreshold
 	}
 	for _, validator := range i.ValidatorPubKeys {
 		len := len(validator)
 		if len < 42 || len > 66 { // Will be 21-66 bytes
-			return ErrInvalidValSet
+			return types.ErrInvalidValSet
 		}
 	}
 	return nil

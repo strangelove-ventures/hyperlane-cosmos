@@ -10,8 +10,10 @@
 - [hyperlane/ism/v1/genesis.proto](#hyperlane/ism/v1/genesis.proto)
     - [GenesisState](#hyperlane.ism.v1.GenesisState)
   
-- [hyperlane/ism/v1/multisig.proto](#hyperlane/ism/v1/multisig.proto)
+- [hyperlane/ism/v1/merkle_root_multisig.proto](#hyperlane/ism/v1/merkle_root_multisig.proto)
     - [MerkleRootMultiSig](#hyperlane.ism.v1.MerkleRootMultiSig)
+  
+- [hyperlane/ism/v1/message_id_multisig.proto](#hyperlane/ism/v1/message_id_multisig.proto)
     - [MessageIdMultiSig](#hyperlane.ism.v1.MessageIdMultiSig)
   
 - [hyperlane/ism/v1/query.proto](#hyperlane/ism/v1/query.proto)
@@ -95,10 +97,10 @@ Hyperlane ISM's keeper genesis state
 
 
 
-<a name="hyperlane/ism/v1/multisig.proto"></a>
+<a name="hyperlane/ism/v1/merkle_root_multisig.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/ism/v1/multisig.proto
+## hyperlane/ism/v1/merkle_root_multisig.proto
 
 
 
@@ -115,6 +117,22 @@ MerkleRootMultiSig ISM for a specific origin
 
 
 
+
+
+ <!-- end messages -->
+
+ <!-- end enums -->
+
+ <!-- end HasExtensions -->
+
+ <!-- end services -->
+
+
+
+<a name="hyperlane/ism/v1/message_id_multisig.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## hyperlane/ism/v1/message_id_multisig.proto
 
 
 

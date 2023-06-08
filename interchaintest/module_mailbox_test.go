@@ -15,6 +15,7 @@ import (
 
 	helpers "github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig"
 )
 
 // TestHyperlaneMailbox ensures the mailbox module & bindings work properly.
@@ -45,7 +46,7 @@ func TestHyperlaneMailbox(t *testing.T) {
 	var abstractIsm ismtypes.AbstractIsm
 	err := simd.Config().EncodingConfig.InterfaceRegistry.UnpackAny(res.DefaultIsms[0].AbstractIsm, &abstractIsm)
 	require.NoError(t, err)
-	merkleRootMultiSig := abstractIsm.(*ismtypes.MerkleRootMultiSig)
+	merkleRootMultiSig := abstractIsm.(*merkle_root_multisig.MerkleRootMultiSig)
 	require.Equal(t, counterChain.ValSet.Threshold, uint8(merkleRootMultiSig.Threshold))
 	for i, val := range counterChain.ValSet.Vals {
 		require.Equal(t, val.Addr, merkleRootMultiSig.ValidatorPubKeys[i])

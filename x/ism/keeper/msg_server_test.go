@@ -64,7 +64,7 @@ func (suite *KeeperTestSuite) TestMsgSetDefaultIsm() {
 					sdk.EventTypeMessage,
 					sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 				))
-				
+
 				for _, evt := range expectedEvents {
 					suite.Require().Contains(events, evt)
 				}
