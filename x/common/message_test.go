@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/strangelove-ventures/hyperlane-cosmos/x/common"
+	types "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 )
 
 func TestMessageSuccess(t *testing.T) {

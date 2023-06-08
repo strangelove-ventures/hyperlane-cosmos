@@ -3,14 +3,14 @@ package helpers
 import (
 	"context"
 	"testing"
-	//"fmt"
-	
+	"fmt"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc"
 
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
@@ -31,17 +31,20 @@ func SetDefaultIsm(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain,
 
 	message := ismtypes.MsgSetDefaultIsm{
 		Signer: sdk.MustBech32ifyAddressBytes(chain.Config().Bech32Prefix, authtypes.NewModuleAddress(govtypes.ModuleName)),
-		Isms: []*ismtypes.OriginsMultiSigIsm{
+		Isms: []*ismtypes.Ism{
 			{
 				Origin: 1, // Ethereum origin
-				Ism: &ismtypes.MultiSigIsm{
-					Threshold: 2,
-					ValidatorPubKeys: valSet,
-				},
+				AbstractIsm: ismtypes.MustPackAbstractIsm(
+					&ismtypes.MerkleRootMultiSig{
+						Threshold:        2,
+						ValidatorPubKeys: valSet,
+					},
+				),
 			},
 		},
 	}
 	msg, err := chain.Config().EncodingConfig.Codec.MarshalInterfaceJSON(&message)
+	fmt.Println("Msg: ", string(msg))
 	require.NoError(t, err)
 	proposal.Messages = append(proposal.Messages, msg)
 
@@ -61,7 +64,7 @@ func SetDefaultIsm(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain,
 	require.NoError(t, err)
 }
 
-func QueryDefaultIsm(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain) *ismtypes.QueryAllDefaultIsmsResponse {
+func QueryAllDefaultIsms(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain) *ismtypes.QueryAllDefaultIsmsResponse {
 	grpcAddress := chain.GetHostGRPCAddress()
 	conn, err := grpc.Dial(grpcAddress, grpc.WithInsecure())
 	require.NoError(t, err)

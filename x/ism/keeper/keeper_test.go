@@ -117,15 +117,16 @@ func TestVerifyMerkleProof(t *testing.T) {
 		metadata, err := hex.DecodeString(metadatas[i])
 		require.NoError(t, err)
 
-		result := keeper.VerifyMerkleProof(metadata, message)
+		result := types.VerifyMerkleProof(metadata, message)
 		require.True(t, result)
 	}
 }
 
 func TestVerifyValidatorSignatures(t *testing.T) {
-	ismMap := map[uint32]types.MultiSigIsm{}
+	ismMap := map[uint32]types.AbstractIsm{}
 	for _, originIsm := range defaultIsms {
-		ismMap[originIsm.Origin] = *originIsm.Ism
+		ism := types.MustUnpackAbstractIsm(originIsm.AbstractIsm)
+		ismMap[originIsm.Origin] = ism
 	}
 
 	for i := 0; i < len(messages); i++ {
@@ -135,7 +136,8 @@ func TestVerifyValidatorSignatures(t *testing.T) {
 		metadata, err := hex.DecodeString(metadatas[i])
 		require.NoError(t, err)
 
-		result := keeper.VerifyValidatorSignatures(metadata, message, ismMap[common.Origin(message)])
+		// Verify will also verify Merkle Proof now
+		result := ismMap[common.Origin(message)].Verify(metadata, message)
 		require.True(t, result)
 	}
 }

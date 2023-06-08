@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	helpers "github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
+	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 )
 
 // TestHyperlaneMailbox ensures the mailbox module & bindings work properly.
@@ -39,11 +40,13 @@ func TestHyperlaneMailbox(t *testing.T) {
 
 	counterChain := helpers.CreateCounterChain(t, 1)
 	helpers.SetDefaultIsm(t, ctx, simd, user.KeyName(), counterChain)
-	res := helpers.QueryDefaultIsm(t, ctx, simd)
+	res := helpers.QueryAllDefaultIsms(t, ctx, simd)
 
-	require.Equal(t, counterChain.ValSet.Threshold, uint8(res.DefaultIsms[0].Ism.Threshold))
+	abstractIsm := ismtypes.MustUnpackAbstractIsm(res.DefaultIsms[0].AbstractIsm)
+	merkleRootMultiSig := abstractIsm.(*ismtypes.MerkleRootMultiSig)
+	require.Equal(t, counterChain.ValSet.Threshold, uint8(merkleRootMultiSig.Threshold))
 	for i, val := range counterChain.ValSet.Vals {
-		require.Equal(t, val.Addr, res.DefaultIsms[0].Ism.ValidatorPubKeys[i])
+		require.Equal(t, val.Addr, merkleRootMultiSig.ValidatorPubKeys[i])
 	}
 
 	// Create message
@@ -60,7 +63,7 @@ func TestHyperlaneMailbox(t *testing.T) {
 	metadata = counterChain.CreateMetadata(message, proof)
 	// Process message
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
-	
+
 	message, proof = counterChain.CreateMessage(sender, destDomain, contract, "Hello!3")
 	// Create metadata
 	metadata = counterChain.CreateMetadata(message, proof)

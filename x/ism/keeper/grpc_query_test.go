@@ -67,7 +67,7 @@ func (suite *KeeperTestSuite) TestQueryOriginsDefaultIsm() {
 				suite.Require().NoError(err)
 				suite.Require().NotNil(res)
 				suite.Require().NotEmpty(res.DefaultIsm)
-				suite.Require().Equal(defaultIsms[index].Ism, res.DefaultIsm)
+				suite.Require().Equal(defaultIsms[index].AbstractIsm.String(), res.DefaultIsm.String())
 			} else {
 				suite.Require().Error(err)
 			}

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 	mailboxtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 

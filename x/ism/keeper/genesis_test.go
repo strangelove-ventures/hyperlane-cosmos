@@ -18,11 +18,10 @@ func (suite *KeeperTestSuite) TestGenesis() {
 
 	gs := suite.keeper.ExportGenesis(suite.ctx)
 	for i := 0; i < len(defaultIsms); i++ {
+		expectedIsm := types.MustUnpackAbstractIsm(defaultIsms[i].AbstractIsm)
+		actualIsm := types.MustUnpackAbstractIsm(gs.DefaultIsm[i].AbstractIsm)
 		suite.Require().Equal(defaultIsms[i].Origin, gs.DefaultIsm[i].Origin)
-		suite.Require().Equal(defaultIsms[i].Ism.Threshold, gs.DefaultIsm[i].Ism.Threshold)
-		for j := 0; j < len(defaultIsms[i].Ism.ValidatorPubKeys); j++ {
-			suite.Require().Equal(defaultIsms[i].Ism.ValidatorPubKeys[j], gs.DefaultIsm[i].Ism.ValidatorPubKeys[j])
-		}
+		suite.Require().Equal(expectedIsm, actualIsm)
 	}
 
 	suite.SetupTest()

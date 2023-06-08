@@ -45,7 +45,7 @@ func (AppModuleBasic) RegisterInterfaces(registry codectypes.InterfaceRegistry) 
 // DefaultGenesis returns an empty state
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(&types.GenesisState{
-		DefaultIsm: []types.OriginsMultiSigIsm{},
+		DefaultIsm: []types.Ism{},
 	})
 }
 

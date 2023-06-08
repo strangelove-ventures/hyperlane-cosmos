@@ -2,7 +2,8 @@ syntax = "proto3";
 package hyperlane.ism.v1;
 
 import "google/api/annotations.proto";
-import "hyperlane/ism/v1/multisig.proto";
+import "hyperlane/ism/v1/ism.proto";
+import "google/protobuf/any.proto";
 
 option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types";
 
@@ -24,7 +25,7 @@ service Query {
 message QueryOriginsDefaultIsmRequest { uint32 origin = 1; }
 
 // QueryDefaultIsmResponse is the response type for the DefaultIsm RPC method.
-message QueryOriginsDefaultIsmResponse { MultiSigIsm default_ism = 1; }
+message QueryOriginsDefaultIsmResponse { google.protobuf.Any default_ism = 1; }
 
 // QueryAllDefaultIsmRequest is the request type for the AllDefaultIsms RPC
 // method.
@@ -32,6 +33,4 @@ message QueryAllDefaultIsmsRequest {}
 
 // QueryAllDefaultIsmResponse is the response type for the AllDefaultIsms RPC
 // method.
-message QueryAllDefaultIsmsResponse {
-  repeated OriginsMultiSigIsm default_isms = 1;
-}
+message QueryAllDefaultIsmsResponse { repeated Ism default_isms = 1; }

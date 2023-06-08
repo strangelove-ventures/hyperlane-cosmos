@@ -11,8 +11,8 @@ import (
 )
 
 type ValSet struct {
-	Vals []Val
-	Total uint32
+	Vals      []Val
+	Total     uint32
 	Threshold uint8
 }
 
@@ -28,7 +28,7 @@ func CreateVal(t *testing.T) *Val {
 	signer := hexutil.Encode(crypto.PubkeyToAddress(priv.PublicKey).Bytes())
 
 	return &Val{
-		Addr: signer, 
+		Addr: signer,
 		Priv: priv,
 	}
 }

@@ -2,12 +2,12 @@ syntax = "proto3";
 package hyperlane.ism.v1;
 
 import "gogoproto/gogo.proto";
-import "hyperlane/ism/v1/multisig.proto";
+import "hyperlane/ism/v1/ism.proto";
 
 option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types";
 
 // Hyperlane ISM's keeper genesis state
 message GenesisState {
   // Genesis default ISM
-  repeated OriginsMultiSigIsm default_ism = 1 [ (gogoproto.nullable) = false ];
+  repeated Ism default_ism = 1 [ (gogoproto.nullable) = false ];
 }

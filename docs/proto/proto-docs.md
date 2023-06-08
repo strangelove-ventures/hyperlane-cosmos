@@ -4,12 +4,15 @@
 
 ## Table of Contents
 
-- [hyperlane/ism/v1/multisig.proto](#hyperlane/ism/v1/multisig.proto)
-    - [MultiSigIsm](#hyperlane.ism.v1.MultiSigIsm)
-    - [OriginsMultiSigIsm](#hyperlane.ism.v1.OriginsMultiSigIsm)
+- [hyperlane/ism/v1/ism.proto](#hyperlane/ism/v1/ism.proto)
+    - [Ism](#hyperlane.ism.v1.Ism)
   
 - [hyperlane/ism/v1/genesis.proto](#hyperlane/ism/v1/genesis.proto)
     - [GenesisState](#hyperlane.ism.v1.GenesisState)
+  
+- [hyperlane/ism/v1/multisig.proto](#hyperlane/ism/v1/multisig.proto)
+    - [MerkleRootMultiSig](#hyperlane.ism.v1.MerkleRootMultiSig)
+    - [MessageIdMultiSig](#hyperlane.ism.v1.MessageIdMultiSig)
   
 - [hyperlane/ism/v1/query.proto](#hyperlane/ism/v1/query.proto)
     - [QueryAllDefaultIsmsRequest](#hyperlane.ism.v1.QueryAllDefaultIsmsRequest)
@@ -29,39 +32,23 @@
 
 
 
-<a name="hyperlane/ism/v1/multisig.proto"></a>
+<a name="hyperlane/ism/v1/ism.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/ism/v1/multisig.proto
+## hyperlane/ism/v1/ism.proto
 
 
 
-<a name="hyperlane.ism.v1.MultiSigIsm"></a>
+<a name="hyperlane.ism.v1.Ism"></a>
 
-### MultiSigIsm
-MultiSig ISM for a specific origin
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `validator_pub_keys` | [string](#string) | repeated | Validator pub keys |
-| `threshold` | [uint32](#uint32) |  | number of validators required |
-
-
-
-
-
-
-<a name="hyperlane.ism.v1.OriginsMultiSigIsm"></a>
-
-### OriginsMultiSigIsm
+### Ism
 Hyperlane's default ISM
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | `origin` | [uint32](#uint32) |  |  |
-| `ism` | [MultiSigIsm](#hyperlane.ism.v1.MultiSigIsm) |  |  |
+| `abstract_ism` | [google.protobuf.Any](#google.protobuf.Any) |  |  |
 
 
 
@@ -92,7 +79,55 @@ Hyperlane ISM's keeper genesis state
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `default_ism` | [OriginsMultiSigIsm](#hyperlane.ism.v1.OriginsMultiSigIsm) | repeated | Genesis default ISM |
+| `default_ism` | [Ism](#hyperlane.ism.v1.Ism) | repeated | Genesis default ISM |
+
+
+
+
+
+ <!-- end messages -->
+
+ <!-- end enums -->
+
+ <!-- end HasExtensions -->
+
+ <!-- end services -->
+
+
+
+<a name="hyperlane/ism/v1/multisig.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## hyperlane/ism/v1/multisig.proto
+
+
+
+<a name="hyperlane.ism.v1.MerkleRootMultiSig"></a>
+
+### MerkleRootMultiSig
+MerkleRootMultiSig ISM for a specific origin
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `validator_pub_keys` | [string](#string) | repeated | Validator pub keys |
+| `threshold` | [uint32](#uint32) |  | number of validators required |
+
+
+
+
+
+
+<a name="hyperlane.ism.v1.MessageIdMultiSig"></a>
+
+### MessageIdMultiSig
+MessageIdMultiSig ISM for a specific origin
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `validator_pub_keys` | [string](#string) | repeated | Validator pub keys |
+| `threshold` | [uint32](#uint32) |  | number of validators required |
 
 
 
@@ -135,7 +170,7 @@ method.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `default_isms` | [OriginsMultiSigIsm](#hyperlane.ism.v1.OriginsMultiSigIsm) | repeated |  |
+| `default_isms` | [Ism](#hyperlane.ism.v1.Ism) | repeated |  |
 
 
 
@@ -165,7 +200,7 @@ QueryDefaultIsmResponse is the response type for the DefaultIsm RPC method.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `default_ism` | [MultiSigIsm](#hyperlane.ism.v1.MultiSigIsm) |  |  |
+| `default_ism` | [google.protobuf.Any](#google.protobuf.Any) |  |  |
 
 
 
@@ -208,7 +243,7 @@ MsgSetDefaultIsm defines the request type for the SetDefaultIsm rpc.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | `signer` | [string](#string) |  |  |
-| `isms` | [OriginsMultiSigIsm](#hyperlane.ism.v1.OriginsMultiSigIsm) | repeated |  |
+| `isms` | [Ism](#hyperlane.ism.v1.Ism) | repeated |  |
 
 
 

@@ -18,8 +18,12 @@ func (k Keeper) OriginsDefaultIsm(c context.Context, req *types.QueryOriginsDefa
 	}
 
 	defaultIsm := k.defaultIsm[req.Origin]
+	ismAny, err := types.PackAbstractIsm(defaultIsm)
+	if err != nil {
+		return nil, err
+	}
 	return &types.QueryOriginsDefaultIsmResponse{
-		DefaultIsm: &defaultIsm,
+		DefaultIsm: ismAny,
 	}, nil
 }
 
@@ -32,9 +36,13 @@ func (k Keeper) AllDefaultIsms(c context.Context, req *types.QueryAllDefaultIsms
 	var allDefaultIsms types.QueryAllDefaultIsmsResponse
 	for origin := range k.defaultIsm {
 		ism := k.defaultIsm[origin]
-		allDefaultIsms.DefaultIsms = append(allDefaultIsms.DefaultIsms, &types.OriginsMultiSigIsm{
+		ismAny, err := types.PackAbstractIsm(ism)
+		if err != nil {
+			return nil, err
+		}
+		allDefaultIsms.DefaultIsms = append(allDefaultIsms.DefaultIsms, &types.Ism{
 			Origin: origin,
-			Ism:    &ism,
+			AbstractIsm:    ismAny,
 		})
 	}
 	return &allDefaultIsms, nil

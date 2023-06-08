@@ -13,15 +13,16 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/keeper"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 
-	ismkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
 	"github.com/stretchr/testify/suite"
+
+	ismkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
 )
 
 type KeeperTestSuite struct {
 	suite.Suite
 
 	ctx         sdk.Context
-	ismctx         sdk.Context
+	ismctx      sdk.Context
 	keeper      keeper.Keeper
 	ismkeeper   ismkeeper.Keeper
 	queryClient types.QueryClient

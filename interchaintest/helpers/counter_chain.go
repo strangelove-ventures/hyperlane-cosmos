@@ -5,27 +5,28 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
-	imt "github.com/strangelove-ventures/hyperlane-cosmos/imt"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
+
+	imt "github.com/strangelove-ventures/hyperlane-cosmos/imt"
+	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 )
 
 const MAX_MESSAGE_BODY_BYTES = 2_000
 
 type CounterChain struct {
-	T *testing.T
+	T      *testing.T
 	ValSet ValSet
-	Tree *imt.Tree
+	Tree   *imt.Tree
 	Domain uint32
 }
 
 func CreateCounterChain(t *testing.T, domain uint32) *CounterChain {
 	return &CounterChain{
-		T: t,
+		T:      t,
 		ValSet: *CreateValSet(t, 3, 2),
-		Tree: &imt.Tree{},
+		Tree:   &imt.Tree{},
 		Domain: domain,
 	}
 }
