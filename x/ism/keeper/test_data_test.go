@@ -2,7 +2,7 @@ package keeper_test
 
 import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
-	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
 )
 
 // Message Ids:
@@ -35,7 +35,7 @@ var defaultIsms = []*types.Ism{
 	{
 		Origin: 1, // Ethereum origin
 		AbstractIsm: types.MustPackAbstractIsm(
-			&merkle_root_multisig.MerkleRootMultiSig{
+			&legacy_multisig.LegacyMultiSig{
 				Threshold: 4,
 				ValidatorPubKeys: []string{
 					"0x4C327CCB881A7542BE77500b2833dc84c839E7b7",
@@ -51,7 +51,7 @@ var defaultIsms = []*types.Ism{
 	{
 		Origin: 10, // Optimism origin
 		AbstractIsm: types.MustPackAbstractIsm(
-			&merkle_root_multisig.MerkleRootMultiSig{
+			&legacy_multisig.LegacyMultiSig{
 				Threshold: 4,
 				ValidatorPubKeys: []string{
 					"0x9f2296D5cFC6b5176aDC7716C7596898dED13D35",
@@ -67,7 +67,7 @@ var defaultIsms = []*types.Ism{
 	{
 		Origin: 42161, // Arbitrum origin
 		AbstractIsm: types.MustPackAbstractIsm(
-			&merkle_root_multisig.MerkleRootMultiSig{
+			&legacy_multisig.LegacyMultiSig{
 				Threshold: 4,
 				ValidatorPubKeys: []string{
 					"0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7",

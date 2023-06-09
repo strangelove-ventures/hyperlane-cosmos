@@ -17,6 +17,7 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/client/cli"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/message_id_multisig"
 )
@@ -42,6 +43,7 @@ func (AppModuleBasic) RegisterLegacyAminoCodec(*codec.LegacyAmino) {}
 // RegisterInterfaces registers module concrete types into protobuf Any.
 func (AppModuleBasic) RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 	types.RegisterInterfaces(registry)
+	legacy_multisig.RegisterInterfaces(registry)
 	merkle_root_multisig.RegisterInterfaces(registry)
 	message_id_multisig.RegisterInterfaces(registry)
 }

@@ -4,10 +4,10 @@ package hyperlane.ism.v1;
 
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig";
+option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig";
 
-// MerkleRootMultiSig ISM for a specific origin
-message MerkleRootMultiSig {
+// LegacyMultiSig ISM for a specific origin
+message LegacyMultiSig {
   option (gogoproto.goproto_getters) = false;
   // Validator pub keys
   repeated string validator_pub_keys = 1;

@@ -17,19 +17,19 @@ const (
 )
 
 func OriginMailbox(metadata []byte) []byte {
-	return metadata[ORIGIN_MAILBOX_OFFSET:ORIGIN_MAILBOX_OFFSET+32]
+	return metadata[ORIGIN_MAILBOX_OFFSET : ORIGIN_MAILBOX_OFFSET+32]
 }
 
 func Index(metadata []byte) uint32 {
-	return binary.BigEndian.Uint32(metadata[CHECKPOINT_INDEX_OFFSET:CHECKPOINT_INDEX_OFFSET+4])
+	return binary.BigEndian.Uint32(metadata[CHECKPOINT_INDEX_OFFSET : CHECKPOINT_INDEX_OFFSET+4])
 }
 
 func MessageId(metadata []byte) []byte {
-	return metadata[CHECKPOINT_MESSAGE_ID_OFFSET:CHECKPOINT_MESSAGE_ID_OFFSET+32]
+	return metadata[CHECKPOINT_MESSAGE_ID_OFFSET : CHECKPOINT_MESSAGE_ID_OFFSET+32]
 }
 
 func Proof(metadata []byte) []byte {
-	return metadata[MERKLE_PROOF_OFFSET:MERKLE_PROOF_OFFSET + MERKLE_PROOF_LENGTH]
+	return metadata[MERKLE_PROOF_OFFSET : MERKLE_PROOF_OFFSET+MERKLE_PROOF_LENGTH]
 }
 
 func SignatureAt(metadata []byte, index uint32) []byte {

@@ -2,7 +2,7 @@ package message_id_multisig
 
 import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
-	
+
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 )
 

@@ -18,6 +18,8 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/message_id_multisig"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
 
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -52,6 +54,9 @@ func (suite *KeeperTestSuite) SetupTest() {
 	)
 
 	types.RegisterInterfaces(encCfg.InterfaceRegistry)
+	legacy_multisig.RegisterInterfaces(encCfg.InterfaceRegistry)
+	merkle_root_multisig.RegisterInterfaces(encCfg.InterfaceRegistry)
+	message_id_multisig.RegisterInterfaces(encCfg.InterfaceRegistry)
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, encCfg.InterfaceRegistry)
 	types.RegisterQueryServer(queryHelper, suite.keeper)
@@ -118,7 +123,7 @@ func TestVerifyMerkleProof(t *testing.T) {
 		metadata, err := hex.DecodeString(metadatas[i])
 		require.NoError(t, err)
 
-		result := merkle_root_multisig.VerifyMerkleProof(metadata, message)
+		result := legacy_multisig.VerifyMerkleProof(metadata, message)
 		require.True(t, result)
 	}
 }

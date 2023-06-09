@@ -4,7 +4,7 @@ package hyperlane.ism.v1;
 
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/message_id_multisig";
+option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/message_id_multisig";
 
 // MessageIdMultiSig ISM for a specific origin
 message MessageIdMultiSig {

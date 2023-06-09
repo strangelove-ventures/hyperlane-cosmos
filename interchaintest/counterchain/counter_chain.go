@@ -21,19 +21,19 @@ var (
 )
 
 type CounterChain struct {
-	T      *testing.T
-	ValSet ValSet
-	Tree   *imt.Tree
-	Domain uint32
+	T       *testing.T
+	ValSet  ValSet
+	Tree    *imt.Tree
+	Domain  uint32
 	IsmType string
 }
 
 func CreateCounterChain(t *testing.T, domain uint32, ismType string) *CounterChain {
 	return &CounterChain{
-		T:      t,
-		ValSet: *CreateValSet(t, 3, 2),
-		Tree:   &imt.Tree{},
-		Domain: domain,
+		T:       t,
+		ValSet:  *CreateValSet(t, 3, 2),
+		Tree:    &imt.Tree{},
+		Domain:  domain,
 		IsmType: ismType,
 	}
 }
@@ -93,5 +93,3 @@ func (c *CounterChain) CreateMessage(sender string, destDomain uint32, recipient
 
 	return message, proof
 }
-
-

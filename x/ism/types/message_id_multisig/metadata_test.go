@@ -20,15 +20,15 @@ type MultisigIsmMetadata struct {
 
 func TestMetadataSuccess(t *testing.T) {
 	var metadata []byte
-	
+
 	originMailbox, err := hex.DecodeString("0000000000000000000000000000000000000000000000000000000000000012")
 	require.NoError(t, err)
 	metadata = append(metadata, originMailbox...)
-	
+
 	root, err := hex.DecodeString("0000000000000000000000000000000000000000000000000000000000000011")
 	require.NoError(t, err)
 	metadata = append(metadata, root...)
-	
+
 	var signatures [][]byte
 	prefixSig := make([]byte, 64)
 	for i := 0; i < 4; i++ {

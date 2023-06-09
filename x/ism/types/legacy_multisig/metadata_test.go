@@ -1,4 +1,4 @@
-package legacy_test
+package legacy_multisig_test
 
 import (
 	"encoding/binary"
@@ -8,34 +8,34 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	types "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig/legacy"
+	types "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
 )
 
 func TestMetadataSuccess(t *testing.T) {
 	var metadata []byte
-	
+
 	root, err := hex.DecodeString("0000000000000000000000000000000000000000000000000000000000000011")
 	require.NoError(t, err)
 	metadata = append(metadata, root...)
-	
+
 	index := uint32(1)
 	indexBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(indexBytes, index)
 	metadata = append(metadata, indexBytes...)
-	
+
 	originMailbox, err := hex.DecodeString("0000000000000000000000000000000000000000000000000000000000000012")
 	require.NoError(t, err)
 	metadata = append(metadata, originMailbox...)
-	
+
 	proof := make([]byte, 1023)
 	temp, err := hex.DecodeString("13")
 	require.NoError(t, err)
 	proof = append(proof, temp...)
 	metadata = append(metadata, proof...)
-	
+
 	threshold := uint8(1)
 	metadata = append(metadata, threshold)
-	
+
 	var signatures [][]byte
 	prefixSig := make([]byte, 64)
 	for i := 0; i < 4; i++ {

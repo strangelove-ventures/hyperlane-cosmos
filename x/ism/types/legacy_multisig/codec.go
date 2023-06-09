@@ -1,4 +1,4 @@
-package merkle_root_multisig
+package legacy_multisig
 
 import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -11,6 +11,6 @@ import (
 func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 	registry.RegisterImplementations(
 		(*types.AbstractIsm)(nil),
-		&MerkleRootMultiSig{},
+		&LegacyMultiSig{},
 	)
 }

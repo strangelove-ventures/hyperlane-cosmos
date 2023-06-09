@@ -9,12 +9,12 @@ import (
 
 // Checkpoint calculation released with message id multisig
 func Digest(
-	origin uint32, 
-	originMailbox []byte, 
-	root []byte, 
+	origin uint32,
+	originMailbox []byte,
+	root []byte,
 	index uint32,
 	messageId []byte,
-	) []byte {
+) []byte {
 	domainHash := DomainHash(origin, originMailbox)
 
 	var packed []byte

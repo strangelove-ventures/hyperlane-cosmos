@@ -8,12 +8,12 @@ import (
 
 	imt "github.com/strangelove-ventures/hyperlane-cosmos/imt"
 	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
-	legacy "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig/legacy"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
 )
 
 func (c *CounterChain) CreateLegacyMetadata(message []byte, proof [imt.TreeDepth][32]byte) (metadata []byte) {
 	require.Equal(c.T, LEGACY_MULTISIG, c.IsmType)
-	
+
 	merkleRoot := c.Tree.Root()
 	metadata = append(metadata, merkleRoot...)
 
@@ -25,14 +25,13 @@ func (c *CounterChain) CreateLegacyMetadata(message []byte, proof [imt.TreeDepth
 	originMailbox := []byte("12345678901234567890123456789012") // Shouldn't matter
 	metadata = append(metadata, originMailbox...)
 
-	// How to get merkle proof?
 	for i := 0; i < imt.TreeDepth; i++ {
 		metadata = append(metadata, proof[i][:]...)
 	}
 
 	metadata = append(metadata, c.ValSet.Threshold)
 
-	checkpoint := legacy.Digest(common.Origin(message), originMailbox, merkleRoot, index)
+	checkpoint := legacy_multisig.Digest(common.Origin(message), originMailbox, merkleRoot, index)
 	for i := uint8(0); i < c.ValSet.Threshold; i++ {
 		sig, err := crypto.Sign(checkpoint, c.ValSet.Vals[i].Priv)
 		require.NoError(c.T, err)

@@ -1,4 +1,4 @@
-package legacy
+package legacy_multisig
 
 import (
 	"encoding/binary"

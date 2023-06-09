@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
@@ -12,12 +13,12 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
-	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/message_id_multisig"
-	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
 )
 
 func GetDefaultIsms(counterChains ...*counterchain.CounterChain) (isms []*ismtypes.Ism) {
@@ -30,13 +31,18 @@ func GetDefaultIsms(counterChains ...*counterchain.CounterChain) (isms []*ismtyp
 		switch counterChain.IsmType {
 		case counterchain.LEGACY_MULTISIG:
 			ism = ismtypes.MustPackAbstractIsm(
-				&merkle_root_multisig.MerkleRootMultiSig{
+				&legacy_multisig.LegacyMultiSig{
 					Threshold:        uint32(counterChain.ValSet.Threshold),
 					ValidatorPubKeys: valSet,
 				},
 			)
 		case counterchain.MERKLE_ROOT_MULTISIG:
-			ism = nil
+			ism = ismtypes.MustPackAbstractIsm(
+				&merkle_root_multisig.MerkleRootMultiSig{
+					Threshold:        uint32(counterChain.ValSet.Threshold),
+					ValidatorPubKeys: valSet,
+				},
+			)
 		case counterchain.MESSAGE_ID_MULTISIG:
 			ism = ismtypes.MustPackAbstractIsm(
 				&message_id_multisig.MessageIdMultiSig{
@@ -46,7 +52,7 @@ func GetDefaultIsms(counterChains ...*counterchain.CounterChain) (isms []*ismtyp
 			)
 		}
 		isms = append(isms, &ismtypes.Ism{
-			Origin: counterChain.Domain,
+			Origin:      counterChain.Domain,
 			AbstractIsm: ism,
 		})
 	}
@@ -63,7 +69,7 @@ func SetDefaultIsm(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain,
 
 	message := ismtypes.MsgSetDefaultIsm{
 		Signer: sdk.MustBech32ifyAddressBytes(chain.Config().Bech32Prefix, authtypes.NewModuleAddress(govtypes.ModuleName)),
-		Isms: GetDefaultIsms(counterChains...),
+		Isms:   GetDefaultIsms(counterChains...),
 	}
 	msg, err := chain.Config().EncodingConfig.Codec.MarshalInterfaceJSON(&message)
 	fmt.Println("Msg: ", string(msg))

@@ -3,6 +3,7 @@ package merkle_root_multisig
 import (
 	"reflect"
 	"strconv"
+	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/imt"
 	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
-	legacy "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig/legacy"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 )
 
@@ -48,7 +48,7 @@ func (i *MerkleRootMultiSig) Validate() error {
 }
 
 func (i *MerkleRootMultiSig) Verify(metadata []byte, message []byte) bool {
-	return VerifyMerkleProof(metadata, message) && i.VerifyValidatorSignatures(metadata, message)
+	return i.VerifyValidatorSignatures(metadata, message)
 }
 
 func (i *MerkleRootMultiSig) VerifyValidatorSignatures(metadata []byte, message []byte) bool {
@@ -57,41 +57,7 @@ func (i *MerkleRootMultiSig) VerifyValidatorSignatures(metadata []byte, message 
 	}
 
 	// checkpoint digest
-	digest := legacy.Digest(common.Origin(message), legacy.OriginMailbox(metadata), legacy.Root(metadata), legacy.Index(metadata))
-
-	validatorCount := len(i.ValidatorPubKeys)
-	validatorIndex := 0
-	// Assumes that signatures are ordered by validator
-	for index := uint32(0); index < i.Threshold; index++ {
-		// get signer
-		signer, err := crypto.SigToPub(digest, legacy.SignatureAt(metadata, index))
-		if err != nil {
-			return false
-		}
-		// fmt.Println("Signer: ", hex.EncodeToString(signer))
-		signerAddress := crypto.PubkeyToAddress(*signer)
-		// Loop through remaining validators until we find a match
-		for validatorIndex < validatorCount {
-			valAddress, err := hexutil.Decode(i.ValidatorPubKeys[validatorIndex])
-			if err != nil {
-				return false
-			}
-			if reflect.DeepEqual(signerAddress.Bytes(), valAddress) {
-				break;
-			}
-			validatorIndex++
-		}
-		// Fail if we never found a match
-		if validatorIndex >= validatorCount {
-			return false
-		}
-		validatorIndex++
-	}
-	return true
-}
-
-func VerifyMerkleProof(metadata []byte, message []byte) bool {
-	proof := legacy.Proof(metadata)
+	proof := Proof(metadata)
 	paths := [imt.TreeDepth][]byte{}
 	for i := 0; i < imt.TreeDepth; i++ {
 		paths[i] = proof[i*32 : (i+1)*32]
@@ -105,6 +71,37 @@ func VerifyMerkleProof(metadata []byte, message []byte) bool {
 	if err != nil {
 		return false
 	}
+	digest := Digest(common.Origin(message), OriginMailbox(metadata), calculatedRoot, Index(metadata), common.Id(message))
 
-	return reflect.DeepEqual(calculatedRoot, legacy.Root(metadata))
+	validatorCount := len(i.ValidatorPubKeys)
+	validatorIndex := 0
+	// Assumes that signatures are ordered by validator
+	for index := uint32(0); index < i.Threshold; index++ {
+		// get signer
+		signer, err := crypto.SigToPub(digest, SignatureAt(metadata, index))
+		if err != nil {
+			return false
+		}
+		// fmt.Println("Signer: ", hex.EncodeToString(signer))
+		signerAddress := crypto.PubkeyToAddress(*signer)
+		// Loop through remaining validators until we find a match
+		for validatorIndex < validatorCount {
+			fmt.Println("Signer: ", hexutil.Encode(signerAddress[:]))
+			fmt.Println("Val: ", i.ValidatorPubKeys[validatorIndex])
+			valAddress, err := hexutil.Decode(i.ValidatorPubKeys[validatorIndex])
+			if err != nil {
+				return false
+			}
+			if reflect.DeepEqual(signerAddress.Bytes(), valAddress) {
+				break
+			}
+			validatorIndex++
+		}
+		// Fail if we never found a match
+		if validatorIndex >= validatorCount {
+			return false
+		}
+		validatorIndex++
+	}
+	return true
 }

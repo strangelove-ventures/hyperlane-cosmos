@@ -1,4 +1,4 @@
-package message_id_multisig
+package legacy_multisig
 
 import (
 	"reflect"
@@ -9,13 +9,14 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 
+	"github.com/strangelove-ventures/hyperlane-cosmos/imt"
 	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 )
 
-var _ types.AbstractIsm = (*MessageIdMultiSig)(nil)
+var _ types.AbstractIsm = (*LegacyMultiSig)(nil)
 
-func (i *MessageIdMultiSig) Event(origin uint32) sdk.Event {
+func (i *LegacyMultiSig) Event(origin uint32) sdk.Event {
 	originStr := strconv.FormatUint(uint64(origin), 10)
 	thresholdStr := strconv.FormatUint(uint64(i.Threshold), 10)
 	eventAttributes := []sdk.Attribute{}
@@ -33,7 +34,7 @@ func (i *MessageIdMultiSig) Event(origin uint32) sdk.Event {
 	)
 }
 
-func (i *MessageIdMultiSig) Validate() error {
+func (i *LegacyMultiSig) Validate() error {
 	if i.Threshold == 0 {
 		return types.ErrInvalidThreshold
 	}
@@ -46,18 +47,17 @@ func (i *MessageIdMultiSig) Validate() error {
 	return nil
 }
 
-func (i *MessageIdMultiSig) Verify(metadata []byte, message []byte) bool {
-	return i.VerifyValidatorSignatures(metadata, message)
+func (i *LegacyMultiSig) Verify(metadata []byte, message []byte) bool {
+	return VerifyMerkleProof(metadata, message) && i.VerifyValidatorSignatures(metadata, message)
 }
 
-func (i *MessageIdMultiSig) VerifyValidatorSignatures(metadata []byte, message []byte) bool {
+func (i *LegacyMultiSig) VerifyValidatorSignatures(metadata []byte, message []byte) bool {
 	if i.Threshold == 0 {
 		return false
 	}
 
 	// checkpoint digest
-	digest := Digest(common.Origin(message), OriginMailbox(metadata),
-		Root(metadata), common.Nonce(message), common.Id(message))
+	digest := Digest(common.Origin(message), OriginMailbox(metadata), Root(metadata), Index(metadata))
 
 	validatorCount := len(i.ValidatorPubKeys)
 	validatorIndex := 0
@@ -90,4 +90,23 @@ func (i *MessageIdMultiSig) VerifyValidatorSignatures(metadata []byte, message [
 		validatorIndex++
 	}
 	return true
+}
+
+func VerifyMerkleProof(metadata []byte, message []byte) bool {
+	proof := Proof(metadata)
+	paths := [imt.TreeDepth][]byte{}
+	for i := 0; i < imt.TreeDepth; i++ {
+		paths[i] = proof[i*32 : (i+1)*32]
+	}
+
+	calculatedRoot, err := imt.BranchRoot(
+		common.Id(message),
+		paths,
+		common.Nonce(message),
+	)
+	if err != nil {
+		return false
+	}
+
+	return reflect.DeepEqual(calculatedRoot, Root(metadata))
 }
