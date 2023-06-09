@@ -43,9 +43,10 @@ func TestHyperlaneMailbox(t *testing.T) {
 	// Create counter chain 1, with origin 1, with val set signing legacy multisig
 	counterChain1 := counterchain.CreateCounterChain(t, 1, counterchain.LEGACY_MULTISIG)
 	counterChain2 := counterchain.CreateCounterChain(t, 2, counterchain.MESSAGE_ID_MULTISIG)
+	counterChain3 := counterchain.CreateCounterChain(t, 3, counterchain.MERKLE_ROOT_MULTISIG)
 
 	// Set default isms for counter chains
-	helpers.SetDefaultIsm(t, ctx, simd, user.KeyName(), counterChain1, counterChain2)
+	helpers.SetDefaultIsm(t, ctx, simd, user.KeyName(), counterChain1, counterChain2, counterChain3)
 	res := helpers.QueryAllDefaultIsms(t, ctx, simd)
 
 	var abstractIsm ismtypes.AbstractIsm
@@ -77,6 +78,11 @@ func TestHyperlaneMailbox(t *testing.T) {
 	// Create first message id multisig message from counter chain 2
 	message, _ = counterChain2.CreateMessage(sender, destDomain, contract, "Message Id Multisig 1")
 	metadata = counterChain2.CreateMessageIdMetadata(message)
+	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
+
+	// Create first merkle root multisig message from counter chain 3
+	message, proof = counterChain3.CreateMessage(sender, destDomain, contract, "Merkle Root Multisig 1")
+	metadata = counterChain3.CreateMerkleRootMetadata(message, proof)
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 
 	dispatchMsgStruct := helpers.ExecuteMsg{
