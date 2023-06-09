@@ -65,7 +65,6 @@ func (i *MessageIdMultiSig) VerifyValidatorSignatures(metadata []byte, message [
 		// get signer
 		signer, err := crypto.SigToPub(digest, SignatureAt(metadata, index))
 		if err != nil {
-			fmt.Println("signer recover error: ", err)
 			return false
 		}
 		// fmt.Println("Signer: ", hex.EncodeToString(signer))

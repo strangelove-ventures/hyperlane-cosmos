@@ -142,6 +142,7 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 		fmt.Println("ISM verify failed") // TODO: remove, debug only
 		return nil, types.ErrMsgVerificationFailed
 	}
+	fmt.Println("ISM verify succeeded") // TODO: remove, debug only
 
 	// Parse the recipient and get the contract address
 	recipientBytes := common.Recipient(messageBytes)

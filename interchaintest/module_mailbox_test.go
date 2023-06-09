@@ -13,7 +13,8 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
 
-	helpers "github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig"
 )
@@ -39,7 +40,7 @@ func TestHyperlaneMailbox(t *testing.T) {
 
 	verifyContractEntryPoints(t, ctx, simd, user, contract)
 
-	counterChain := helpers.CreateCounterChain(t, 1)
+	counterChain := counterchain.CreateCounterChain(t, 1)
 	helpers.SetDefaultIsm(t, ctx, simd, user.KeyName(), counterChain)
 	res := helpers.QueryAllDefaultIsms(t, ctx, simd)
 
@@ -55,21 +56,21 @@ func TestHyperlaneMailbox(t *testing.T) {
 	// Create message
 	sender := "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7"
 	destDomain := uint32(12345)
-	message, proof := counterChain.CreateMessage(sender, destDomain, contract, "Hello!")
+	message, proof := counterChain.CreateMessage(sender, destDomain, contract, "Hello!1")
 	// Create metadata
-	metadata := counterChain.CreateMetadata(message, proof)
+	metadata := counterChain.CreateLegacyMetadata(message, proof)
 	// Process message
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 
 	message, proof = counterChain.CreateMessage(sender, destDomain, contract, "Hello!2")
 	// Create metadata
-	metadata = counterChain.CreateMetadata(message, proof)
+	metadata = counterChain.CreateLegacyMetadata(message, proof)
 	// Process message
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 
 	message, proof = counterChain.CreateMessage(sender, destDomain, contract, "Hello!3")
 	// Create metadata
-	metadata = counterChain.CreateMetadata(message, proof)
+	metadata = counterChain.CreateLegacyMetadata(message, proof)
 	// Process message
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 

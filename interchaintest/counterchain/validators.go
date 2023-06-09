@@ -1,4 +1,4 @@
-package helpers
+package counterchain
 
 import (
 	"crypto/ecdsa"

@@ -1,7 +1,6 @@
 package merkle_root_multisig
 
 import (
-	"fmt"
 	"reflect"
 	"strconv"
 
@@ -67,19 +66,23 @@ func (i *MerkleRootMultiSig) VerifyValidatorSignatures(metadata []byte, message 
 		// get signer
 		signer, err := crypto.SigToPub(digest, legacy.SignatureAt(metadata, index))
 		if err != nil {
-			fmt.Println("signer recover error: ", err)
 			return false
 		}
 		// fmt.Println("Signer: ", hex.EncodeToString(signer))
 		signerAddress := crypto.PubkeyToAddress(*signer)
 		// Loop through remaining validators until we find a match
-		for validatorIndex < validatorCount &&
-			hexutil.Encode(signerAddress.Bytes()) == i.ValidatorPubKeys[validatorIndex] {
+		for validatorIndex < validatorCount {
+			valAddress, err := hexutil.Decode(i.ValidatorPubKeys[validatorIndex])
+			if err != nil {
+				return false
+			}
+			if reflect.DeepEqual(signerAddress.Bytes(), valAddress) {
+				break;
+			}
 			validatorIndex++
 		}
 		// Fail if we never found a match
 		if validatorIndex >= validatorCount {
-			fmt.Println("never found match")
 			return false
 		}
 		validatorIndex++
