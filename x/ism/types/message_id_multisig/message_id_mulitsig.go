@@ -55,7 +55,8 @@ func (i *MessageIdMultiSig) VerifyValidatorSignatures(metadata []byte, message [
 	}
 
 	// checkpoint digest
-	digest := Digest(common.Origin(message), OriginMailbox(metadata), Root(metadata), Index(metadata))
+	digest := Digest(common.Origin(message), OriginMailbox(metadata), 
+						Root(metadata), common.Nonce(message), common.Id(message))
 
 	validatorCount := len(i.ValidatorPubKeys)
 	validatorIndex := 0

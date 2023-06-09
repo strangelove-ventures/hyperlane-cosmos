@@ -1,4 +1,4 @@
-package legacy
+package merkle_root_multisig
 
 import (
 	"encoding/binary"
@@ -7,7 +7,15 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
-func Digest(origin uint32, originMailbox []byte, root []byte, index uint32) []byte {
+// Checkpoint calculation released with message id multisig
+// Note: Not currently used yet, see legacy folder for checkpoint in use
+func Digest(
+	origin uint32, 
+	originMailbox []byte, 
+	root []byte, 
+	index uint32,
+	messageId []byte,
+	) []byte {
 	domainHash := DomainHash(origin, originMailbox)
 
 	var packed []byte
@@ -16,6 +24,7 @@ func Digest(origin uint32, originMailbox []byte, root []byte, index uint32) []by
 	indexBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(indexBytes, index)
 	packed = append(packed, indexBytes...)
+	packed = append(packed, messageId...)
 
 	packedHash := crypto.Keccak256(packed)
 	msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(packedHash), packedHash)

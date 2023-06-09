@@ -4,9 +4,7 @@ import (
 	"encoding/binary"
 )
 
-// This should be in a common library
-
-// Currently the old metadata
+// Legacy metadata
 const (
 	MERKLE_ROOT_OFFSET    = 0
 	MERKLE_INDEX_OFFSET   = 32

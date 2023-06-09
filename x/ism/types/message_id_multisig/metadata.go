@@ -1,43 +1,19 @@
 package message_id_multisig
 
-import (
-	"encoding/binary"
-)
-
-// This should be in a common library
-
-// Currently the old metadata
+// Message ID Multisig metadata
 const (
-	MERKLE_ROOT_OFFSET    = 0
-	MERKLE_INDEX_OFFSET   = 32
-	ORIGIN_MAILBOX_OFFSET = 36
-	MERKLE_PROOF_OFFSET   = 68
-	THRESHOLD_OFFSET      = 1092
-	SIGNATURES_OFFSET     = 1093
+	ORIGIN_MAILBOX_OFFSET = 0
+	MERKLE_ROOT_OFFSET    = 32
+	SIGNATURES_OFFSET     = 64
 	SIGNATURE_LENGTH      = 65
-	// SIGNATURES_OFFSET = 1092
-	// SIGNATURE_LENGTH = 65
 )
-
-func Root(metadata []byte) []byte {
-	return metadata[MERKLE_ROOT_OFFSET:MERKLE_INDEX_OFFSET]
-}
-
-func Index(metadata []byte) uint32 {
-	return binary.BigEndian.Uint32(metadata[MERKLE_INDEX_OFFSET:ORIGIN_MAILBOX_OFFSET])
-}
 
 func OriginMailbox(metadata []byte) []byte {
-	return metadata[ORIGIN_MAILBOX_OFFSET:MERKLE_PROOF_OFFSET]
+	return metadata[ORIGIN_MAILBOX_OFFSET:MERKLE_ROOT_OFFSET]
 }
 
-func Proof(metadata []byte) []byte {
-	return metadata[MERKLE_PROOF_OFFSET:THRESHOLD_OFFSET]
-	// return metadata[MERKLE_PROOF_OFFSET:SIGNATURES_OFFSET]
-}
-
-func Threshold(metadata []byte) uint8 {
-	return metadata[THRESHOLD_OFFSET:SIGNATURES_OFFSET][0]
+func Root(metadata []byte) []byte {
+	return metadata[MERKLE_ROOT_OFFSET:SIGNATURES_OFFSET]
 }
 
 func SignatureAt(metadata []byte, index uint32) []byte {
