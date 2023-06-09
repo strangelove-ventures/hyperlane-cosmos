@@ -12,6 +12,8 @@ import (
 )
 
 func (c *CounterChain) CreateLegacyMetadata(message []byte, proof [imt.TreeDepth][32]byte) (metadata []byte) {
+	require.Equal(c.T, LEGACY_MULTISIG, c.IsmType)
+	
 	merkleRoot := c.Tree.Root()
 	metadata = append(metadata, merkleRoot...)
 

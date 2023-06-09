@@ -15,11 +15,6 @@ func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 		"hyperlane.ism.v1.AbstractIsm",
 		(*AbstractIsm)(nil),
 	)
-	/*registry.RegisterImplementations(
-		(*Ism)(nil),
-		&MessageIdMultiSig{},
-		&MerkleRootMultiSig{},
-	)*/
 	registry.RegisterImplementations(
 		(*sdk.Msg)(nil),
 		&MsgSetDefaultIsm{},

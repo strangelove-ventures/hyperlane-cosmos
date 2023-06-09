@@ -12,13 +12,48 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/message_id_multisig"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
 )
 
-func SetDefaultIsm(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain, keyName string, counterChain *counterchain.CounterChain) {
+func GetDefaultIsms(counterChains ...*counterchain.CounterChain) (isms []*ismtypes.Ism) {
+	for _, counterChain := range counterChains {
+		var valSet []string
+		for _, val := range counterChain.ValSet.Vals {
+			valSet = append(valSet, val.Addr)
+		}
+		var ism *codectypes.Any
+		switch counterChain.IsmType {
+		case counterchain.LEGACY_MULTISIG:
+			ism = ismtypes.MustPackAbstractIsm(
+				&merkle_root_multisig.MerkleRootMultiSig{
+					Threshold:        uint32(counterChain.ValSet.Threshold),
+					ValidatorPubKeys: valSet,
+				},
+			)
+		case counterchain.MERKLE_ROOT_MULTISIG:
+			ism = nil
+		case counterchain.MESSAGE_ID_MULTISIG:
+			ism = ismtypes.MustPackAbstractIsm(
+				&message_id_multisig.MessageIdMultiSig{
+					Threshold:        uint32(counterChain.ValSet.Threshold),
+					ValidatorPubKeys: valSet,
+				},
+			)
+		}
+		isms = append(isms, &ismtypes.Ism{
+			Origin: counterChain.Domain,
+			AbstractIsm: ism,
+		})
+	}
+	return isms
+}
+
+func SetDefaultIsm(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain, keyName string, counterChains ...*counterchain.CounterChain) {
 	proposal := cosmos.TxProposalv1{
 		Metadata: "none",
 		Deposit:  "500000000" + chain.Config().Denom, // greater than min deposit
@@ -26,24 +61,9 @@ func SetDefaultIsm(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain,
 		Summary:  "Set hyperlane default ISM",
 	}
 
-	var valSet []string
-	for _, val := range counterChain.ValSet.Vals {
-		valSet = append(valSet, val.Addr)
-	}
-
 	message := ismtypes.MsgSetDefaultIsm{
 		Signer: sdk.MustBech32ifyAddressBytes(chain.Config().Bech32Prefix, authtypes.NewModuleAddress(govtypes.ModuleName)),
-		Isms: []*ismtypes.Ism{
-			{
-				Origin: 1,
-				AbstractIsm: ismtypes.MustPackAbstractIsm(
-					&merkle_root_multisig.MerkleRootMultiSig{
-						Threshold:        2,
-						ValidatorPubKeys: valSet,
-					},
-				),
-			},
-		},
+		Isms: GetDefaultIsms(counterChains...),
 	}
 	msg, err := chain.Config().EncodingConfig.Codec.MarshalInterfaceJSON(&message)
 	fmt.Println("Msg: ", string(msg))

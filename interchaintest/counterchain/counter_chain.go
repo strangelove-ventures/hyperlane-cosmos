@@ -14,19 +14,27 @@ import (
 
 const MAX_MESSAGE_BODY_BYTES = 2_000
 
+var (
+	LEGACY_MULTISIG      = "legacy_multisig"
+	MERKLE_ROOT_MULTISIG = "merkle_root_multisig"
+	MESSAGE_ID_MULTISIG  = "message_id_multisig"
+)
+
 type CounterChain struct {
 	T      *testing.T
 	ValSet ValSet
 	Tree   *imt.Tree
 	Domain uint32
+	IsmType string
 }
 
-func CreateCounterChain(t *testing.T, domain uint32) *CounterChain {
+func CreateCounterChain(t *testing.T, domain uint32, ismType string) *CounterChain {
 	return &CounterChain{
 		T:      t,
 		ValSet: *CreateValSet(t, 3, 2),
 		Tree:   &imt.Tree{},
 		Domain: domain,
+		IsmType: ismType,
 	}
 }
 
