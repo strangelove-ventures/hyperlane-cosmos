@@ -39,7 +39,7 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) types.GenesisState {
 		}
 		genesisState.DefaultIsm = append(genesisState.DefaultIsm, types.OriginsMultiSigIsm{
 			Origin: uint32(origin),
-			Ism: &multiSigIsm,
+			Ism:    &multiSigIsm,
 		})
 	}
 

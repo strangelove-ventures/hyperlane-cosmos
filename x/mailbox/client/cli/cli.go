@@ -35,7 +35,8 @@ func NewTxCmd() *cobra.Command {
 	}
 
 	txCmd.AddCommand(
-		setDefaultIsmCmd(),
+		dispatchCmd(),
+		processCmd(),
 	)
 
 	return txCmd

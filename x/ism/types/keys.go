@@ -16,5 +16,4 @@ const (
 
 func OriginKey(origin uint32) []byte {
 	return []byte(fmt.Sprintf("%s/%d", KeyOriginsDefaultIsm, origin))
-	
 }

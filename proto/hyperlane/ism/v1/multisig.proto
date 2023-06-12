@@ -1,4 +1,5 @@
 syntax = "proto3";
+
 package hyperlane.ism.v1;
 
 option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types";

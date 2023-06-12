@@ -133,6 +133,7 @@ import (
 	ismkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 	mailbox "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox"
+	mailboxbindings "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/bindings"
 	mailboxkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/keeper"
 	mailboxtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
@@ -595,6 +596,9 @@ func NewSimApp(
 		panic(fmt.Sprintf("error while reading wasm config: %s", err))
 	}
 
+	mailboxOpts := mailboxbindings.RegisterCustomPlugins(&app.MailboxKeeper)
+	wasmOpts = append(wasmOpts, mailboxOpts...)
+
 	// The last arguments can contain custom message handlers, and custom query handlers,
 	// if we want to allow any custom callbacks
 	availableCapabilities := strings.Join(AllCapabilities(), ",")
@@ -618,8 +622,11 @@ func NewSimApp(
 		wasmOpts...,
 	)
 
-	app.MailboxKeeper = mailboxkeeper.NewKeeper(appCodec, keys[mailboxtypes.StoreKey])
+	// TODO: How are the domains registered selected.. using 12345 as a placeholder
+	domain := uint32(12345)
+
 	app.IsmKeeper = ismkeeper.NewKeeper(appCodec, keys[ismtypes.StoreKey], authtypes.NewModuleAddress(govtypes.ModuleName).String())
+	app.MailboxKeeper = mailboxkeeper.NewKeeper(appCodec, keys[mailboxtypes.StoreKey], &app.WasmKeeper, &app.IsmKeeper, domain)
 
 	// The gov proposal types can be individually enabled
 	if len(enabledProposals) != 0 {

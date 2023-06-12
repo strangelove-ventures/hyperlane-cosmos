@@ -79,7 +79,7 @@ func VerifyValidatorSignatures(metadata []byte, message []byte, ism types.MultiS
 		signerAddress := crypto.PubkeyToAddress(*signer)
 		// Loop through remaining validators until we find a match
 		for validatorIndex < validatorCount &&
-		    hexutil.Encode(signerAddress.Bytes()) == ism.ValidatorPubKeys[validatorIndex] {
+			hexutil.Encode(signerAddress.Bytes()) == ism.ValidatorPubKeys[validatorIndex] {
 			validatorIndex++
 		}
 		// Fail if we never found a match

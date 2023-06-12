@@ -11,7 +11,8 @@ import (
 func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 	registry.RegisterImplementations(
 		(*sdk.Msg)(nil),
-		&MsgSetDefaultIsm{},
+		&MsgDispatch{},
+		&MsgProcess{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
