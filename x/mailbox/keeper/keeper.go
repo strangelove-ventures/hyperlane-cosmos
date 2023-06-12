@@ -11,8 +11,8 @@ import (
 	cosmwasm "github.com/CosmWasm/wasmd/x/wasm/keeper"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/imt"
+	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 	ismkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
-	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
 
@@ -53,15 +53,15 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwas
 }
 
 func (k Keeper) VerifyMessage(messageBytes []byte) (string, error) {
-	if ismtypes.Version(messageBytes) != k.version {
+	if common.Version(messageBytes) != k.version {
 		return "", types.ErrMsgInvalidVersion
 	}
 
-	if ismtypes.Destination(messageBytes) != k.domain {
+	if common.Destination(messageBytes) != k.domain {
 		return "", types.ErrMsgInvalidDomain
 	}
 
-	idBytes := ismtypes.Id(messageBytes)
+	idBytes := common.Id(messageBytes)
 	id := hexutil.Encode(idBytes)
 
 	// Verify message has not been delivered yet

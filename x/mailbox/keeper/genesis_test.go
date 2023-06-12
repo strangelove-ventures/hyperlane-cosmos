@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
 
@@ -37,7 +38,7 @@ func (suite *KeeperTestSuite) TestGenesis() {
 			if gs.Tree.TreeEntries[j].Index == uint32(i) {
 				if hexutil.Encode(gs.Tree.TreeEntries[j].Message) == idMap[i] {
 					count++
-					break;
+					break
 				}
 			}
 		}

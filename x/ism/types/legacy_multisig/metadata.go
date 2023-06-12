@@ -1,11 +1,10 @@
-package types
+package legacy_multisig
 
 import (
 	"encoding/binary"
 )
 
-// This should be in a common library
-
+// Legacy metadata
 const (
 	MERKLE_ROOT_OFFSET    = 0
 	MERKLE_INDEX_OFFSET   = 32
@@ -14,8 +13,6 @@ const (
 	THRESHOLD_OFFSET      = 1092
 	SIGNATURES_OFFSET     = 1093
 	SIGNATURE_LENGTH      = 65
-	// SIGNATURES_OFFSET = 1092
-	// SIGNATURE_LENGTH = 65
 )
 
 func Root(metadata []byte) []byte {
@@ -32,7 +29,6 @@ func OriginMailbox(metadata []byte) []byte {
 
 func Proof(metadata []byte) []byte {
 	return metadata[MERKLE_PROOF_OFFSET:THRESHOLD_OFFSET]
-	// return metadata[MERKLE_PROOF_OFFSET:SIGNATURES_OFFSET]
 }
 
 func Threshold(metadata []byte) uint8 {

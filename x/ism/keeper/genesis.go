@@ -14,7 +14,11 @@ import (
 // state.
 func (k Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
 	for _, originIsm := range gs.DefaultIsm {
-		k.defaultIsm[originIsm.Origin] = *originIsm.Ism
+		ism, err := types.UnpackAbstractIsm(originIsm.AbstractIsm)
+		if err != nil {
+			return err
+		}
+		k.defaultIsm[originIsm.Origin] = ism
 	}
 	return nil
 }
@@ -32,14 +36,15 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) types.GenesisState {
 		if err != nil {
 			panic(err)
 		}
-		var multiSigIsm types.MultiSigIsm
-		err = k.cdc.Unmarshal(iterator.Value(), &multiSigIsm)
+		var ism types.AbstractIsm
+		err = k.cdc.UnmarshalInterface(iterator.Value(), &ism)
 		if err != nil {
 			panic(err)
 		}
-		genesisState.DefaultIsm = append(genesisState.DefaultIsm, types.OriginsMultiSigIsm{
-			Origin: uint32(origin),
-			Ism:    &multiSigIsm,
+		ismAny, err := types.PackAbstractIsm(ism)
+		genesisState.DefaultIsm = append(genesisState.DefaultIsm, types.Ism{
+			Origin:      uint32(origin),
+			AbstractIsm: ismAny,
 		})
 	}
 

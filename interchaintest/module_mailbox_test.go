@@ -13,7 +13,10 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
 
-	helpers "github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
+	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
 )
 
 // TestHyperlaneMailbox ensures the mailbox module & bindings work properly.
@@ -37,34 +40,49 @@ func TestHyperlaneMailbox(t *testing.T) {
 
 	verifyContractEntryPoints(t, ctx, simd, user, contract)
 
-	counterChain := helpers.CreateCounterChain(t, 1)
-	helpers.SetDefaultIsm(t, ctx, simd, user.KeyName(), counterChain)
-	res := helpers.QueryDefaultIsm(t, ctx, simd)
+	// Create counter chain 1, with origin 1, with val set signing legacy multisig
+	counterChain1 := counterchain.CreateCounterChain(t, 1, counterchain.LEGACY_MULTISIG)
+	counterChain2 := counterchain.CreateCounterChain(t, 2, counterchain.MESSAGE_ID_MULTISIG)
+	counterChain3 := counterchain.CreateCounterChain(t, 3, counterchain.MERKLE_ROOT_MULTISIG)
 
-	require.Equal(t, counterChain.ValSet.Threshold, uint8(res.DefaultIsms[0].Ism.Threshold))
-	for i, val := range counterChain.ValSet.Vals {
-		require.Equal(t, val.Addr, res.DefaultIsms[0].Ism.ValidatorPubKeys[i])
+	// Set default isms for counter chains
+	helpers.SetDefaultIsm(t, ctx, simd, user.KeyName(), counterChain1, counterChain2, counterChain3)
+	res := helpers.QueryAllDefaultIsms(t, ctx, simd)
+
+	var abstractIsm ismtypes.AbstractIsm
+	err := simd.Config().EncodingConfig.InterfaceRegistry.UnpackAny(res.DefaultIsms[0].AbstractIsm, &abstractIsm)
+	require.NoError(t, err)
+	legacyMultiSig := abstractIsm.(*legacy_multisig.LegacyMultiSig)
+	require.Equal(t, counterChain1.ValSet.Threshold, uint8(legacyMultiSig.Threshold))
+	for i, val := range counterChain1.ValSet.Vals {
+		require.Equal(t, val.Addr, legacyMultiSig.ValidatorPubKeys[i])
 	}
 
-	// Create message
+	// Create first legacy multisig message from counter chain 1
 	sender := "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7"
 	destDomain := uint32(12345)
-	message, proof := counterChain.CreateMessage(sender, destDomain, contract, "Hello!")
-	// Create metadata
-	metadata := counterChain.CreateMetadata(message, proof)
-	// Process message
+	message, proof := counterChain1.CreateMessage(sender, destDomain, contract, "Legacy Multisig 1")
+	metadata := counterChain1.CreateLegacyMetadata(message, proof)
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 
-	message, proof = counterChain.CreateMessage(sender, destDomain, contract, "Hello!2")
-	// Create metadata
-	metadata = counterChain.CreateMetadata(message, proof)
-	// Process message
+	// Create second legacy multisig message from counter chain 1
+	message, proof = counterChain1.CreateMessage(sender, destDomain, contract, "Legacy Multisig 2")
+	metadata = counterChain1.CreateLegacyMetadata(message, proof)
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
-	
-	message, proof = counterChain.CreateMessage(sender, destDomain, contract, "Hello!3")
-	// Create metadata
-	metadata = counterChain.CreateMetadata(message, proof)
-	// Process message
+
+	// Create third legacy multisig message from counter chain 1
+	message, proof = counterChain1.CreateMessage(sender, destDomain, contract, "Legacy Multisig 3")
+	metadata = counterChain1.CreateLegacyMetadata(message, proof)
+	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
+
+	// Create first message id multisig message from counter chain 2
+	message, _ = counterChain2.CreateMessage(sender, destDomain, contract, "Message Id Multisig 1")
+	metadata = counterChain2.CreateMessageIdMetadata(message)
+	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
+
+	// Create first merkle root multisig message from counter chain 3
+	message, proof = counterChain3.CreateMessage(sender, destDomain, contract, "Merkle Root Multisig 1")
+	metadata = counterChain3.CreateMerkleRootMetadata(message, proof)
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 
 	dispatchMsgStruct := helpers.ExecuteMsg{

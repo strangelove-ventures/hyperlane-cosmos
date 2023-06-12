@@ -1,9 +1,6 @@
 package keeper_test
 
 import (
-	"encoding/json"
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
@@ -47,6 +44,9 @@ func (suite *KeeperTestSuite) TestMsgSetDefaultIsm() {
 
 			tc.malleate()
 
+			err := msg.ValidateBasic()
+			suite.Require().NoError(err)
+
 			res, err := suite.msgServer.SetDefaultIsm(suite.ctx, msg)
 			events := suite.ctx.EventManager().Events()
 
@@ -54,22 +54,16 @@ func (suite *KeeperTestSuite) TestMsgSetDefaultIsm() {
 				suite.Require().NoError(err)
 				suite.Require().NotNil(res)
 
-				eventValue, err := json.Marshal(defaultIsms)
-				suite.Require().NoError(err)
-
-				fmt.Println("EventValue: ", string(eventValue))
-
 				// Verify events
-				expectedEvents := sdk.Events{
-					sdk.NewEvent(
-						types.EventTypeSetDefaultIsm,
-						sdk.NewAttribute(types.AttributeKeySetDefaultIsm, string(eventValue)),
-					),
-					sdk.NewEvent(
-						sdk.EventTypeMessage,
-						sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-					),
+				expectedEvents := sdk.Events{}
+				for _, originIsm := range defaultIsms {
+					ism := types.MustUnpackAbstractIsm(originIsm.AbstractIsm)
+					expectedEvents.AppendEvent(ism.Event(originIsm.Origin))
 				}
+				expectedEvents.AppendEvent(sdk.NewEvent(
+					sdk.EventTypeMessage,
+					sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+				))
 
 				for _, evt := range expectedEvents {
 					suite.Require().Contains(events, evt)

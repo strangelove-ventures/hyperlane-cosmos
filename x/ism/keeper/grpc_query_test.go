@@ -47,6 +47,7 @@ func (suite *KeeperTestSuite) TestQueryOriginsDefaultIsm() {
 			},
 			false,
 		},
+		// TODO: add test case with invalid origin / no default ISM set
 	}
 
 	for _, tc := range testCases {
@@ -67,10 +68,12 @@ func (suite *KeeperTestSuite) TestQueryOriginsDefaultIsm() {
 				suite.Require().NoError(err)
 				suite.Require().NotNil(res)
 				suite.Require().NotEmpty(res.DefaultIsm)
-				suite.Require().Equal(defaultIsms[index].Ism, res.DefaultIsm)
+				suite.Require().Equal(defaultIsms[index].AbstractIsm.String(), res.DefaultIsm.String())
 			} else {
 				suite.Require().Error(err)
 			}
 		})
 	}
 }
+
+// TODO: add test case for querying all ISMs

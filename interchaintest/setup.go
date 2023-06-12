@@ -7,7 +7,11 @@ import (
 	"testing"
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/message_id_multisig"
 	mailboxtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
@@ -36,6 +40,9 @@ func hyperlaneEncoding() *testutil.TestEncodingConfig {
 	wasmtypes.RegisterInterfaces(cfg.InterfaceRegistry)
 	mailboxtypes.RegisterInterfaces(cfg.InterfaceRegistry)
 	ismtypes.RegisterInterfaces(cfg.InterfaceRegistry)
+	merkle_root_multisig.RegisterInterfaces(cfg.InterfaceRegistry)
+	message_id_multisig.RegisterInterfaces(cfg.InterfaceRegistry)
+	legacy_multisig.RegisterInterfaces(cfg.InterfaceRegistry)
 
 	return &cfg
 }

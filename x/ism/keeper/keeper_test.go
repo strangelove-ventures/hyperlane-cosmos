@@ -14,8 +14,12 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
+	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/message_id_multisig"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
 
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -50,6 +54,9 @@ func (suite *KeeperTestSuite) SetupTest() {
 	)
 
 	types.RegisterInterfaces(encCfg.InterfaceRegistry)
+	legacy_multisig.RegisterInterfaces(encCfg.InterfaceRegistry)
+	merkle_root_multisig.RegisterInterfaces(encCfg.InterfaceRegistry)
+	message_id_multisig.RegisterInterfaces(encCfg.InterfaceRegistry)
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, encCfg.InterfaceRegistry)
 	types.RegisterQueryServer(queryHelper, suite.keeper)
@@ -116,15 +123,16 @@ func TestVerifyMerkleProof(t *testing.T) {
 		metadata, err := hex.DecodeString(metadatas[i])
 		require.NoError(t, err)
 
-		result := keeper.VerifyMerkleProof(metadata, message)
+		result := legacy_multisig.VerifyMerkleProof(metadata, message)
 		require.True(t, result)
 	}
 }
 
 func TestVerifyValidatorSignatures(t *testing.T) {
-	ismMap := map[uint32]types.MultiSigIsm{}
+	ismMap := map[uint32]types.AbstractIsm{}
 	for _, originIsm := range defaultIsms {
-		ismMap[originIsm.Origin] = *originIsm.Ism
+		ism := types.MustUnpackAbstractIsm(originIsm.AbstractIsm)
+		ismMap[originIsm.Origin] = ism
 	}
 
 	for i := 0; i < len(messages); i++ {
@@ -134,7 +142,8 @@ func TestVerifyValidatorSignatures(t *testing.T) {
 		metadata, err := hex.DecodeString(metadatas[i])
 		require.NoError(t, err)
 
-		result := keeper.VerifyValidatorSignatures(metadata, message, ismMap[types.Origin(message)])
+		// Verify will also verify Merkle Proof now
+		result := ismMap[common.Origin(message)].Verify(metadata, message)
 		require.True(t, result)
 	}
 }

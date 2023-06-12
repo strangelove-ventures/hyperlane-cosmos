@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package hyperlane.ism.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/message_id_multisig";
+
+// MessageIdMultiSig ISM for a specific origin
+message MessageIdMultiSig {
+  option (gogoproto.goproto_getters) = false;
+  // Validator pub keys
+  repeated string validator_pub_keys = 1;
+  // number of validators required
+  uint32 threshold = 2;
+}
