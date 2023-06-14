@@ -81,7 +81,7 @@ func TestVectors(t *testing.T) {
 			}
 
 			// Make sure we've inserted the correct amount
-			require.Equal(t, i.Count(), len(c.Leaves))
+			require.Equal(t, int(i.Count()), len(c.Leaves))
 
 			// Make sure we've computed the expected root
 			expectedRoot, err := hex.DecodeString(c.ExpectedRoot[2:])
