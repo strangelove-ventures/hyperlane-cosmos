@@ -1,34 +1,24 @@
 # hyperlane-cosmos
 [![Conforms to README.lint](https://img.shields.io/badge/README.lint-conforming-brightgreen)](https://github.com/strangelove-ventures/readme-dot-lint)
 
-🌌 Why use hyperlane-cosmos
+🌌 Why did we build hyperlane-cosmos?
 =============================
- * The [Cosmos-SDK](https://github.com/cosmos/cosmos-sdk) ecosystem is the internet of blockchains.
- * [Hyperlane](https://www.hyperlane.xyz/) is another protocol for blockchain interoperability, like [IBC](https://github.com/cosmos/ibc).
- * This repo provides a reference implementation for integrating and maintaining Hyperlane modules.
+ - How come [IBC](https://github.com/cosmos/ibc) gets to have all the Cosmos fun? This repo provides a reference implementation for integrating and maintaining [Hyperlane](https://www.hyperlane.xyz/) modules in [Cosmos](https://github.com/cosmos/cosmos-sdk) blockchains.
 
 🌌🌌 Who benefits from it?
 =============================
-Cosmos-SDK based chain builders and integrators looking to add hyperlane connectivity to their chain will find this repository useful.
+Cosmos-SDK based chain builders and integrators looking to add hyperlane connectivity to their chain.
 
 🌌🌌🌌 What does hyperlane-cosmos do?
 =============================
-[Hyperlane](https://www.hyperlane.xyz/) is an API to communicate between blockchains easily and securely, leverage the Hyperlane SDK to quickly build interchain applications, or bring interoperability to any new chain.
-
 This repository provides modules integrated into a reference chain to demonstrate mailboxes, isms, and other hyperlane features.
 
-🌌🌌🌌🌌 How do I use it
-=============================
-At present, `hyperlane-cosmos` serves as the collaboration space for developing the modules.
-
-In the near future, this repository will include a module integration guide for chain maintainers to be able to introduce hyperlane into their chain.
-
-🌌🌌🌌🌌🌌 Extras
+🌌🌌🌌🌌 How do I use it?
 =============================
 
-## Geting Started
+## Getting Started
 
-You will need go v1.19 or higher.
+You will need `go v1.19` or higher.
 
 See go's documentation on how to [download and install](https://go.dev/doc/install)
 
@@ -70,3 +60,10 @@ From within the `hyperlane-cosmos` directory, the unit tests and interchain test
 cd $HOME/hyperlane-cosmos
 make test
 ```
+
+🌌🌌🌌🌌🌌 Extras
+=============================
+
+### Roadmap
+- [x] Build `hyperlane-cosmos` to serve as the collaboration space for developing the modules.
+- [ ] include a module integration guide for chain maintainers to be able to introduce hyperlane into their chain.
