@@ -22,6 +22,10 @@ service Msg {
   rpc SetGasOracles(MsgSetGasOracles) returns (MsgSetGasOraclesResponse);
   // Sets the beneficiary.
   rpc SetBeneficiary(MsgSetBeneficiary) returns (MsgSetBeneficiaryResponse);
+  // Sets the overhead gas for the destination domain. This is in the
+  // destination gas denom and will be added to the required payForGas payment.
+  rpc SetDestinationGasOverhead(MsgSetDestinationGasOverhead)
+      returns (MsgSetDestinationGasOverheadResponse);
 }
 
 // MsgPayForGas defines the request type for the Dispatch rpc.
@@ -45,8 +49,32 @@ message MsgPayForGas {
   string refund_address = 5 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
 }
 
-// MsgPayForGasResponse defines the Dispatch response type.
+// MsgPayForGasResponse defines the PayForGas response type.
 message MsgPayForGasResponse {}
+
+// MsgSetDestinationGasOverhead defines the overhead gas amount for the given
+// destination.
+message MsgSetDestinationGasOverhead {
+  option (cosmos.msg.v1.signer) = "sender";
+  option (amino.name) = "hyperlane-cosmos/MsgSetDestinationGasOverhead";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string sender = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  uint32 destination_domain = 2;
+  string gas_overhead = 3 [
+    (cosmos_proto.scalar) = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
+}
+
+// MsgSetDestinationGasOverheadResponse defines the SetDestinationGasOverhead
+// response type.
+message MsgSetDestinationGasOverheadResponse {}
 
 // MsgClaim defines the request type for the Claim rpc.
 message MsgClaim {

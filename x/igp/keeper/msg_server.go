@@ -20,6 +20,12 @@ func (k Keeper) PayForGas(goCtx context.Context, msg *types.MsgPayForGas) (*type
 	return &types.MsgPayForGasResponse{}, nil
 }
 
+func (k Keeper) SetDestinationGasOverhead(goCtx context.Context, msg *types.MsgSetDestinationGasOverhead) (*types.MsgSetDestinationGasOverheadResponse, error) {
+	//_ := sdk.UnwrapSDKContext(goCtx)
+
+	return &types.MsgSetDestinationGasOverheadResponse{}, nil
+}
+
 // Claim defines a rpc handler method for MsgClaims
 func (k Keeper) Claim(goCtx context.Context, msg *types.MsgClaim) (*types.MsgClaimResponse, error) {
 	//_ := sdk.UnwrapSDKContext(goCtx)

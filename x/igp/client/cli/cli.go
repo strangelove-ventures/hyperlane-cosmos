@@ -17,7 +17,7 @@ func GetQueryCmd() *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 
-	//TODO: Add queries
+	// TODO: Add queries
 	queryCmd.AddCommand()
 
 	return queryCmd
@@ -33,7 +33,7 @@ func NewTxCmd() *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 
-	//TODO: Add txs
+	// TODO: Add txs
 	txCmd.AddCommand()
 
 	return txCmd
