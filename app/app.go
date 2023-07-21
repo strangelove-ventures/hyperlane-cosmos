@@ -129,6 +129,10 @@ import (
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
 	// Hyperlane dependencies
+	igp "github.com/strangelove-ventures/hyperlane-cosmos/x/igp"
+	igpkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/igp/keeper"
+	igptypes "github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
+
 	ism "github.com/strangelove-ventures/hyperlane-cosmos/x/ism"
 	ismkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
@@ -234,6 +238,7 @@ var (
 		ibcfee.AppModuleBasic{},
 		mailbox.AppModuleBasic{},
 		ism.AppModuleBasic{},
+		igp.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -297,6 +302,7 @@ type SimApp struct {
 	WasmKeeper          wasm.Keeper
 	MailboxKeeper       mailboxkeeper.Keeper
 	IsmKeeper           ismkeeper.Keeper
+	IgpKeeper           igpkeeper.Keeper
 
 	ScopedIBCKeeper           capabilitykeeper.ScopedKeeper
 	ScopedICAHostKeeper       capabilitykeeper.ScopedKeeper
@@ -348,6 +354,7 @@ func NewSimApp(
 		ibcexported.StoreKey, ibctransfertypes.StoreKey, ibcfeetypes.StoreKey,
 		wasm.StoreKey, icahosttypes.StoreKey,
 		icacontrollertypes.StoreKey, mailboxtypes.StoreKey, ismtypes.StoreKey,
+		igptypes.StoreKey,
 	)
 
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -625,6 +632,7 @@ func NewSimApp(
 	// TODO: How are the domains registered selected.. using 12345 as a placeholder
 	domain := uint32(12345)
 
+	app.IgpKeeper = igpkeeper.NewKeeper(appCodec, keys[igptypes.StoreKey], "")
 	app.IsmKeeper = ismkeeper.NewKeeper(appCodec, keys[ismtypes.StoreKey], authtypes.NewModuleAddress(govtypes.ModuleName).String())
 	app.MailboxKeeper = mailboxkeeper.NewKeeper(appCodec, keys[mailboxtypes.StoreKey], &app.WasmKeeper, &app.IsmKeeper, domain)
 
@@ -708,6 +716,7 @@ func NewSimApp(
 		ica.NewAppModule(&app.ICAControllerKeeper, &app.ICAHostKeeper),
 		mailbox.NewAppModule(app.MailboxKeeper),
 		ism.NewAppModule(app.IsmKeeper),
+		igp.NewAppModule(app.IgpKeeper),
 		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
 	)
 
@@ -730,6 +739,7 @@ func NewSimApp(
 		wasm.ModuleName,
 		mailboxtypes.ModuleName,
 		ismtypes.ModuleName,
+		igptypes.ModuleName,
 	)
 
 	app.ModuleManager.SetOrderEndBlockers(
@@ -747,6 +757,7 @@ func NewSimApp(
 		wasm.ModuleName,
 		mailboxtypes.ModuleName,
 		ismtypes.ModuleName,
+		igptypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -772,6 +783,7 @@ func NewSimApp(
 		wasm.ModuleName,
 		mailboxtypes.ModuleName,
 		ismtypes.ModuleName,
+		igptypes.ModuleName,
 	}
 	app.ModuleManager.SetOrderInitGenesis(genesisModuleOrder...)
 	app.ModuleManager.SetOrderExportGenesis(genesisModuleOrder...)
