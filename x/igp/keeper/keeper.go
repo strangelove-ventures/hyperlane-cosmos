@@ -10,7 +10,6 @@ import (
 type Keeper struct {
 	// implements gRPC QueryServer interface
 	types.QueryServer
-
 	storeKey    storetypes.StoreKey
 	cdc         codec.BinaryCodec
 	gasoracles  map[uint32]types.GasOracleConfig
