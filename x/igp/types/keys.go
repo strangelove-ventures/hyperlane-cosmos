@@ -17,8 +17,9 @@ const (
 
 // KVStore keys
 var (
-	GasOverhead = []byte{0x00}
-	GasPaidKey  = []byte{0x1}
+	GasOverhead       = []byte{0x00}
+	GasPaidKey        = []byte{0x1}
+	DefaultRelayerKey = []byte{0x2}
 )
 
 func GasOverheadKey(destination uint32) []byte {

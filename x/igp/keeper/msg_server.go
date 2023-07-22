@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"encoding/binary"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -18,13 +17,49 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 }
 
 // PayForGas defines a rpc handler method for MsgPayForGas
+// TODO: Refunds need to be implemented, see https://docs.hyperlane.xyz/docs/apis-and-sdks/interchain-gas-paymaster-api#refunds
 func (k Keeper) PayForGas(goCtx context.Context, msg *types.MsgPayForGas) (*types.MsgPayForGasResponse, error) {
-	// ctx := sdk.UnwrapSDKContext(goCtx)
-	// events := sdk.Events{}
-	// store := ctx.KVStore(k.storeKey)
+	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	// store.Set(types.OriginKey(originIsm.Origin), ismBzMap[originIsm.Origin])
+	sender, err := sdk.AccAddressFromBech32(msg.Sender)
+	if err != nil {
+		return nil, err
+	}
 
+	var relayer sdk.AccAddress
+	if msg.RelayerAddress != "" {
+		relayer, err = sdk.AccAddressFromBech32(msg.RelayerAddress)
+		if err != nil {
+			return nil, types.ErrInvalidRelayer.Wrapf("relayer %s is not a valid bech32 address", msg.RelayerAddress)
+		}
+	} else {
+		relayer = k.getDefaultRelayer(ctx)
+		if relayer == nil {
+			return nil, types.ErrInvalidRelayer.Wrapf("default relayer is not configured. include a relayer in MsgPayForGas.")
+		}
+	}
+
+	store := k.getGasPaidStore(ctx, msg.DestinationDomain, relayer)
+
+	// message gas is already paid for, deny another payment
+	if store.Has([]byte(msg.MessageId)) {
+		return nil, types.ErrGasPaid.Wrapf("Message %s gas already paid to domain %d", msg.MessageId, msg.DestinationDomain)
+	}
+
+	gasDenom := getGasPaymentDenom()
+	amountPayable := quoteGasPayment(msg.DestinationDomain, msg.GasAmount)
+	gasPayment := sdk.NewCoin(gasDenom, amountPayable)
+
+	// TODO: IMPORTANT: Technically, funds should be escrowed in PayForGas, then Claim()ed by the relayer.
+	// However in Cosmos there is really no reason to Claim(), since nothing happens if a relayer never claims the payment.
+	// In other words... sender can never recover the funds either way in the current hyperlane spec.
+	k.sendKeeper.SendCoins(ctx, sender, relayer, sdk.NewCoins(gasPayment))
+
+	//TODO: improve error message
+	if err != nil {
+		return nil, err
+	}
+	store.Set([]byte(msg.MessageId), []byte(gasPayment.String()))
 	return &types.MsgPayForGasResponse{}, nil
 }
 
@@ -32,15 +67,17 @@ func (k Keeper) SetDestinationGasOverhead(goCtx context.Context, msg *types.MsgS
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	store := ctx.KVStore(k.storeKey)
 	key := types.GasOverheadKey(msg.DestinationDomain)
-	gasOverhead := make([]byte, 8)
-	binary.LittleEndian.PutUint64(gasOverhead, msg.GasOverhead)
-	store.Set(key, gasOverhead)
+	gasOh, err := msg.GasOverhead.Marshal()
+	if err != nil {
+		return nil, err
+	}
+	store.Set(key, gasOh)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeSetGasOverhead,
 			sdk.NewAttribute(types.AttributeDestination, strconv.FormatUint(uint64(msg.DestinationDomain), 10)),
-			sdk.NewAttribute(types.AttributeOverheadAmount, strconv.FormatUint(uint64(msg.GasOverhead), 10)),
+			sdk.NewAttribute(types.AttributeOverheadAmount, msg.GasOverhead.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
