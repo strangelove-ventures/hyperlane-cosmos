@@ -2,6 +2,10 @@ package keeper
 
 import (
 	"context"
+	"encoding/binary"
+	"strconv"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
 )
@@ -15,14 +19,34 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 
 // PayForGas defines a rpc handler method for MsgPayForGas
 func (k Keeper) PayForGas(goCtx context.Context, msg *types.MsgPayForGas) (*types.MsgPayForGasResponse, error) {
-	//_ := sdk.UnwrapSDKContext(goCtx)
+	// ctx := sdk.UnwrapSDKContext(goCtx)
+	// events := sdk.Events{}
+	// store := ctx.KVStore(k.storeKey)
+
+	// store.Set(types.OriginKey(originIsm.Origin), ismBzMap[originIsm.Origin])
 
 	return &types.MsgPayForGasResponse{}, nil
 }
 
 func (k Keeper) SetDestinationGasOverhead(goCtx context.Context, msg *types.MsgSetDestinationGasOverhead) (*types.MsgSetDestinationGasOverheadResponse, error) {
-	//_ := sdk.UnwrapSDKContext(goCtx)
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	store := ctx.KVStore(k.storeKey)
+	key := types.GasOverheadKey(msg.DestinationDomain)
+	gasOverhead := make([]byte, 8)
+	binary.LittleEndian.PutUint64(gasOverhead, msg.GasOverhead)
+	store.Set(key, gasOverhead)
 
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeSetGasOverhead,
+			sdk.NewAttribute(types.AttributeDestination, strconv.FormatUint(uint64(msg.DestinationDomain), 10)),
+			sdk.NewAttribute(types.AttributeOverheadAmount, strconv.FormatUint(uint64(msg.GasOverhead), 10)),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
+		),
+	})
 	return &types.MsgSetDestinationGasOverheadResponse{}, nil
 }
 

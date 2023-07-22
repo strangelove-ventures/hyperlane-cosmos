@@ -4,57 +4,56 @@
 
 ## Table of Contents
 
-- [hyperlane/igp/v1/types.proto](#hyperlane/igp/v1/types.proto)
-    - [GasOracleConfig](#hyperlane.igp.v1.GasOracleConfig)
+- [hyperlane/ism/v1/ism.proto](#hyperlane/ism/v1/ism.proto)
+    - [Ism](#hyperlane.ism.v1.Ism)
   
-- [hyperlane/igp/v1/genesis.proto](#hyperlane/igp/v1/genesis.proto)
-    - [GenesisState](#hyperlane.igp.v1.GenesisState)
+- [hyperlane/ism/v1/genesis.proto](#hyperlane/ism/v1/genesis.proto)
+    - [GenesisState](#hyperlane.ism.v1.GenesisState)
   
-- [hyperlane/igp/v1/query.proto](#hyperlane/igp/v1/query.proto)
-    - [GetBeneficiaryRequest](#hyperlane.igp.v1.GetBeneficiaryRequest)
-    - [GetBeneficiaryResponse](#hyperlane.igp.v1.GetBeneficiaryResponse)
-    - [GetExchangeRateAndGasPriceRequest](#hyperlane.igp.v1.GetExchangeRateAndGasPriceRequest)
-    - [GetExchangeRateAndGasPriceResponse](#hyperlane.igp.v1.GetExchangeRateAndGasPriceResponse)
-    - [QuoteGasPaymentRequest](#hyperlane.igp.v1.QuoteGasPaymentRequest)
-    - [QuoteGasPaymentResponse](#hyperlane.igp.v1.QuoteGasPaymentResponse)
+- [hyperlane/ism/v1/legacy_multisig.proto](#hyperlane/ism/v1/legacy_multisig.proto)
+    - [LegacyMultiSig](#hyperlane.ism.v1.LegacyMultiSig)
   
-    - [Query](#hyperlane.igp.v1.Query)
+- [hyperlane/ism/v1/merkle_root_multisig.proto](#hyperlane/ism/v1/merkle_root_multisig.proto)
+    - [MerkleRootMultiSig](#hyperlane.ism.v1.MerkleRootMultiSig)
   
-- [hyperlane/igp/v1/tx.proto](#hyperlane/igp/v1/tx.proto)
-    - [MsgClaim](#hyperlane.igp.v1.MsgClaim)
-    - [MsgClaimResponse](#hyperlane.igp.v1.MsgClaimResponse)
-    - [MsgPayForGas](#hyperlane.igp.v1.MsgPayForGas)
-    - [MsgPayForGasResponse](#hyperlane.igp.v1.MsgPayForGasResponse)
-    - [MsgSetBeneficiary](#hyperlane.igp.v1.MsgSetBeneficiary)
-    - [MsgSetBeneficiaryResponse](#hyperlane.igp.v1.MsgSetBeneficiaryResponse)
-    - [MsgSetDestinationGasOverhead](#hyperlane.igp.v1.MsgSetDestinationGasOverhead)
-    - [MsgSetDestinationGasOverheadResponse](#hyperlane.igp.v1.MsgSetDestinationGasOverheadResponse)
-    - [MsgSetGasOracles](#hyperlane.igp.v1.MsgSetGasOracles)
-    - [MsgSetGasOraclesResponse](#hyperlane.igp.v1.MsgSetGasOraclesResponse)
+- [hyperlane/ism/v1/message_id_multisig.proto](#hyperlane/ism/v1/message_id_multisig.proto)
+    - [MessageIdMultiSig](#hyperlane.ism.v1.MessageIdMultiSig)
   
-    - [Msg](#hyperlane.igp.v1.Msg)
+- [hyperlane/ism/v1/query.proto](#hyperlane/ism/v1/query.proto)
+    - [QueryAllDefaultIsmsRequest](#hyperlane.ism.v1.QueryAllDefaultIsmsRequest)
+    - [QueryAllDefaultIsmsResponse](#hyperlane.ism.v1.QueryAllDefaultIsmsResponse)
+    - [QueryOriginsDefaultIsmRequest](#hyperlane.ism.v1.QueryOriginsDefaultIsmRequest)
+    - [QueryOriginsDefaultIsmResponse](#hyperlane.ism.v1.QueryOriginsDefaultIsmResponse)
+  
+    - [Query](#hyperlane.ism.v1.Query)
+  
+- [hyperlane/ism/v1/tx.proto](#hyperlane/ism/v1/tx.proto)
+    - [MsgSetDefaultIsm](#hyperlane.ism.v1.MsgSetDefaultIsm)
+    - [MsgSetDefaultIsmResponse](#hyperlane.ism.v1.MsgSetDefaultIsmResponse)
+  
+    - [Msg](#hyperlane.ism.v1.Msg)
   
 - [Scalar Value Types](#scalar-value-types)
 
 
 
-<a name="hyperlane/igp/v1/types.proto"></a>
+<a name="hyperlane/ism/v1/ism.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/igp/v1/types.proto
+## hyperlane/ism/v1/ism.proto
 
 
 
-<a name="hyperlane.igp.v1.GasOracleConfig"></a>
+<a name="hyperlane.ism.v1.Ism"></a>
 
-### GasOracleConfig
-Hyperlane's tree
+### Ism
+Hyperlane's default ISM
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `remote_domain` | [uint32](#uint32) |  | Count of items inserted to tree |
-| `gas_oracle` | [string](#string) |  | Address of the oracle |
+| `origin` | [uint32](#uint32) |  |  |
+| `abstract_ism` | [google.protobuf.Any](#google.protobuf.Any) |  |  |
 
 
 
@@ -70,23 +69,22 @@ Hyperlane's tree
 
 
 
-<a name="hyperlane/igp/v1/genesis.proto"></a>
+<a name="hyperlane/ism/v1/genesis.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/igp/v1/genesis.proto
+## hyperlane/ism/v1/genesis.proto
 
 
 
-<a name="hyperlane.igp.v1.GenesisState"></a>
+<a name="hyperlane.ism.v1.GenesisState"></a>
 
 ### GenesisState
-Hyperlane InterchainGasPaymaster's keeper genesis state
+Hyperlane ISM's keeper genesis state
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `gas_oracles` | [GasOracleConfig](#hyperlane.igp.v1.GasOracleConfig) | repeated | Every gas oracle that has been set |
-| `beneficiary` | [string](#string) |  | Beneficiary |
+| `default_ism` | [Ism](#hyperlane.ism.v1.Ism) | repeated | Genesis default ISM |
 
 
 
@@ -102,96 +100,160 @@ Hyperlane InterchainGasPaymaster's keeper genesis state
 
 
 
-<a name="hyperlane/igp/v1/query.proto"></a>
+<a name="hyperlane/ism/v1/legacy_multisig.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/igp/v1/query.proto
+## hyperlane/ism/v1/legacy_multisig.proto
 
 
 
-<a name="hyperlane.igp.v1.GetBeneficiaryRequest"></a>
+<a name="hyperlane.ism.v1.LegacyMultiSig"></a>
 
-### GetBeneficiaryRequest
-GetBeneficiaryRequest is the request type for the Query/Tree RPC method.
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.GetBeneficiaryResponse"></a>
-
-### GetBeneficiaryResponse
-GetBeneficiaryResponse is the response type for the Query/Tree RPC method.
+### LegacyMultiSig
+LegacyMultiSig ISM for a specific origin
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `address` | [string](#string) |  |  |
+| `validator_pub_keys` | [string](#string) | repeated | Validator pub keys |
+| `threshold` | [uint32](#uint32) |  | number of validators required |
+
+
+
+
+
+ <!-- end messages -->
+
+ <!-- end enums -->
+
+ <!-- end HasExtensions -->
+
+ <!-- end services -->
+
+
+
+<a name="hyperlane/ism/v1/merkle_root_multisig.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## hyperlane/ism/v1/merkle_root_multisig.proto
+
+
+
+<a name="hyperlane.ism.v1.MerkleRootMultiSig"></a>
+
+### MerkleRootMultiSig
+MerkleRootMultiSig ISM for a specific origin
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `validator_pub_keys` | [string](#string) | repeated | Validator pub keys |
+| `threshold` | [uint32](#uint32) |  | number of validators required |
+
+
+
+
+
+ <!-- end messages -->
+
+ <!-- end enums -->
+
+ <!-- end HasExtensions -->
+
+ <!-- end services -->
+
+
+
+<a name="hyperlane/ism/v1/message_id_multisig.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## hyperlane/ism/v1/message_id_multisig.proto
+
+
+
+<a name="hyperlane.ism.v1.MessageIdMultiSig"></a>
+
+### MessageIdMultiSig
+MessageIdMultiSig ISM for a specific origin
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `validator_pub_keys` | [string](#string) | repeated | Validator pub keys |
+| `threshold` | [uint32](#uint32) |  | number of validators required |
+
+
+
+
+
+ <!-- end messages -->
+
+ <!-- end enums -->
+
+ <!-- end HasExtensions -->
+
+ <!-- end services -->
+
+
+
+<a name="hyperlane/ism/v1/query.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## hyperlane/ism/v1/query.proto
+
+
+
+<a name="hyperlane.ism.v1.QueryAllDefaultIsmsRequest"></a>
+
+### QueryAllDefaultIsmsRequest
+QueryAllDefaultIsmRequest is the request type for the AllDefaultIsms RPC
+method.
 
 
 
 
 
 
-<a name="hyperlane.igp.v1.GetExchangeRateAndGasPriceRequest"></a>
+<a name="hyperlane.ism.v1.QueryAllDefaultIsmsResponse"></a>
 
-### GetExchangeRateAndGasPriceRequest
-GetExchangeRateAndGasPriceRequest is the request type for the Query/Tree RPC
+### QueryAllDefaultIsmsResponse
+QueryAllDefaultIsmResponse is the response type for the AllDefaultIsms RPC
 method.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `destination_domain` | [uint32](#uint32) |  |  |
+| `default_isms` | [Ism](#hyperlane.ism.v1.Ism) | repeated |  |
 
 
 
 
 
 
-<a name="hyperlane.igp.v1.GetExchangeRateAndGasPriceResponse"></a>
+<a name="hyperlane.ism.v1.QueryOriginsDefaultIsmRequest"></a>
 
-### GetExchangeRateAndGasPriceResponse
-GetExchangeRateAndGasPriceResponse is the response type for the Query/Tree
-RPC method.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `exchange_rate` | [string](#string) |  |  |
-| `price` | [cosmos.base.v1beta1.Coin](#cosmos.base.v1beta1.Coin) |  |  |
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.QuoteGasPaymentRequest"></a>
-
-### QuoteGasPaymentRequest
-QuoteGasPaymentRequest is the request type for the Query/Tree RPC method.
+### QueryOriginsDefaultIsmRequest
+QueryDefaultIsmRequest is the request type for the DefaultIsm RPC method.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `destination_domain` | [uint32](#uint32) |  |  |
-| `gas_amount` | [string](#string) |  |  |
+| `origin` | [uint32](#uint32) |  |  |
 
 
 
 
 
 
-<a name="hyperlane.igp.v1.QuoteGasPaymentResponse"></a>
+<a name="hyperlane.ism.v1.QueryOriginsDefaultIsmResponse"></a>
 
-### QuoteGasPaymentResponse
-QuoteGasPaymentResponse is the response type for the Query/Tree RPC method.
+### QueryOriginsDefaultIsmResponse
+QueryDefaultIsmResponse is the response type for the DefaultIsm RPC method.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `price` | [cosmos.base.v1beta1.Coin](#cosmos.base.v1beta1.Coin) |  |  |
+| `default_ism` | [google.protobuf.Any](#google.protobuf.Any) |  |  |
 
 
 
@@ -204,157 +266,47 @@ QuoteGasPaymentResponse is the response type for the Query/Tree RPC method.
  <!-- end HasExtensions -->
 
 
-<a name="hyperlane.igp.v1.Query"></a>
+<a name="hyperlane.ism.v1.Query"></a>
 
 ### Query
-Query service for hyperlane igp module
+Query service for hyperlane ISM module
 
 | Method Name | Request Type | Response Type | Description | HTTP Verb | Endpoint |
 | ----------- | ------------ | ------------- | ------------| ------- | -------- |
-| `GetBeneficiary` | [GetBeneficiaryRequest](#hyperlane.igp.v1.GetBeneficiaryRequest) | [GetBeneficiaryResponse](#hyperlane.igp.v1.GetBeneficiaryResponse) | Gets the beneficiary | GET|/hyperlane/igp/v1/get_beneficiary|
-| `QuoteGasPayment` | [QuoteGasPaymentRequest](#hyperlane.igp.v1.QuoteGasPaymentRequest) | [QuoteGasPaymentResponse](#hyperlane.igp.v1.QuoteGasPaymentResponse) | Quotes the amount of native tokens to pay for interchain gas. | GET|/hyperlane/igp/v1/quote_gas_payment|
-| `GetExchangeRateAndGasPrice` | [GetExchangeRateAndGasPriceRequest](#hyperlane.igp.v1.GetExchangeRateAndGasPriceRequest) | [GetExchangeRateAndGasPriceResponse](#hyperlane.igp.v1.GetExchangeRateAndGasPriceResponse) | Gets the token exchange rate and gas price from the configured gas oracle for a given destination domain. | GET|/hyperlane/igp/v1/get_exchange_rate_and_gas_price|
+| `OriginsDefaultIsm` | [QueryOriginsDefaultIsmRequest](#hyperlane.ism.v1.QueryOriginsDefaultIsmRequest) | [QueryOriginsDefaultIsmResponse](#hyperlane.ism.v1.QueryOriginsDefaultIsmResponse) | Get current default multisig ISM for an origin | GET|/hyperlane/ism/v1/origins_default_ism|
+| `AllDefaultIsms` | [QueryAllDefaultIsmsRequest](#hyperlane.ism.v1.QueryAllDefaultIsmsRequest) | [QueryAllDefaultIsmsResponse](#hyperlane.ism.v1.QueryAllDefaultIsmsResponse) | Get all current default multisig ISMs | GET|/hyperlane/ism/v1/all_default_isms|
 
  <!-- end services -->
 
 
 
-<a name="hyperlane/igp/v1/tx.proto"></a>
+<a name="hyperlane/ism/v1/tx.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/igp/v1/tx.proto
+## hyperlane/ism/v1/tx.proto
 
 
 
-<a name="hyperlane.igp.v1.MsgClaim"></a>
+<a name="hyperlane.ism.v1.MsgSetDefaultIsm"></a>
 
-### MsgClaim
-MsgClaim defines the request type for the Claim rpc.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `sender` | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgClaimResponse"></a>
-
-### MsgClaimResponse
-MsgClaimResponse defines the Claim response type.
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgPayForGas"></a>
-
-### MsgPayForGas
-MsgPayForGas defines the request type for the Dispatch rpc.
+### MsgSetDefaultIsm
+MsgSetDefaultIsm defines the request type for the SetDefaultIsm rpc.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `sender` | [string](#string) |  |  |
-| `message_id` | [string](#string) |  |  |
-| `destination_domain` | [uint32](#uint32) |  |  |
-| `gas_amount` | [string](#string) |  |  |
-| `refund_address` | [string](#string) |  |  |
+| `signer` | [string](#string) |  |  |
+| `isms` | [Ism](#hyperlane.ism.v1.Ism) | repeated |  |
 
 
 
 
 
 
-<a name="hyperlane.igp.v1.MsgPayForGasResponse"></a>
+<a name="hyperlane.ism.v1.MsgSetDefaultIsmResponse"></a>
 
-### MsgPayForGasResponse
-MsgPayForGasResponse defines the PayForGas response type.
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgSetBeneficiary"></a>
-
-### MsgSetBeneficiary
-MsgSetBeneficiary defines the request type for the SetBeneficiary rpc.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `sender` | [string](#string) |  |  |
-| `address` | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgSetBeneficiaryResponse"></a>
-
-### MsgSetBeneficiaryResponse
-MsgSetBeneficiaryResponse defines the Claim response type.
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgSetDestinationGasOverhead"></a>
-
-### MsgSetDestinationGasOverhead
-MsgSetDestinationGasOverhead defines the overhead gas amount for the given
-destination.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `sender` | [string](#string) |  |  |
-| `destination_domain` | [uint32](#uint32) |  |  |
-| `gas_overhead` | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgSetDestinationGasOverheadResponse"></a>
-
-### MsgSetDestinationGasOverheadResponse
-MsgSetDestinationGasOverheadResponse defines the SetDestinationGasOverhead
-response type.
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgSetGasOracles"></a>
-
-### MsgSetGasOracles
-MsgSetGasOracles defines the request type for the Claim rpc.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `sender` | [string](#string) |  |  |
-| `configs` | [GasOracleConfig](#hyperlane.igp.v1.GasOracleConfig) | repeated |  |
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgSetGasOraclesResponse"></a>
-
-### MsgSetGasOraclesResponse
-MsgSetGasOraclesResponse defines the Claim response type.
+### MsgSetDefaultIsmResponse
+MsgSetDefaultIsmResponse defines the Msg/SetDefaultIsm response type
 
 
 
@@ -367,18 +319,14 @@ MsgSetGasOraclesResponse defines the Claim response type.
  <!-- end HasExtensions -->
 
 
-<a name="hyperlane.igp.v1.Msg"></a>
+<a name="hyperlane.ism.v1.Msg"></a>
 
 ### Msg
-Msg defines the hyperlane igp Msg service.
+Msg defines the hyperlane ISM Msg service.
 
 | Method Name | Request Type | Response Type | Description | HTTP Verb | Endpoint |
 | ----------- | ------------ | ------------- | ------------| ------- | -------- |
-| `PayForGas` | [MsgPayForGas](#hyperlane.igp.v1.MsgPayForGas) | [MsgPayForGasResponse](#hyperlane.igp.v1.MsgPayForGasResponse) | Deposits a payment for the relaying of a message to its destination chain. | |
-| `Claim` | [MsgClaim](#hyperlane.igp.v1.MsgClaim) | [MsgClaimResponse](#hyperlane.igp.v1.MsgClaimResponse) | Transfers the entire native token balance to the beneficiary. | |
-| `SetGasOracles` | [MsgSetGasOracles](#hyperlane.igp.v1.MsgSetGasOracles) | [MsgSetGasOraclesResponse](#hyperlane.igp.v1.MsgSetGasOraclesResponse) | Sets the gas oracles for remote domains specified in the config array. | |
-| `SetBeneficiary` | [MsgSetBeneficiary](#hyperlane.igp.v1.MsgSetBeneficiary) | [MsgSetBeneficiaryResponse](#hyperlane.igp.v1.MsgSetBeneficiaryResponse) | Sets the beneficiary. | |
-| `SetDestinationGasOverhead` | [MsgSetDestinationGasOverhead](#hyperlane.igp.v1.MsgSetDestinationGasOverhead) | [MsgSetDestinationGasOverheadResponse](#hyperlane.igp.v1.MsgSetDestinationGasOverheadResponse) | Sets the overhead gas for the destination domain. This is in the destination gas denom and will be added to the required payForGas payment. | |
+| `SetDefaultIsm` | [MsgSetDefaultIsm](#hyperlane.ism.v1.MsgSetDefaultIsm) | [MsgSetDefaultIsmResponse](#hyperlane.ism.v1.MsgSetDefaultIsmResponse) | SetDefaultIsm defines a rpc handler method for MsgSetDefaultIsm. | |
 
  <!-- end services -->
 
