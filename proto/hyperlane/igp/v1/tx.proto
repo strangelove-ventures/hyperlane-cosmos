@@ -14,10 +14,16 @@ option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/igp/type
 service Msg {
   option (cosmos.msg.v1.service) = true;
 
+  // Create the IGP, optionally providing a beneficiary.
+  rpc CreateIgp(MsgCreateIgp) returns (MsgCreateIgpResponse);
+
   // Deposits a payment for the relaying of a message to its destination chain.
   rpc PayForGas(MsgPayForGas) returns (MsgPayForGasResponse);
+
   // Transfers the entire native token balance to the beneficiary.
-  rpc Claim(MsgClaim) returns (MsgClaimResponse);
+  // Deprecated, unneeded. TODO: delete this (keeping it for discussion at
+  // present). rpc Claim(MsgClaim) returns (MsgClaimResponse);
+
   // Sets the gas oracles for remote domains specified in the config array.
   rpc SetGasOracles(MsgSetGasOracles) returns (MsgSetGasOraclesResponse);
   // Sets the beneficiary.
@@ -74,6 +80,9 @@ message MsgSetDestinationGasOverhead {
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int"
   ];
+
+  // Identifies the IGP the gas overhead configuration applies to
+  uint32 igp_id = 4;
 }
 
 // MsgSetDestinationGasOverheadResponse defines the SetDestinationGasOverhead
@@ -94,7 +103,8 @@ message MsgClaim {
 // MsgClaimResponse defines the Claim response type.
 message MsgClaimResponse {}
 
-// MsgSetGasOracles defines the request type for the Claim rpc.
+// MsgSetGasOracles set the addresses allowed to define spot prices for relay
+// fee payment.
 message MsgSetGasOracles {
   option (cosmos.msg.v1.signer) = "sender";
   option (amino.name) = "hyperlane-cosmos/MsgSetGasOracles";
@@ -119,7 +129,29 @@ message MsgSetBeneficiary {
 
   string sender = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
   string address = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  // The IGP the beneficiary is being set for
+  uint32 igp_id = 3;
 }
 
-// MsgSetBeneficiaryResponse defines the Claim response type.
+// MsgSetBeneficiaryResponse defines the MsgSetBeneficiary response type.
 message MsgSetBeneficiaryResponse {}
+
+// MsgCreateIgp defines the request type to create a hyperlane IGP.
+message MsgCreateIgp {
+  option (cosmos.msg.v1.signer) = "sender";
+  option (amino.name) = "hyperlane-cosmos/MsgCreateIgp";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string sender = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  // If empty, the sender will be considered the beneficiary
+  string beneficiary = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+}
+
+// MsgCreateIgpResponse defines the MsgCreateIgp response type.
+message MsgCreateIgpResponse {
+  // The unique ID assigned to the newly created IGP
+  uint32 igp_id = 1;
+}

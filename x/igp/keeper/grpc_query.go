@@ -6,17 +6,24 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
 )
 
 var _ types.QueryServer = (*Keeper)(nil)
 
-// GetBeneficiary implements the Query
-func (k Keeper) GetBeneficiary(c context.Context, req *types.GetBeneficiaryRequest) (*types.GetBeneficiaryResponse, error) {
-	if req == nil || *req == (types.GetBeneficiaryRequest{}) {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
+// GetBeneficiary returns the beneficiary for the given IGP
+func (k Keeper) GetBeneficiary(ctx context.Context, req *types.GetBeneficiaryRequest) (*types.GetBeneficiaryResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
-	return &types.GetBeneficiaryResponse{}, nil
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	igp, err := k.getIgp(sdkCtx, req.IgpId)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.GetBeneficiaryResponse{Address: igp.Beneficiary}, nil
 }
 
 // QuoteGasPayment implements the Query

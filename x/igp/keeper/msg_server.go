@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"errors"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -50,12 +51,10 @@ func (k Keeper) PayForGas(goCtx context.Context, msg *types.MsgPayForGas) (*type
 	amountPayable := quoteGasPayment(msg.DestinationDomain, msg.GasAmount)
 	gasPayment := sdk.NewCoin(gasDenom, amountPayable)
 
-	// TODO: IMPORTANT: Technically, funds should be escrowed in PayForGas, then Claim()ed by the relayer.
-	// However in Cosmos there is really no reason to Claim(), since nothing happens if a relayer never claims the payment.
-	// In other words... sender can never recover the funds either way in the current hyperlane spec.
+	// Note: This implementation does not require that beneficiaries Claim() payments.
+	// Instead, the payment is sent directly to the beneficiary here (not escrowed).
+	// TODO: compare payment to quoteGasPayment and ensure we do not overcharge the payer.
 	k.sendKeeper.SendCoins(ctx, sender, relayer, sdk.NewCoins(gasPayment))
-
-	//TODO: improve error message
 	if err != nil {
 		return nil, err
 	}
@@ -65,13 +64,26 @@ func (k Keeper) PayForGas(goCtx context.Context, msg *types.MsgPayForGas) (*type
 
 func (k Keeper) SetDestinationGasOverhead(goCtx context.Context, msg *types.MsgSetDestinationGasOverhead) (*types.MsgSetDestinationGasOverheadResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	store := ctx.KVStore(k.storeKey)
-	key := types.GasOverheadKey(msg.DestinationDomain)
-	gasOh, err := msg.GasOverhead.Marshal()
+	igp, err := k.getIgp(ctx, msg.IgpId)
 	if err != nil {
 		return nil, err
 	}
-	store.Set(key, gasOh)
+
+	oracle, ok := igp.Oracles[msg.DestinationDomain]
+
+	if !ok {
+		return nil, types.ErrOracleUnauthorized.Wrapf("oracle with destination %d does not exist for IGP %d", msg.DestinationDomain, igp.IgpId)
+	} else {
+		// This is an existing oracle, confirm authorization to update it.
+		// The oracle can be updated if the msg.Sender owns the IGP or the oracle itself.
+		if igp.Owner != msg.Sender && oracle.GasOracle != msg.Sender {
+			return nil, types.ErrOracleUnauthorized.Wrapf("account %s is unauthorized to configure existing oracle for IGP %d with owner %s", msg.Sender, igp.IgpId, igp.Owner)
+		}
+	}
+
+	// Configure the gas overhead for the oracle
+	oracle.GasOverhead = msg.GasOverhead
+	k.setIgp(ctx, igp)
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
@@ -87,23 +99,91 @@ func (k Keeper) SetDestinationGasOverhead(goCtx context.Context, msg *types.MsgS
 	return &types.MsgSetDestinationGasOverheadResponse{}, nil
 }
 
-// Claim defines a rpc handler method for MsgClaims
-func (k Keeper) Claim(goCtx context.Context, msg *types.MsgClaim) (*types.MsgClaimResponse, error) {
-	//_ := sdk.UnwrapSDKContext(goCtx)
-
-	return &types.MsgClaimResponse{}, nil
-}
-
 // SetGasOracles defines a rpc handler method for MsgSetGasOracles
 func (k Keeper) SetGasOracles(goCtx context.Context, msg *types.MsgSetGasOracles) (*types.MsgSetGasOraclesResponse, error) {
-	//_ := sdk.UnwrapSDKContext(goCtx)
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	if len(msg.Configs) == 0 {
+		return nil, errors.New("invalid GasOracleConfig")
+	}
+
+	igps := map[uint32]*types.Igp{}
+
+	for _, oracleConfig := range msg.Configs {
+		var igp *types.Igp
+
+		// Lookup the IGP
+		igp, ok := igps[oracleConfig.IgpId]
+		if !ok {
+			igp, err := k.getIgp(ctx, oracleConfig.IgpId)
+			if err != nil {
+				return nil, err
+			}
+			igps[oracleConfig.IgpId] = igp
+		}
+
+		oracle, existingOracle := igp.Oracles[oracleConfig.RemoteDomain]
+
+		// This is a new oracle, create and set it on the IGP
+		if !existingOracle {
+			if igp.Owner != msg.Sender {
+				return nil, types.ErrOracleUnauthorized.Wrapf("account %s is unauthorized to configure new oracle for IGP %d with owner %s", msg.Sender, igp.IgpId, igp.Owner)
+			}
+
+			oracle = &types.GasOracle{}
+			igp.Oracles[oracleConfig.RemoteDomain] = oracle
+		} else {
+			// This is an existing oracle, confirm authorization to update it.
+			// The oracle can be updated if the msg.Sender owns the IGP or the oracle itself.
+			if igp.Owner != msg.Sender && oracle.GasOracle != msg.Sender {
+				return nil, types.ErrOracleUnauthorized.Wrapf("account %s is unauthorized to configure existing oracle for IGP %d with owner %s", msg.Sender, igp.IgpId, igp.Owner)
+			}
+		}
+
+		// Configure the owner who can update the gas oracle (this can be different than the IGP owner)
+		oracle.GasOracle = oracleConfig.GasOracle
+		// TODO: set gas prices, overhead (optional)
+	}
 
 	return &types.MsgSetGasOraclesResponse{}, nil
 }
 
-// SetGasOracles defines a rpc handler method for MsgSetGasOracles
+func (k Keeper) CreateIgp(goCtx context.Context, msg *types.MsgCreateIgp) (*types.MsgCreateIgpResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	newIgp := types.Igp{
+		Owner:       msg.Sender,
+		Beneficiary: msg.Beneficiary,
+	}
+
+	igp_id := uint32(0)
+
+	for {
+		_, err := k.getIgp(ctx, igp_id)
+		if err != nil {
+			break
+		}
+		igp_id += 1
+	}
+	newIgp.IgpId = igp_id
+	k.setIgp(ctx, &newIgp)
+	return &types.MsgCreateIgpResponse{IgpId: igp_id}, nil
+}
+
+// SetBeneficiary updates the IGP's beneficiary (account sent relayer gas payments)
 func (k Keeper) SetBeneficiary(goCtx context.Context, msg *types.MsgSetBeneficiary) (*types.MsgSetBeneficiaryResponse, error) {
-	//_ := sdk.UnwrapSDKContext(goCtx)
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	igp, err := k.getIgp(ctx, msg.IgpId)
+	if err != nil {
+		return nil, err
+	}
+
+	// Only the IGP owner can change the beneficiary
+	if igp.Owner != msg.Sender {
+		return nil, types.ErrBeneficiaryUnauthorized.Wrapf("account %s is unauthorized to configure beneficiary for IGP %d and owner %s", msg.Sender, igp.IgpId, igp.Owner)
+	}
+
+	igp.Beneficiary = msg.Address
+	k.setIgp(ctx, igp)
 
 	return &types.MsgSetBeneficiaryResponse{}, nil
 }

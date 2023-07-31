@@ -31,7 +31,10 @@ service Query {
 }
 
 // GetBeneficiaryRequest is the request type for the Query/Tree RPC method.
-message GetBeneficiaryRequest {}
+message GetBeneficiaryRequest {
+  // The IGP of the beneficiary
+  uint32 igp_id = 3;
+}
 
 // GetBeneficiaryResponse is the response type for the Query/Tree RPC method.
 message GetBeneficiaryResponse {

@@ -20,6 +20,7 @@ type Keeper struct {
 
 func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, sendKeeper bankTypes.SendKeeper, beneficiary string) Keeper {
 	return Keeper{
+		sendKeeper:  sendKeeper,
 		cdc:         cdc,
 		storeKey:    key,
 		gasoracles:  map[uint32]types.GasOracleConfig{},

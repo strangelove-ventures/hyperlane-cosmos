@@ -44,10 +44,7 @@ func (AppModuleBasic) RegisterInterfaces(registry codectypes.InterfaceRegistry) 
 
 // DefaultGenesis returns an empty state
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	return cdc.MustMarshalJSON(&types.GenesisState{
-		GasOracles:  []*types.GasOracleConfig{},
-		Beneficiary: "",
-	})
+	return cdc.MustMarshalJSON(&types.GenesisState{})
 }
 
 // ValidateGenesis performs a no-op.
