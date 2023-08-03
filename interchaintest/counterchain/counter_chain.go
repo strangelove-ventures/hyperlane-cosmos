@@ -8,7 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/stretchr/testify/require"
 
-	imt "github.com/strangelove-ventures/hyperlane-cosmos/imt"
+	"github.com/strangelove-ventures/hyperlane-cosmos/imt"
 	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 )
 
@@ -85,7 +85,7 @@ func (c *CounterChain) CreateMessage(sender string, destDomain uint32, recipient
 	// Get the message ID
 	id := common.Id(message)
 
-	proof = c.Tree.GetProofForNexIndex()
+	proof = c.Tree.GetProofForNextIndex()
 
 	// Insert the message id into the tree
 	err := c.Tree.Insert(id)
