@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strconv"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
@@ -17,8 +18,7 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 	return keeper
 }
 
-// PayForGas defines a rpc handler method for MsgPayForGas
-// TODO: Refunds need to be implemented, see https://docs.hyperlane.xyz/docs/apis-and-sdks/interchain-gas-paymaster-api#refunds
+// PayForGas Make payments for relayer to deliver message to a destination domain
 func (k Keeper) PayForGas(goCtx context.Context, msg *types.MsgPayForGas) (*types.MsgPayForGasResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -40,6 +40,22 @@ func (k Keeper) PayForGas(goCtx context.Context, msg *types.MsgPayForGas) (*type
 		}
 	}
 
+	// Get the expected payment amount and denomination
+	quoteGasResp, err := k.QuoteGasPayment(ctx, &types.QuoteGasPaymentRequest{IgpId: msg.IgpId, DestinationDomain: msg.DestinationDomain, GasAmount: msg.GasAmount})
+	if err != nil {
+		return nil, err
+	}
+
+	// Verify that the payment is in the chain's native denom
+	if quoteGasResp.Denom != msg.MaximumPayment.Denom {
+		return nil, types.ErrInvalidPaymentDenom.Wrapf("Payment provided in denom '%s' but require in denom %s", msg.MaximumPayment.Denom, quoteGasResp.Denom)
+	}
+
+	requiredPayment := quoteGasResp.Amount
+	if msg.MaximumPayment.Amount.LT(requiredPayment) {
+		return nil, errors.New("insufficient payment")
+	}
+
 	store := k.getGasPaidStore(ctx, msg.DestinationDomain, relayer)
 
 	// message gas is already paid for, deny another payment
@@ -47,19 +63,53 @@ func (k Keeper) PayForGas(goCtx context.Context, msg *types.MsgPayForGas) (*type
 		return nil, types.ErrGasPaid.Wrapf("Message %s gas already paid to domain %d", msg.MessageId, msg.DestinationDomain)
 	}
 
-	gasDenom := getGasPaymentDenom()
-	amountPayable := quoteGasPayment(msg.DestinationDomain, msg.GasAmount)
-	gasPayment := sdk.NewCoin(gasDenom, amountPayable)
+	gasPayment := sdk.NewCoin(quoteGasResp.Denom, requiredPayment)
 
-	// Note: This implementation does not require that beneficiaries Claim() payments.
-	// Instead, the payment is sent directly to the beneficiary here (not escrowed).
-	// TODO: compare payment to quoteGasPayment and ensure we do not overcharge the payer.
+	// This implementation does not require that beneficiaries Claim() payments.
+	// The payment is sent directly to the beneficiary (not escrowed).
 	k.sendKeeper.SendCoins(ctx, sender, relayer, sdk.NewCoins(gasPayment))
 	if err != nil {
 		return nil, err
 	}
 	store.Set([]byte(msg.MessageId), []byte(gasPayment.String()))
 	return &types.MsgPayForGasResponse{}, nil
+}
+
+func (k Keeper) SetRemoteGasData(goCtx context.Context, msg *types.MsgSetRemoteGasData) (*types.MsgSetRemoteGasDataResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	igp, err := k.getIgp(ctx, msg.IgpId)
+	if err != nil {
+		return nil, err
+	}
+
+	oracle, ok := igp.Oracles[msg.RemoteDomain]
+
+	// The oracle can only be updated if the msg.Sender owns the oracle.
+	if !ok {
+		return nil, types.ErrOracleUnauthorized.Wrapf("oracle with destination %d does not exist for IGP %d", msg.RemoteDomain, igp.IgpId)
+	} else if oracle.GasOracle != msg.Sender {
+		return nil, types.ErrOracleUnauthorized.Wrapf("account %s is unauthorized to configure oracle for IGP %d and remote domain %d", msg.Sender, igp.IgpId, msg.RemoteDomain)
+	}
+
+	// Store the updated exchange rate and gas price for the oracle
+	oracle.GasPrice = msg.GasPrice
+	oracle.TokenExchangeRate = msg.TokenExchangeRate
+	k.setIgp(ctx, igp)
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeGasDataSet,
+			sdk.NewAttribute(types.AttributeRemoteDomain, strconv.FormatUint(uint64(msg.RemoteDomain), 10)),
+			sdk.NewAttribute(types.AttributeTokenExchangeRate, msg.TokenExchangeRate.String()),
+			sdk.NewAttribute(types.AttributeGasPrice, msg.GasPrice.String()),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
+		),
+	})
+
+	return &types.MsgSetRemoteGasDataResponse{}, nil
 }
 
 func (k Keeper) SetDestinationGasOverhead(goCtx context.Context, msg *types.MsgSetDestinationGasOverhead) (*types.MsgSetDestinationGasOverheadResponse, error) {
@@ -140,7 +190,7 @@ func (k Keeper) SetGasOracles(goCtx context.Context, msg *types.MsgSetGasOracles
 			}
 		}
 
-		// Configure the owner who can update the gas oracle (this can be different than the IGP owner)
+		// Configure the address that can update the gas oracle config
 		oracle.GasOracle = oracleConfig.GasOracle
 		// TODO: set gas prices, overhead (optional)
 	}
@@ -149,10 +199,17 @@ func (k Keeper) SetGasOracles(goCtx context.Context, msg *types.MsgSetGasOracles
 }
 
 func (k Keeper) CreateIgp(goCtx context.Context, msg *types.MsgCreateIgp) (*types.MsgCreateIgpResponse, error) {
+	validExchRate := msg.TokenExchangeRateScale.IsZero() || msg.TokenExchangeRateScale.GTE(math.OneInt())
+	if !validExchRate {
+		return nil, types.ErrExchangeRateScale.Wrapf("provided %s, exchange rate should be power of ten", msg.TokenExchangeRateScale.String())
+	}
+
 	ctx := sdk.UnwrapSDKContext(goCtx)
+
 	newIgp := types.Igp{
-		Owner:       msg.Sender,
-		Beneficiary: msg.Beneficiary,
+		Owner:                  msg.Sender,
+		Beneficiary:            msg.Beneficiary,
+		TokenExchangeRateScale: msg.TokenExchangeRateScale,
 	}
 
 	igp_id := uint32(0)

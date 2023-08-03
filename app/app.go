@@ -632,7 +632,7 @@ func NewSimApp(
 	// TODO: How are the domains registered selected.. using 12345 as a placeholder
 	domain := uint32(12345)
 
-	app.IgpKeeper = igpkeeper.NewKeeper(appCodec, keys[igptypes.StoreKey], app.BankKeeper.(bankkeeper.SendKeeper), "")
+	app.IgpKeeper = igpkeeper.NewKeeper(appCodec, keys[igptypes.StoreKey], app.BankKeeper.(bankkeeper.SendKeeper), app.StakingKeeper, "")
 	app.IsmKeeper = ismkeeper.NewKeeper(appCodec, keys[ismtypes.StoreKey], authtypes.NewModuleAddress(govtypes.ModuleName).String())
 	app.MailboxKeeper = mailboxkeeper.NewKeeper(appCodec, keys[mailboxtypes.StoreKey], &app.WasmKeeper, &app.IsmKeeper, domain)
 

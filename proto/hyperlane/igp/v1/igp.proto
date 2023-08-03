@@ -4,6 +4,8 @@ package hyperlane.igp.v1;
 
 import "cosmos_proto/cosmos.proto";
 import "hyperlane/igp/v1/types.proto";
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
 
 option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types";
 
@@ -19,6 +21,13 @@ message Igp {
   // owner.
   string beneficiary = 3 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
 
+  string token_exchange_rate_scale = 4 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int"
+  ];
+
   // Key is the remote domain of the gas oracle
-  map<uint32, GasOracle> oracles = 4;
+  map<uint32, GasOracle> oracles = 5;
 }

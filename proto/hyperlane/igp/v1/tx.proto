@@ -7,6 +7,7 @@ import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "hyperlane/igp/v1/types.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types";
 
@@ -24,8 +25,13 @@ service Msg {
   // Deprecated, unneeded. TODO: delete this (keeping it for discussion at
   // present). rpc Claim(MsgClaim) returns (MsgClaimResponse);
 
+  // Sets the gas oracle data for a specific remote domain
+  rpc SetRemoteGasData(MsgSetRemoteGasData)
+      returns (MsgSetRemoteGasDataResponse);
+
   // Sets the gas oracles for remote domains specified in the config array.
   rpc SetGasOracles(MsgSetGasOracles) returns (MsgSetGasOraclesResponse);
+
   // Sets the beneficiary.
   rpc SetBeneficiary(MsgSetBeneficiary) returns (MsgSetBeneficiaryResponse);
   // Sets the overhead gas for the destination domain. This is in the
@@ -34,7 +40,39 @@ service Msg {
       returns (MsgSetDestinationGasOverheadResponse);
 }
 
-// MsgPayForGas defines the request type for the Dispatch rpc.
+// MsgSetRemoteGasData defines the gas exchange rate and gas price
+message MsgSetRemoteGasData {
+  option (cosmos.msg.v1.signer) = "sender";
+  option (amino.name) = "hyperlane-cosmos/MsgSetRemoteGasData";
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string sender = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  // The IGP that this gas oracle config belongs to
+  uint32 igp_id = 2;
+
+  uint32 remote_domain = 3;
+  string token_exchange_rate = 4 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int"
+  ];
+
+  string gas_price = 5 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int"
+  ];
+}
+
+// MsgSetRemoteGasDataResponse defines the MsgSetRemoteGasData response type.
+message MsgSetRemoteGasDataResponse {}
+
+// MsgPayForGas submits payment for the relaying of a message to its destination
+// chain..
 message MsgPayForGas {
   option (cosmos.msg.v1.signer) = "sender";
   option (amino.name) = "hyperlane-cosmos/MsgPayForGas";
@@ -46,17 +84,31 @@ message MsgPayForGas {
 
   string message_id = 2;
   uint32 destination_domain = 3;
+
+  // The amount of destination gas you are willing to pay for
   string gas_amount = 4 [
     (cosmos_proto.scalar) = "cosmos.Int",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
-  string refund_address = 5 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
-  string relayer_address = 6 [
+
+  // The maximum payment (in the chain's native denom) that will be paid for
+  // relaying fees. If the required payment is less than this amount (according
+  // to quoteGasPayment), the lesser is charged. If the required payment exceeds
+  // this amount, the transaction will fail (no charge).
+  cosmos.base.v1beta1.Coin maximum_payment = 5
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
+
+  string refund_address = 6 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  string relayer_address = 7 [
     (cosmos_proto.scalar) = "cosmos.AddressString",
     (gogoproto.nullable) = true
   ];
+
+  // If any IGP other than the default (0) was used, this should be specified.
+  // We will use it to check gas costs to make sure the payer is not overpaying.
+  uint32 igp_id = 8;
 }
 
 // MsgPayForGasResponse defines the PayForGas response type.
@@ -148,6 +200,15 @@ message MsgCreateIgp {
 
   // If empty, the sender will be considered the beneficiary
   string beneficiary = 2 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  // TODO: Do we really want this in the IGP creation (as it is in the hyperlane
+  // .sol contract)? Or the gas oracle?
+  string token_exchange_rate_scale = 3 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true,
+    (cosmos_proto.scalar) = "cosmos.Int",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int"
+  ];
 }
 
 // MsgCreateIgpResponse defines the MsgCreateIgp response type.

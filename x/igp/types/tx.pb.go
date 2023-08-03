@@ -12,6 +12,7 @@ import (
 
 	_ "github.com/cosmos/cosmos-proto"
 	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
+	types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/cosmos/cosmos-sdk/types/msgservice"
 	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
 	_ "github.com/cosmos/gogoproto/gogoproto"
@@ -35,21 +36,120 @@ var (
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// MsgPayForGas defines the request type for the Dispatch rpc.
+// MsgSetRemoteGasData defines the gas exchange rate and gas price
+type MsgSetRemoteGasData struct {
+	Sender string `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
+	// The IGP that this gas oracle config belongs to
+	IgpId             uint32                                 `protobuf:"varint,2,opt,name=igp_id,json=igpId,proto3" json:"igp_id,omitempty"`
+	RemoteDomain      uint32                                 `protobuf:"varint,3,opt,name=remote_domain,json=remoteDomain,proto3" json:"remote_domain,omitempty"`
+	TokenExchangeRate github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,4,opt,name=token_exchange_rate,json=tokenExchangeRate,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"token_exchange_rate"`
+	GasPrice          github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,5,opt,name=gas_price,json=gasPrice,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"gas_price"`
+}
+
+func (m *MsgSetRemoteGasData) Reset()         { *m = MsgSetRemoteGasData{} }
+func (m *MsgSetRemoteGasData) String() string { return proto.CompactTextString(m) }
+func (*MsgSetRemoteGasData) ProtoMessage()    {}
+func (*MsgSetRemoteGasData) Descriptor() ([]byte, []int) {
+	return fileDescriptor_db701085baeb3386, []int{0}
+}
+
+func (m *MsgSetRemoteGasData) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+
+func (m *MsgSetRemoteGasData) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgSetRemoteGasData.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+
+func (m *MsgSetRemoteGasData) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgSetRemoteGasData.Merge(m, src)
+}
+
+func (m *MsgSetRemoteGasData) XXX_Size() int {
+	return m.Size()
+}
+
+func (m *MsgSetRemoteGasData) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgSetRemoteGasData.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgSetRemoteGasData proto.InternalMessageInfo
+
+// MsgSetRemoteGasDataResponse defines the MsgSetRemoteGasData response type.
+type MsgSetRemoteGasDataResponse struct{}
+
+func (m *MsgSetRemoteGasDataResponse) Reset()         { *m = MsgSetRemoteGasDataResponse{} }
+func (m *MsgSetRemoteGasDataResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgSetRemoteGasDataResponse) ProtoMessage()    {}
+func (*MsgSetRemoteGasDataResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_db701085baeb3386, []int{1}
+}
+
+func (m *MsgSetRemoteGasDataResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+
+func (m *MsgSetRemoteGasDataResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgSetRemoteGasDataResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+
+func (m *MsgSetRemoteGasDataResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgSetRemoteGasDataResponse.Merge(m, src)
+}
+
+func (m *MsgSetRemoteGasDataResponse) XXX_Size() int {
+	return m.Size()
+}
+
+func (m *MsgSetRemoteGasDataResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgSetRemoteGasDataResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgSetRemoteGasDataResponse proto.InternalMessageInfo
+
+// MsgPayForGas submits payment for the relaying of a message to its destination
+// chain..
 type MsgPayForGas struct {
-	Sender            string                                 `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
-	MessageId         string                                 `protobuf:"bytes,2,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
-	DestinationDomain uint32                                 `protobuf:"varint,3,opt,name=destination_domain,json=destinationDomain,proto3" json:"destination_domain,omitempty"`
-	GasAmount         github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,4,opt,name=gas_amount,json=gasAmount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"gas_amount"`
-	RefundAddress     string                                 `protobuf:"bytes,5,opt,name=refund_address,json=refundAddress,proto3" json:"refund_address,omitempty"`
-	RelayerAddress    string                                 `protobuf:"bytes,6,opt,name=relayer_address,json=relayerAddress,proto3" json:"relayer_address,omitempty"`
+	Sender            string `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
+	MessageId         string `protobuf:"bytes,2,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
+	DestinationDomain uint32 `protobuf:"varint,3,opt,name=destination_domain,json=destinationDomain,proto3" json:"destination_domain,omitempty"`
+	// The amount of destination gas you are willing to pay for
+	GasAmount github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,4,opt,name=gas_amount,json=gasAmount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"gas_amount"`
+	// The maximum payment (in the chain's native denom) that will be paid for
+	// relaying fees. If the required payment is less than this amount (according
+	// to quoteGasPayment), the lesser is charged. If the required payment exceeds
+	// this amount, the transaction will fail (no charge).
+	MaximumPayment types.Coin `protobuf:"bytes,5,opt,name=maximum_payment,json=maximumPayment,proto3" json:"maximum_payment"`
+	RefundAddress  string     `protobuf:"bytes,6,opt,name=refund_address,json=refundAddress,proto3" json:"refund_address,omitempty"`
+	RelayerAddress string     `protobuf:"bytes,7,opt,name=relayer_address,json=relayerAddress,proto3" json:"relayer_address,omitempty"`
+	// If any IGP other than the default (0) was used, this should be specified.
+	// We will use it to check gas costs to make sure the payer is not overpaying.
+	IgpId uint32 `protobuf:"varint,8,opt,name=igp_id,json=igpId,proto3" json:"igp_id,omitempty"`
 }
 
 func (m *MsgPayForGas) Reset()         { *m = MsgPayForGas{} }
 func (m *MsgPayForGas) String() string { return proto.CompactTextString(m) }
 func (*MsgPayForGas) ProtoMessage()    {}
 func (*MsgPayForGas) Descriptor() ([]byte, []int) {
-	return fileDescriptor_db701085baeb3386, []int{0}
+	return fileDescriptor_db701085baeb3386, []int{2}
 }
 
 func (m *MsgPayForGas) XXX_Unmarshal(b []byte) error {
@@ -90,7 +190,7 @@ func (m *MsgPayForGasResponse) Reset()         { *m = MsgPayForGasResponse{} }
 func (m *MsgPayForGasResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgPayForGasResponse) ProtoMessage()    {}
 func (*MsgPayForGasResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_db701085baeb3386, []int{1}
+	return fileDescriptor_db701085baeb3386, []int{3}
 }
 
 func (m *MsgPayForGasResponse) XXX_Unmarshal(b []byte) error {
@@ -138,7 +238,7 @@ func (m *MsgSetDestinationGasOverhead) Reset()         { *m = MsgSetDestinationG
 func (m *MsgSetDestinationGasOverhead) String() string { return proto.CompactTextString(m) }
 func (*MsgSetDestinationGasOverhead) ProtoMessage()    {}
 func (*MsgSetDestinationGasOverhead) Descriptor() ([]byte, []int) {
-	return fileDescriptor_db701085baeb3386, []int{2}
+	return fileDescriptor_db701085baeb3386, []int{4}
 }
 
 func (m *MsgSetDestinationGasOverhead) XXX_Unmarshal(b []byte) error {
@@ -180,7 +280,7 @@ func (m *MsgSetDestinationGasOverheadResponse) Reset()         { *m = MsgSetDest
 func (m *MsgSetDestinationGasOverheadResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgSetDestinationGasOverheadResponse) ProtoMessage()    {}
 func (*MsgSetDestinationGasOverheadResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_db701085baeb3386, []int{3}
+	return fileDescriptor_db701085baeb3386, []int{5}
 }
 
 func (m *MsgSetDestinationGasOverheadResponse) XXX_Unmarshal(b []byte) error {
@@ -223,7 +323,7 @@ func (m *MsgClaim) Reset()         { *m = MsgClaim{} }
 func (m *MsgClaim) String() string { return proto.CompactTextString(m) }
 func (*MsgClaim) ProtoMessage()    {}
 func (*MsgClaim) Descriptor() ([]byte, []int) {
-	return fileDescriptor_db701085baeb3386, []int{4}
+	return fileDescriptor_db701085baeb3386, []int{6}
 }
 
 func (m *MsgClaim) XXX_Unmarshal(b []byte) error {
@@ -264,7 +364,7 @@ func (m *MsgClaimResponse) Reset()         { *m = MsgClaimResponse{} }
 func (m *MsgClaimResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgClaimResponse) ProtoMessage()    {}
 func (*MsgClaimResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_db701085baeb3386, []int{5}
+	return fileDescriptor_db701085baeb3386, []int{7}
 }
 
 func (m *MsgClaimResponse) XXX_Unmarshal(b []byte) error {
@@ -309,7 +409,7 @@ func (m *MsgSetGasOracles) Reset()         { *m = MsgSetGasOracles{} }
 func (m *MsgSetGasOracles) String() string { return proto.CompactTextString(m) }
 func (*MsgSetGasOracles) ProtoMessage()    {}
 func (*MsgSetGasOracles) Descriptor() ([]byte, []int) {
-	return fileDescriptor_db701085baeb3386, []int{6}
+	return fileDescriptor_db701085baeb3386, []int{8}
 }
 
 func (m *MsgSetGasOracles) XXX_Unmarshal(b []byte) error {
@@ -350,7 +450,7 @@ func (m *MsgSetGasOraclesResponse) Reset()         { *m = MsgSetGasOraclesRespon
 func (m *MsgSetGasOraclesResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgSetGasOraclesResponse) ProtoMessage()    {}
 func (*MsgSetGasOraclesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_db701085baeb3386, []int{7}
+	return fileDescriptor_db701085baeb3386, []int{9}
 }
 
 func (m *MsgSetGasOraclesResponse) XXX_Unmarshal(b []byte) error {
@@ -396,7 +496,7 @@ func (m *MsgSetBeneficiary) Reset()         { *m = MsgSetBeneficiary{} }
 func (m *MsgSetBeneficiary) String() string { return proto.CompactTextString(m) }
 func (*MsgSetBeneficiary) ProtoMessage()    {}
 func (*MsgSetBeneficiary) Descriptor() ([]byte, []int) {
-	return fileDescriptor_db701085baeb3386, []int{8}
+	return fileDescriptor_db701085baeb3386, []int{10}
 }
 
 func (m *MsgSetBeneficiary) XXX_Unmarshal(b []byte) error {
@@ -437,7 +537,7 @@ func (m *MsgSetBeneficiaryResponse) Reset()         { *m = MsgSetBeneficiaryResp
 func (m *MsgSetBeneficiaryResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgSetBeneficiaryResponse) ProtoMessage()    {}
 func (*MsgSetBeneficiaryResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_db701085baeb3386, []int{9}
+	return fileDescriptor_db701085baeb3386, []int{11}
 }
 
 func (m *MsgSetBeneficiaryResponse) XXX_Unmarshal(b []byte) error {
@@ -476,13 +576,16 @@ type MsgCreateIgp struct {
 	Sender string `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
 	// If empty, the sender will be considered the beneficiary
 	Beneficiary string `protobuf:"bytes,2,opt,name=beneficiary,proto3" json:"beneficiary,omitempty"`
+	// TODO: Do we really want this in the IGP creation (as it is in the hyperlane
+	// .sol contract)? Or the gas oracle?
+	TokenExchangeRateScale github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,3,opt,name=token_exchange_rate_scale,json=tokenExchangeRateScale,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"token_exchange_rate_scale"`
 }
 
 func (m *MsgCreateIgp) Reset()         { *m = MsgCreateIgp{} }
 func (m *MsgCreateIgp) String() string { return proto.CompactTextString(m) }
 func (*MsgCreateIgp) ProtoMessage()    {}
 func (*MsgCreateIgp) Descriptor() ([]byte, []int) {
-	return fileDescriptor_db701085baeb3386, []int{10}
+	return fileDescriptor_db701085baeb3386, []int{12}
 }
 
 func (m *MsgCreateIgp) XXX_Unmarshal(b []byte) error {
@@ -526,7 +629,7 @@ func (m *MsgCreateIgpResponse) Reset()         { *m = MsgCreateIgpResponse{} }
 func (m *MsgCreateIgpResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgCreateIgpResponse) ProtoMessage()    {}
 func (*MsgCreateIgpResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_db701085baeb3386, []int{11}
+	return fileDescriptor_db701085baeb3386, []int{13}
 }
 
 func (m *MsgCreateIgpResponse) XXX_Unmarshal(b []byte) error {
@@ -568,6 +671,8 @@ func (m *MsgCreateIgpResponse) GetIgpId() uint32 {
 }
 
 func init() {
+	proto.RegisterType((*MsgSetRemoteGasData)(nil), "hyperlane.igp.v1.MsgSetRemoteGasData")
+	proto.RegisterType((*MsgSetRemoteGasDataResponse)(nil), "hyperlane.igp.v1.MsgSetRemoteGasDataResponse")
 	proto.RegisterType((*MsgPayForGas)(nil), "hyperlane.igp.v1.MsgPayForGas")
 	proto.RegisterType((*MsgPayForGasResponse)(nil), "hyperlane.igp.v1.MsgPayForGasResponse")
 	proto.RegisterType((*MsgSetDestinationGasOverhead)(nil), "hyperlane.igp.v1.MsgSetDestinationGasOverhead")
@@ -585,59 +690,72 @@ func init() {
 func init() { proto.RegisterFile("hyperlane/igp/v1/tx.proto", fileDescriptor_db701085baeb3386) }
 
 var fileDescriptor_db701085baeb3386 = []byte{
-	// 831 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0x4d, 0x6f, 0xd3, 0x4c,
-	0x10, 0x8e, 0x93, 0x36, 0x7d, 0xb3, 0xfd, 0x78, 0x5b, 0xab, 0xef, 0x8b, 0x63, 0xda, 0xa4, 0x35,
-	0xa8, 0xaa, 0x82, 0x9c, 0xd0, 0x22, 0x90, 0x08, 0x48, 0xa8, 0x5f, 0x54, 0x39, 0x44, 0xa0, 0x44,
-	0xe2, 0xc0, 0x25, 0x6c, 0xe2, 0xed, 0xd6, 0x22, 0xde, 0xb5, 0xbc, 0x4e, 0xd4, 0xdc, 0xf8, 0xb8,
-	0x20, 0x4e, 0xfc, 0x84, 0x1e, 0xb9, 0x51, 0x89, 0x1e, 0xb9, 0x71, 0xe9, 0x81, 0x43, 0xd5, 0x13,
-	0xe2, 0x50, 0xa1, 0xf6, 0x50, 0x7e, 0x06, 0xca, 0x66, 0xe3, 0xb8, 0x4d, 0xdc, 0xd0, 0x88, 0x4b,
-	0xe2, 0x9d, 0x79, 0x66, 0xe6, 0x79, 0x66, 0xd6, 0xbb, 0x06, 0xf1, 0xed, 0x86, 0x8d, 0x9c, 0x2a,
-	0x24, 0x28, 0x63, 0x62, 0x3b, 0x53, 0x5f, 0xca, 0xb8, 0x3b, 0x69, 0xdb, 0xa1, 0x2e, 0x95, 0x27,
-	0x3d, 0x57, 0xda, 0xc4, 0x76, 0xba, 0xbe, 0xa4, 0x4e, 0x41, 0xcb, 0x24, 0x34, 0xc3, 0x7f, 0x5b,
-	0x20, 0xf5, 0x5a, 0x85, 0x32, 0x8b, 0xb2, 0x8c, 0xc5, 0x70, 0x33, 0xd8, 0x62, 0x58, 0x38, 0xe2,
-	0x2d, 0x47, 0x89, 0xaf, 0x32, 0xad, 0x85, 0x70, 0x4d, 0x63, 0x8a, 0x69, 0xcb, 0xde, 0x7c, 0x12,
-	0xd6, 0x99, 0x6e, 0x26, 0x0d, 0x1b, 0x89, 0x18, 0xed, 0x53, 0x04, 0x8c, 0xe5, 0x19, 0x7e, 0x0a,
-	0x1b, 0x8f, 0xa9, 0xb3, 0x09, 0x99, 0x7c, 0x1b, 0x44, 0x19, 0x22, 0x06, 0x72, 0x14, 0x69, 0x4e,
-	0x5a, 0x8c, 0xad, 0x2a, 0x47, 0xfb, 0xfa, 0xb4, 0x28, 0xb3, 0x62, 0x18, 0x0e, 0x62, 0xac, 0xe8,
-	0x3a, 0x26, 0xc1, 0x05, 0x81, 0x93, 0x67, 0x01, 0xb0, 0x10, 0x63, 0x10, 0xa3, 0x92, 0x69, 0x28,
-	0xe1, 0x66, 0x54, 0x21, 0x26, 0x2c, 0x39, 0x43, 0xd6, 0x81, 0x6c, 0x20, 0xe6, 0x9a, 0x04, 0xba,
-	0x26, 0x25, 0x25, 0x83, 0x5a, 0xd0, 0x24, 0x4a, 0x64, 0x4e, 0x5a, 0x1c, 0x2f, 0x4c, 0xf9, 0x3c,
-	0xeb, 0xdc, 0x21, 0xbf, 0x00, 0x00, 0x43, 0x56, 0x82, 0x16, 0xad, 0x11, 0x57, 0x19, 0xe2, 0x1c,
-	0x56, 0x0e, 0x8e, 0x93, 0xa1, 0x1f, 0xc7, 0xc9, 0x05, 0x6c, 0xba, 0xdb, 0xb5, 0x72, 0xba, 0x42,
-	0x2d, 0xa1, 0x5c, 0xfc, 0xe9, 0xcc, 0x78, 0x29, 0x64, 0xe5, 0x88, 0x7b, 0xb4, 0xaf, 0x03, 0xc1,
-	0x38, 0x47, 0xdc, 0x8f, 0x67, 0x7b, 0x29, 0xa9, 0x10, 0xc3, 0x90, 0xad, 0xf0, 0x9c, 0xf2, 0x23,
-	0x30, 0xe1, 0xa0, 0xad, 0x1a, 0x31, 0x4a, 0xb0, 0xa5, 0x47, 0x19, 0xee, 0xa3, 0x74, 0xbc, 0x85,
-	0x17, 0x46, 0x79, 0x03, 0xfc, 0xeb, 0xa0, 0x2a, 0x6c, 0x20, 0xc7, 0xcb, 0x10, 0xe5, 0x19, 0x66,
-	0x0e, 0x8e, 0x93, 0x52, 0x60, 0x96, 0x09, 0x11, 0x24, 0xac, 0xd9, 0xbb, 0xef, 0x76, 0x93, 0xa1,
-	0x5f, 0xbb, 0xc9, 0xd0, 0x9b, 0xb3, 0xbd, 0x94, 0x68, 0xe6, 0xfb, 0xb3, 0xbd, 0xd4, 0xac, 0x37,
-	0x30, 0x5d, 0x88, 0xf4, 0x0f, 0x48, 0xfb, 0x1f, 0x4c, 0xfb, 0xd7, 0x05, 0xc4, 0x6c, 0x4a, 0x18,
-	0xd2, 0xbe, 0x86, 0xc1, 0x4c, 0x9e, 0xe1, 0x22, 0x72, 0xd7, 0x3b, 0x4d, 0xdd, 0x84, 0xec, 0x49,
-	0x1d, 0x39, 0xdb, 0x08, 0x1a, 0x03, 0x4c, 0xb6, 0xf7, 0xe8, 0xc2, 0x41, 0xa3, 0x33, 0xc0, 0x58,
-	0x73, 0x74, 0x54, 0x14, 0xe4, 0x33, 0xfe, 0x2b, 0xc3, 0x1b, 0xc5, 0x3e, 0x19, 0xff, 0x81, 0xa8,
-	0x89, 0xed, 0xe6, 0x56, 0x1b, 0xe2, 0x44, 0x86, 0x4d, 0x6c, 0xe7, 0x8c, 0xec, 0x46, 0x40, 0x37,
-	0xf5, 0x5e, 0xdd, 0x0c, 0x6c, 0x92, 0xb6, 0x00, 0x6e, 0x5e, 0xe6, 0xf7, 0xba, 0x4d, 0xc1, 0x3f,
-	0x79, 0x86, 0xd7, 0xaa, 0xd0, 0xb4, 0xae, 0xde, 0xd8, 0xec, 0x52, 0x00, 0xd9, 0x78, 0x2f, 0xb2,
-	0xbc, 0x88, 0x26, 0x83, 0xc9, 0xf6, 0xb3, 0x47, 0xe2, 0x8b, 0xc4, 0x8d, 0x45, 0xe4, 0x36, 0x29,
-	0x3a, 0xb0, 0x52, 0x45, 0x83, 0xbc, 0xc0, 0x0f, 0xc0, 0x48, 0x85, 0x92, 0x2d, 0x13, 0x33, 0x25,
-	0x3c, 0x17, 0x59, 0x1c, 0x5d, 0x9e, 0x4f, 0x5f, 0x3c, 0xa2, 0xd2, 0x5e, 0x81, 0x35, 0x8e, 0x2c,
-	0xb4, 0x23, 0xb2, 0xf7, 0x03, 0xa4, 0xcc, 0x07, 0xf4, 0xbd, 0xc3, 0x54, 0x53, 0x81, 0x72, 0xd1,
-	0xe6, 0x49, 0xfb, 0x26, 0x81, 0xa9, 0x96, 0x73, 0x15, 0x11, 0xb4, 0x65, 0x56, 0x4c, 0xe8, 0x34,
-	0x06, 0xd0, 0xb6, 0x0c, 0x46, 0xda, 0xef, 0x68, 0xb8, 0x4f, 0x48, 0x1b, 0xe8, 0xdb, 0x61, 0x11,
-	0xff, 0x0e, 0xcb, 0x06, 0x28, 0xd5, 0x02, 0x94, 0xfa, 0x88, 0x6b, 0xd7, 0x41, 0xbc, 0xcb, 0xe8,
-	0x69, 0xfd, 0x2c, 0xf1, 0x33, 0x78, 0xcd, 0x41, 0xd0, 0x45, 0x39, 0x6c, 0x0f, 0x20, 0x33, 0x0b,
-	0x46, 0xcb, 0x9d, 0xcc, 0x7d, 0xa5, 0xfa, 0xc1, 0x57, 0x3b, 0x87, 0x3c, 0x92, 0x9a, 0xce, 0xcf,
-	0x21, 0x6f, 0xdd, 0x56, 0xe3, 0xeb, 0x9e, 0xe4, 0xeb, 0xde, 0xf2, 0xeb, 0x21, 0x10, 0xc9, 0x33,
-	0x2c, 0x17, 0x41, 0xac, 0x23, 0x34, 0xd1, 0xbd, 0xd1, 0xfc, 0x39, 0xd5, 0x85, 0xcb, 0xfd, 0x5e,
-	0xcd, 0x22, 0x88, 0x75, 0x6e, 0xb0, 0xde, 0x49, 0x3d, 0x7f, 0x40, 0xd2, 0xae, 0x03, 0x55, 0x2e,
-	0x81, 0xf1, 0xf3, 0x6f, 0x96, 0xd6, 0x33, 0xf0, 0x1c, 0x46, 0x4d, 0xf5, 0xc7, 0x78, 0x05, 0xca,
-	0x60, 0xe2, 0xc2, 0xfe, 0xbe, 0x11, 0x14, 0xed, 0x03, 0xa9, 0xb7, 0xfe, 0x00, 0xe4, 0xd5, 0x78,
-	0x2b, 0x81, 0x78, 0xf0, 0x95, 0x90, 0x0e, 0x4a, 0xd5, 0x1b, 0xaf, 0xde, 0xbb, 0x1a, 0xbe, 0xcd,
-	0x42, 0x1d, 0x7e, 0xd5, 0x3c, 0xc7, 0x57, 0x9f, 0x1d, 0x9c, 0x24, 0xa4, 0xc3, 0x93, 0x84, 0xf4,
-	0xf3, 0x24, 0x21, 0x7d, 0x38, 0x4d, 0x84, 0x0e, 0x4f, 0x13, 0xa1, 0xef, 0xa7, 0x89, 0xd0, 0xf3,
-	0x87, 0xbe, 0xcb, 0x81, 0xb9, 0x0e, 0x24, 0x18, 0x55, 0x69, 0x1d, 0xe9, 0x75, 0x44, 0xdc, 0x9a,
-	0x83, 0x58, 0xa6, 0x6b, 0x2f, 0xee, 0xf0, 0xaf, 0x19, 0x7e, 0x6d, 0x94, 0xa3, 0xfc, 0x5b, 0xe6,
-	0xce, 0xef, 0x00, 0x00, 0x00, 0xff, 0xff, 0xa3, 0x88, 0x11, 0x5a, 0x75, 0x09, 0x00, 0x00,
+	// 1036 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0xbd, 0x6f, 0x23, 0x45,
+	0x14, 0xf7, 0x3a, 0xb9, 0x24, 0x9e, 0x7c, 0x5c, 0xb2, 0x17, 0x0e, 0xdb, 0x97, 0xd8, 0xb9, 0xbd,
+	0x23, 0x8a, 0x82, 0xbc, 0xc6, 0x41, 0x20, 0x61, 0x4e, 0x42, 0xf9, 0x22, 0x72, 0x61, 0x11, 0xd9,
+	0x12, 0x05, 0x05, 0x66, 0xec, 0x7d, 0x19, 0xaf, 0xce, 0x3b, 0xb3, 0xec, 0x8c, 0xad, 0x58, 0xa2,
+	0x40, 0xd0, 0x20, 0x2a, 0x0a, 0xe8, 0xaf, 0xa4, 0x0c, 0xd2, 0x95, 0x74, 0x34, 0x29, 0x28, 0x4e,
+	0x57, 0x21, 0x8a, 0x08, 0x25, 0x45, 0x90, 0xf8, 0x27, 0xd0, 0xee, 0x8e, 0xd7, 0x7b, 0xf1, 0xee,
+	0xe5, 0x62, 0xa5, 0x49, 0x3c, 0xef, 0xfb, 0xfd, 0xde, 0xef, 0xcd, 0x2c, 0xca, 0xb4, 0xfb, 0x36,
+	0x38, 0x1d, 0x4c, 0xa1, 0x68, 0x12, 0xbb, 0xd8, 0x2b, 0x15, 0xc5, 0xb1, 0x6e, 0x3b, 0x4c, 0x30,
+	0x75, 0x31, 0x50, 0xe9, 0x26, 0xb1, 0xf5, 0x5e, 0x29, 0xbb, 0x84, 0x2d, 0x93, 0xb2, 0xa2, 0xf7,
+	0xd7, 0x37, 0xca, 0xbe, 0xdd, 0x62, 0xdc, 0x62, 0xbc, 0x68, 0x71, 0xe2, 0x3a, 0x5b, 0x9c, 0x48,
+	0x45, 0xc6, 0x57, 0x34, 0xbc, 0x53, 0xd1, 0x3f, 0x48, 0xd5, 0x32, 0x61, 0x84, 0xf9, 0x72, 0xf7,
+	0x97, 0x94, 0xae, 0x8c, 0x56, 0xd2, 0xb7, 0x61, 0xe0, 0x93, 0x93, 0x79, 0x9a, 0x98, 0x43, 0xb1,
+	0x57, 0x6a, 0x82, 0xc0, 0xa5, 0x62, 0x8b, 0x99, 0xd4, 0xd7, 0x6b, 0x3f, 0x4f, 0xa0, 0x7b, 0x55,
+	0x4e, 0xea, 0x20, 0x6a, 0x60, 0x31, 0x01, 0x07, 0x98, 0xef, 0x61, 0x81, 0xd5, 0xf7, 0xd0, 0x14,
+	0x07, 0x6a, 0x80, 0x93, 0x56, 0xd6, 0x94, 0x8d, 0xd4, 0x4e, 0xfa, 0xe5, 0xf3, 0xc2, 0xb2, 0xac,
+	0x66, 0xdb, 0x30, 0x1c, 0xe0, 0xbc, 0x2e, 0x1c, 0x93, 0x92, 0x9a, 0xb4, 0x53, 0xdf, 0x42, 0x53,
+	0x26, 0xb1, 0x1b, 0xa6, 0x91, 0x4e, 0xae, 0x29, 0x1b, 0xf3, 0xb5, 0x3b, 0x26, 0xb1, 0x2b, 0x86,
+	0xfa, 0x08, 0xcd, 0x3b, 0x5e, 0xe4, 0x86, 0xc1, 0x2c, 0x6c, 0xd2, 0xf4, 0x84, 0xa7, 0x9d, 0xf3,
+	0x85, 0x7b, 0x9e, 0x4c, 0xfd, 0x1a, 0xdd, 0x13, 0xec, 0x29, 0xd0, 0x06, 0x1c, 0xb7, 0xda, 0x98,
+	0x12, 0x68, 0x38, 0x58, 0x40, 0x7a, 0xd2, 0x4b, 0xbd, 0x7d, 0x7a, 0x96, 0x4f, 0xfc, 0x7d, 0x96,
+	0x5f, 0x27, 0xa6, 0x68, 0x77, 0x9b, 0x7a, 0x8b, 0x59, 0x12, 0x17, 0xf9, 0xaf, 0xc0, 0x8d, 0xa7,
+	0xb2, 0xe9, 0x0a, 0x15, 0x2f, 0x9f, 0x17, 0x90, 0x2c, 0xb4, 0x42, 0xc5, 0xaf, 0x97, 0x27, 0x9b,
+	0x4a, 0x6d, 0xc9, 0x8b, 0xbe, 0x2f, 0x83, 0xd7, 0xb0, 0x00, 0xf5, 0x4b, 0x94, 0x22, 0xd8, 0x85,
+	0xd9, 0x6c, 0x41, 0xfa, 0xce, 0x6d, 0x25, 0x9a, 0x21, 0x98, 0x1f, 0xba, 0x21, 0xcb, 0x4f, 0x7e,
+	0x78, 0x96, 0x4f, 0xfc, 0xfb, 0x2c, 0x9f, 0xf8, 0xee, 0xf2, 0x64, 0x53, 0x62, 0xf4, 0xe3, 0xe5,
+	0xc9, 0xe6, 0xe3, 0x60, 0x5c, 0x05, 0x19, 0x3b, 0x02, 0x7e, 0x6d, 0x15, 0x3d, 0x88, 0x10, 0xd7,
+	0x80, 0xdb, 0x8c, 0x72, 0xd0, 0x7e, 0x99, 0x44, 0x73, 0x55, 0x4e, 0x0e, 0x71, 0xff, 0x53, 0xe6,
+	0x1c, 0x60, 0x3e, 0xc6, 0xb8, 0x56, 0x11, 0xb2, 0x80, 0x73, 0x4c, 0x60, 0x30, 0xb2, 0x54, 0x2d,
+	0x25, 0x25, 0x15, 0x43, 0x2d, 0x20, 0xd5, 0x00, 0x2e, 0x4c, 0x8a, 0x85, 0xc9, 0xe8, 0xab, 0xb3,
+	0x5b, 0x0a, 0x69, 0xe4, 0x00, 0xbf, 0x42, 0xc8, 0x45, 0x13, 0x5b, 0xac, 0x4b, 0xc5, 0xed, 0xcd,
+	0xcd, 0x1d, 0xd1, 0xb6, 0x17, 0x53, 0xad, 0xa2, 0xbb, 0x16, 0x3e, 0x36, 0xad, 0xae, 0xd5, 0xb0,
+	0x71, 0xdf, 0x02, 0x2a, 0xbc, 0xa9, 0xcd, 0x6e, 0x65, 0x74, 0xe9, 0xe5, 0x52, 0x5c, 0x97, 0x14,
+	0xd7, 0x77, 0x99, 0x49, 0x77, 0x52, 0x6e, 0x05, 0x7e, 0xa4, 0x05, 0xe9, 0x7c, 0xe8, 0xfb, 0xaa,
+	0x9f, 0xa0, 0x05, 0x07, 0x8e, 0xba, 0xd4, 0x68, 0x60, 0x1f, 0x9e, 0xf4, 0xd4, 0x35, 0xc0, 0xcd,
+	0xfb, 0xf6, 0x52, 0xa8, 0xee, 0xa3, 0xbb, 0x0e, 0x74, 0x70, 0x1f, 0x9c, 0x20, 0xc2, 0xb4, 0x17,
+	0x61, 0xe5, 0xf4, 0x2c, 0xaf, 0xc4, 0x46, 0x59, 0x90, 0x4e, 0x83, 0x30, 0xc3, 0xad, 0x99, 0x09,
+	0x6d, 0x4d, 0xf9, 0x83, 0x18, 0xf6, 0xac, 0x46, 0xb1, 0x27, 0xa0, 0x81, 0x76, 0x1f, 0x2d, 0x87,
+	0xcf, 0x01, 0x5f, 0xfe, 0x48, 0xa2, 0x15, 0x9f, 0x4f, 0x7b, 0xc3, 0xd1, 0x1d, 0x60, 0xfe, 0x59,
+	0x0f, 0x9c, 0x36, 0x60, 0x63, 0x0c, 0xfe, 0x44, 0x13, 0x24, 0x19, 0x47, 0x10, 0x03, 0xcd, 0xb9,
+	0x04, 0x61, 0x32, 0xa1, 0xc7, 0xa4, 0x5b, 0xa1, 0xc8, 0x2c, 0x09, 0xb5, 0x31, 0x44, 0x73, 0x32,
+	0x8c, 0xe6, 0x7e, 0x0c, 0x9a, 0x85, 0x98, 0x5d, 0x8c, 0x06, 0x49, 0x5b, 0x47, 0x8f, 0x5f, 0xa7,
+	0x0f, 0xd0, 0x66, 0x68, 0xa6, 0xca, 0xc9, 0x6e, 0x07, 0x9b, 0xd6, 0xcd, 0x81, 0x2d, 0x97, 0x62,
+	0x8a, 0xcd, 0x44, 0x15, 0xeb, 0x25, 0xd1, 0x54, 0xb4, 0x38, 0xf8, 0x1d, 0x14, 0xf1, 0xbb, 0xe2,
+	0x09, 0xeb, 0x20, 0xdc, 0x12, 0x1d, 0xdc, 0xea, 0xc0, 0x38, 0xd7, 0xc4, 0xc7, 0x68, 0xba, 0xc5,
+	0xe8, 0x91, 0x49, 0x78, 0x3a, 0xb9, 0x36, 0xb1, 0x31, 0xbb, 0xf5, 0x50, 0xbf, 0xfa, 0xbc, 0xe9,
+	0x41, 0x82, 0x5d, 0xcf, 0xb2, 0x36, 0xf0, 0x28, 0x7f, 0x14, 0xd3, 0xca, 0xc3, 0x18, 0xdc, 0x87,
+	0x95, 0x6a, 0x59, 0x94, 0xbe, 0x2a, 0x0b, 0x5a, 0xfb, 0x53, 0x41, 0x4b, 0xbe, 0x72, 0x07, 0x28,
+	0x1c, 0x99, 0x2d, 0x13, 0x3b, 0xfd, 0x31, 0x7a, 0xdb, 0x42, 0xd3, 0x83, 0xd5, 0x4d, 0x5e, 0xe3,
+	0x32, 0x30, 0x0c, 0x31, 0x6c, 0x22, 0xcc, 0xb0, 0x72, 0x4c, 0xa7, 0x5a, 0x4c, 0xa7, 0xa1, 0xc2,
+	0xb5, 0x07, 0x28, 0x33, 0x22, 0x0c, 0x7a, 0xfd, 0x2d, 0xe9, 0xdd, 0xf4, 0xbb, 0x0e, 0x60, 0x01,
+	0x15, 0x62, 0x8f, 0xd1, 0x66, 0x19, 0xcd, 0x36, 0x87, 0x91, 0xaf, 0x6d, 0x35, 0x6c, 0xac, 0x7e,
+	0x83, 0x32, 0x11, 0x0f, 0x73, 0x83, 0xb7, 0x70, 0x07, 0x6e, 0x6f, 0x87, 0xef, 0x8f, 0x3c, 0xcf,
+	0x75, 0x37, 0xc1, 0xcd, 0x6e, 0xc1, 0x00, 0x22, 0xad, 0xe0, 0xdd, 0x82, 0xc1, 0x79, 0x80, 0x65,
+	0x68, 0x76, 0x4a, 0x68, 0x76, 0x5b, 0xff, 0x4d, 0xa2, 0x89, 0x2a, 0x27, 0x6a, 0x1d, 0xa5, 0x86,
+	0x30, 0xe7, 0x46, 0x69, 0x1e, 0x8e, 0x99, 0x5d, 0x7f, 0xbd, 0x3e, 0xc8, 0x59, 0x47, 0xa9, 0xe1,
+	0x2b, 0x1d, 0x1d, 0x34, 0xd0, 0xc7, 0x04, 0x1d, 0xb9, 0xce, 0xd5, 0x36, 0x5a, 0x1c, 0xf9, 0x60,
+	0x7b, 0x27, 0xd2, 0xf7, 0xaa, 0x59, 0xb6, 0xf0, 0x46, 0x66, 0x41, 0xa6, 0x06, 0x9a, 0x7f, 0xf5,
+	0x06, 0xd1, 0xe2, 0xfc, 0x87, 0x36, 0xd9, 0xcd, 0xeb, 0x6d, 0x82, 0x04, 0x4d, 0xb4, 0x70, 0x65,
+	0x8f, 0x1f, 0xc5, 0x79, 0x87, 0x8c, 0xb2, 0xef, 0xbe, 0x81, 0x51, 0x90, 0xe3, 0x7b, 0x05, 0x65,
+	0xe2, 0x9f, 0x3e, 0x3d, 0x2e, 0x54, 0xb4, 0x7d, 0xf6, 0xc3, 0x9b, 0xd9, 0x0f, 0xaa, 0xc8, 0xde,
+	0xf9, 0xd6, 0xe5, 0xfa, 0xce, 0xe7, 0xa7, 0xe7, 0x39, 0xe5, 0xc5, 0x79, 0x4e, 0xf9, 0xe7, 0x3c,
+	0xa7, 0xfc, 0x74, 0x91, 0x4b, 0xbc, 0xb8, 0xc8, 0x25, 0xfe, 0xba, 0xc8, 0x25, 0xbe, 0x78, 0x12,
+	0x5a, 0x20, 0x2e, 0x1c, 0x77, 0x15, 0x3a, 0xac, 0x07, 0x85, 0x1e, 0x50, 0xd1, 0x75, 0x80, 0x17,
+	0x47, 0x58, 0x7f, 0xec, 0x7d, 0xf1, 0x7b, 0xab, 0xd5, 0x9c, 0xf2, 0xbe, 0xe7, 0xdf, 0xff, 0x3f,
+	0x00, 0x00, 0xff, 0xff, 0x01, 0x7c, 0x9f, 0x7c, 0x99, 0x0c, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -658,6 +776,8 @@ type MsgClient interface {
 	CreateIgp(ctx context.Context, in *MsgCreateIgp, opts ...grpc.CallOption) (*MsgCreateIgpResponse, error)
 	// Deposits a payment for the relaying of a message to its destination chain.
 	PayForGas(ctx context.Context, in *MsgPayForGas, opts ...grpc.CallOption) (*MsgPayForGasResponse, error)
+	// Sets the gas oracle data for a specific remote domain
+	SetRemoteGasData(ctx context.Context, in *MsgSetRemoteGasData, opts ...grpc.CallOption) (*MsgSetRemoteGasDataResponse, error)
 	// Sets the gas oracles for remote domains specified in the config array.
 	SetGasOracles(ctx context.Context, in *MsgSetGasOracles, opts ...grpc.CallOption) (*MsgSetGasOraclesResponse, error)
 	// Sets the beneficiary.
@@ -687,6 +807,15 @@ func (c *msgClient) CreateIgp(ctx context.Context, in *MsgCreateIgp, opts ...grp
 func (c *msgClient) PayForGas(ctx context.Context, in *MsgPayForGas, opts ...grpc.CallOption) (*MsgPayForGasResponse, error) {
 	out := new(MsgPayForGasResponse)
 	err := c.cc.Invoke(ctx, "/hyperlane.igp.v1.Msg/PayForGas", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) SetRemoteGasData(ctx context.Context, in *MsgSetRemoteGasData, opts ...grpc.CallOption) (*MsgSetRemoteGasDataResponse, error) {
+	out := new(MsgSetRemoteGasDataResponse)
+	err := c.cc.Invoke(ctx, "/hyperlane.igp.v1.Msg/SetRemoteGasData", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -726,6 +855,8 @@ type MsgServer interface {
 	CreateIgp(context.Context, *MsgCreateIgp) (*MsgCreateIgpResponse, error)
 	// Deposits a payment for the relaying of a message to its destination chain.
 	PayForGas(context.Context, *MsgPayForGas) (*MsgPayForGasResponse, error)
+	// Sets the gas oracle data for a specific remote domain
+	SetRemoteGasData(context.Context, *MsgSetRemoteGasData) (*MsgSetRemoteGasDataResponse, error)
 	// Sets the gas oracles for remote domains specified in the config array.
 	SetGasOracles(context.Context, *MsgSetGasOracles) (*MsgSetGasOraclesResponse, error)
 	// Sets the beneficiary.
@@ -744,6 +875,10 @@ func (*UnimplementedMsgServer) CreateIgp(ctx context.Context, req *MsgCreateIgp)
 
 func (*UnimplementedMsgServer) PayForGas(ctx context.Context, req *MsgPayForGas) (*MsgPayForGasResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PayForGas not implemented")
+}
+
+func (*UnimplementedMsgServer) SetRemoteGasData(ctx context.Context, req *MsgSetRemoteGasData) (*MsgSetRemoteGasDataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetRemoteGasData not implemented")
 }
 
 func (*UnimplementedMsgServer) SetGasOracles(ctx context.Context, req *MsgSetGasOracles) (*MsgSetGasOraclesResponse, error) {
@@ -794,6 +929,24 @@ func _Msg_PayForGas_Handler(srv interface{}, ctx context.Context, dec func(inter
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).PayForGas(ctx, req.(*MsgPayForGas))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_SetRemoteGasData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgSetRemoteGasData)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).SetRemoteGasData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/hyperlane.igp.v1.Msg/SetRemoteGasData",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).SetRemoteGasData(ctx, req.(*MsgSetRemoteGasData))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -865,6 +1018,10 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_PayForGas_Handler,
 		},
 		{
+			MethodName: "SetRemoteGasData",
+			Handler:    _Msg_SetRemoteGasData_Handler,
+		},
+		{
 			MethodName: "SetGasOracles",
 			Handler:    _Msg_SetGasOracles_Handler,
 		},
@@ -879,6 +1036,89 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "hyperlane/igp/v1/tx.proto",
+}
+
+func (m *MsgSetRemoteGasData) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgSetRemoteGasData) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgSetRemoteGasData) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size := m.GasPrice.Size()
+		i -= size
+		if _, err := m.GasPrice.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x2a
+	{
+		size := m.TokenExchangeRate.Size()
+		i -= size
+		if _, err := m.TokenExchangeRate.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x22
+	if m.RemoteDomain != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.RemoteDomain))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.IgpId != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.IgpId))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Sender)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgSetRemoteGasDataResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgSetRemoteGasDataResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgSetRemoteGasDataResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
 }
 
 func (m *MsgPayForGas) Marshal() (dAtA []byte, err error) {
@@ -901,20 +1141,35 @@ func (m *MsgPayForGas) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.IgpId != 0 {
+		i = encodeVarintTx(dAtA, i, uint64(m.IgpId))
+		i--
+		dAtA[i] = 0x40
+	}
 	if len(m.RelayerAddress) > 0 {
 		i -= len(m.RelayerAddress)
 		copy(dAtA[i:], m.RelayerAddress)
 		i = encodeVarintTx(dAtA, i, uint64(len(m.RelayerAddress)))
 		i--
-		dAtA[i] = 0x32
+		dAtA[i] = 0x3a
 	}
 	if len(m.RefundAddress) > 0 {
 		i -= len(m.RefundAddress)
 		copy(dAtA[i:], m.RefundAddress)
 		i = encodeVarintTx(dAtA, i, uint64(len(m.RefundAddress)))
 		i--
-		dAtA[i] = 0x2a
+		dAtA[i] = 0x32
 	}
+	{
+		size, err := m.MaximumPayment.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x2a
 	{
 		size := m.GasAmount.Size()
 		i -= size
@@ -1248,6 +1503,16 @@ func (m *MsgCreateIgp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	{
+		size := m.TokenExchangeRateScale.Size()
+		i -= size
+		if _, err := m.TokenExchangeRateScale.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x1a
 	if len(m.Beneficiary) > 0 {
 		i -= len(m.Beneficiary)
 		copy(dAtA[i:], m.Beneficiary)
@@ -1305,6 +1570,38 @@ func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	return base
 }
 
+func (m *MsgSetRemoteGasData) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Sender)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.IgpId != 0 {
+		n += 1 + sovTx(uint64(m.IgpId))
+	}
+	if m.RemoteDomain != 0 {
+		n += 1 + sovTx(uint64(m.RemoteDomain))
+	}
+	l = m.TokenExchangeRate.Size()
+	n += 1 + l + sovTx(uint64(l))
+	l = m.GasPrice.Size()
+	n += 1 + l + sovTx(uint64(l))
+	return n
+}
+
+func (m *MsgSetRemoteGasDataResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
 func (m *MsgPayForGas) Size() (n int) {
 	if m == nil {
 		return 0
@@ -1324,6 +1621,8 @@ func (m *MsgPayForGas) Size() (n int) {
 	}
 	l = m.GasAmount.Size()
 	n += 1 + l + sovTx(uint64(l))
+	l = m.MaximumPayment.Size()
+	n += 1 + l + sovTx(uint64(l))
 	l = len(m.RefundAddress)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
@@ -1331,6 +1630,9 @@ func (m *MsgPayForGas) Size() (n int) {
 	l = len(m.RelayerAddress)
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
+	}
+	if m.IgpId != 0 {
+		n += 1 + sovTx(uint64(m.IgpId))
 	}
 	return n
 }
@@ -1467,6 +1769,8 @@ func (m *MsgCreateIgp) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
+	l = m.TokenExchangeRateScale.Size()
+	n += 1 + l + sovTx(uint64(l))
 	return n
 }
 
@@ -1488,6 +1792,246 @@ func sovTx(x uint64) (n int) {
 
 func sozTx(x uint64) (n int) {
 	return sovTx(uint64((x << 1) ^ uint64((int64(x) >> 63))))
+}
+
+func (m *MsgSetRemoteGasData) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgSetRemoteGasData: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgSetRemoteGasData: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Sender = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IgpId", wireType)
+			}
+			m.IgpId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.IgpId |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field RemoteDomain", wireType)
+			}
+			m.RemoteDomain = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.RemoteDomain |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TokenExchangeRate", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.TokenExchangeRate.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field GasPrice", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.GasPrice.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+
+func (m *MsgSetRemoteGasDataResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgSetRemoteGasDataResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgSetRemoteGasDataResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
 }
 
 func (m *MsgPayForGas) Unmarshal(dAtA []byte) error {
@@ -1638,6 +2182,39 @@ func (m *MsgPayForGas) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MaximumPayment", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.MaximumPayment.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field RefundAddress", wireType)
 			}
 			var stringLen uint64
@@ -1668,7 +2245,7 @@ func (m *MsgPayForGas) Unmarshal(dAtA []byte) error {
 			}
 			m.RefundAddress = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 6:
+		case 7:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field RelayerAddress", wireType)
 			}
@@ -1700,6 +2277,25 @@ func (m *MsgPayForGas) Unmarshal(dAtA []byte) error {
 			}
 			m.RelayerAddress = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
+		case 8:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IgpId", wireType)
+			}
+			m.IgpId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.IgpId |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])
@@ -2558,6 +3154,40 @@ func (m *MsgCreateIgp) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.Beneficiary = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TokenExchangeRateScale", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.TokenExchangeRateScale.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
