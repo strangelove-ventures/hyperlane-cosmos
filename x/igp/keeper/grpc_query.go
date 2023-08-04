@@ -65,11 +65,23 @@ func (k Keeper) QuoteGasPayment(ctx context.Context, req *types.QuoteGasPaymentR
 }
 
 // GetExchangeRateAndGasPrice implements the Query
-func (k Keeper) GetExchangeRateAndGasPrice(c context.Context, req *types.GetExchangeRateAndGasPriceRequest) (*types.GetExchangeRateAndGasPriceResponse, error) {
-	if req == nil || *req == (types.GetExchangeRateAndGasPriceRequest{}) {
+func (k Keeper) GetExchangeRateAndGasPrice(ctx context.Context, req *types.GetExchangeRateAndGasPriceRequest) (*types.GetExchangeRateAndGasPriceResponse, error) {
+	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
-	return &types.GetExchangeRateAndGasPriceResponse{}, nil
-}
 
-// TODO: do these queries need UnpackInterfaces? See: https://github.com/cosmos/cosmos-sdk/issues/8327
+	//TODO: replace with actual IGP from param
+	igp_ph := uint32(0)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	igp, err := k.getIgp(sdkCtx, igp_ph)
+	if err != nil {
+		return nil, err
+	}
+
+	oracle, ok := igp.Oracles[req.DestinationDomain]
+	if !ok {
+		return nil, types.ErrOracleUnauthorized.Wrapf("oracle with destination %d does not exist for IGP %d", req.DestinationDomain, igp.IgpId)
+	}
+
+	return &types.GetExchangeRateAndGasPriceResponse{TokenExchangeRate: oracle.TokenExchangeRate, GasPrice: oracle.GasPrice}, nil
+}

@@ -40,6 +40,10 @@ func TestKeeperTestSuite(t *testing.T) {
 	suite.Run(t, new(KeeperTestSuite))
 }
 
+func NewTestKeeperTestSuite(t *testing.T) *KeeperTestSuite {
+	return new(KeeperTestSuite)
+}
+
 func (suite *KeeperTestSuite) SetupTest() {
 	key := sdk.NewKVStoreKey(types.StoreKey)
 	testCtx := testutil.DefaultContextWithDB(suite.T(), key, sdk.NewTransientStoreKey("transient_test"))
