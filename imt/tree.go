@@ -10,7 +10,7 @@ import (
 
 const (
 	TreeDepth = 32
-	MaxLeaves = uint32(^uint32(0))
+	MaxLeaves = ^uint32(0)
 )
 
 type Tree struct {
@@ -105,8 +105,8 @@ func BranchRoot(item []byte, branch [TreeDepth][]byte, index uint32) ([]byte, er
 	return current, nil
 }
 
-// Returns the proof for the next index
-func (t *Tree) GetProofForNexIndex() (proof [TreeDepth][32]byte) {
+// GetProofForNextIndex returns the proof for the next index.
+func (t *Tree) GetProofForNextIndex() (proof [TreeDepth][32]byte) {
 	zeroHashes := ZeroHashes()
 	index := t.count
 	for i := 0; i < TreeDepth; i++ {
