@@ -100,15 +100,9 @@ message MsgPayForGas {
   cosmos.base.v1beta1.Coin maximum_payment = 5
       [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
 
-  string refund_address = 6 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
-  string relayer_address = 7 [
-    (cosmos_proto.scalar) = "cosmos.AddressString",
-    (gogoproto.nullable) = true
-  ];
-
   // If any IGP other than the default (0) was used, this should be specified.
   // We will use it to check gas costs to make sure the payer is not overpaying.
-  uint32 igp_id = 8;
+  uint32 igp_id = 6;
 }
 
 // MsgPayForGasResponse defines the PayForGas response type.

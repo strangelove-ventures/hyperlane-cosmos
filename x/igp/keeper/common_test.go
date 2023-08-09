@@ -9,6 +9,7 @@ import (
 	govtestutil "github.com/cosmos/cosmos-sdk/x/gov/testutil"
 
 	"github.com/golang/mock/gomock"
+
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
 )
 

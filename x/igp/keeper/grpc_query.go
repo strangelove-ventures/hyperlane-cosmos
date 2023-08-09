@@ -70,8 +70,7 @@ func (k Keeper) GetExchangeRateAndGasPrice(ctx context.Context, req *types.GetEx
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	//TODO: replace with actual IGP from param
-	igp_ph := uint32(0)
+	igp_ph := req.IgpId
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	igp, err := k.getIgp(sdkCtx, igp_ph)
 	if err != nil {

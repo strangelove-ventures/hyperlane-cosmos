@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"cosmossdk.io/math"
+
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
 )
 

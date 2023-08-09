@@ -37,8 +37,8 @@ type KeeperTestSuite struct {
 	bankKeeper    bankKeeper.Keeper
 	queryClient   types.QueryClient
 	msgServer     types.MsgServer
-	payers        []sdk.AccAddress //Addresses that will be funded so they can send mock gas payments
-	beneficiaries []sdk.AccAddress //Addresses that will receive mock gas payments
+	payers        []sdk.AccAddress // Addresses that will be funded so they can send mock gas payments
+	beneficiaries []sdk.AccAddress // Addresses that will receive mock gas payments
 	encCfg        moduletestutil.TestEncodingConfig
 }
 
@@ -52,9 +52,6 @@ func (suite *KeeperTestSuite) SetupTest(t *testing.T) {
 	ctx := testCtx.Ctx.WithBlockHeader(tmproto.Header{Time: tmtime.Now()})
 	encCfg := moduletestutil.MakeTestEncodingConfig()
 	banktypes.RegisterInterfaces(encCfg.InterfaceRegistry)
-
-	// Create MsgServiceRouter, but don't populate it before creating the igp keeper
-	msr := baseapp.NewMsgServiceRouter()
 
 	// gomock initializations
 	ctrl := gomock.NewController(t)
@@ -85,9 +82,14 @@ func (suite *KeeperTestSuite) SetupTest(t *testing.T) {
 	types.RegisterQueryServer(queryHelper, suite.keeper)
 	queryClient := types.NewQueryClient(queryHelper)
 	msgServer := keeper.NewMsgServerImpl(suite.keeper)
-	types.RegisterMsgServer(msr, msgServer)
 
 	suite.queryClient = queryClient
 	suite.msgServer = msgServer
 	suite.encCfg = encCfg
+}
+
+func (suite *KeeperTestSuite) mockQueryClient(ctx sdk.Context) types.QueryClient {
+	queryHelper := baseapp.NewQueryServerTestHelper(ctx, suite.encCfg.InterfaceRegistry)
+	banktypes.RegisterQueryServer(queryHelper, suite.bankKeeper)
+	return types.NewQueryClient(queryHelper)
 }

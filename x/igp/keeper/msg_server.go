@@ -21,23 +21,24 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 // PayForGas Make payments for relayer to deliver message to a destination domain
 func (k Keeper) PayForGas(goCtx context.Context, msg *types.MsgPayForGas) (*types.MsgPayForGasResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	igp, err := k.getIgp(ctx, msg.IgpId)
+	if err != nil {
+		return nil, err
+	}
+
+	beneficiary := igp.GetBeneficiary()
+	if beneficiary == "" {
+		beneficiary = igp.GetOwner()
+	}
 
 	sender, err := sdk.AccAddressFromBech32(msg.Sender)
 	if err != nil {
 		return nil, err
 	}
 
-	var relayer sdk.AccAddress
-	if msg.RelayerAddress != "" {
-		relayer, err = sdk.AccAddressFromBech32(msg.RelayerAddress)
-		if err != nil {
-			return nil, types.ErrInvalidRelayer.Wrapf("relayer %s is not a valid bech32 address", msg.RelayerAddress)
-		}
-	} else {
-		relayer = k.getDefaultRelayer(ctx)
-		if relayer == nil {
-			return nil, types.ErrInvalidRelayer.Wrapf("default relayer is not configured. include a relayer in MsgPayForGas.")
-		}
+	beneficiaryAcc, err := sdk.AccAddressFromBech32(beneficiary)
+	if err != nil {
+		return nil, err
 	}
 
 	// Get the expected payment amount and denomination
@@ -56,7 +57,7 @@ func (k Keeper) PayForGas(goCtx context.Context, msg *types.MsgPayForGas) (*type
 		return nil, errors.New("insufficient payment")
 	}
 
-	store := k.getGasPaidStore(ctx, msg.DestinationDomain, relayer)
+	store := k.getGasPaidStore(ctx, msg.DestinationDomain, beneficiaryAcc)
 
 	// message gas is already paid for, deny another payment
 	if store.Has([]byte(msg.MessageId)) {
@@ -67,7 +68,7 @@ func (k Keeper) PayForGas(goCtx context.Context, msg *types.MsgPayForGas) (*type
 
 	// This implementation does not require that beneficiaries Claim() payments.
 	// The payment is sent directly to the beneficiary (not escrowed).
-	k.sendKeeper.SendCoins(ctx, sender, relayer, sdk.NewCoins(gasPayment))
+	k.sendKeeper.SendCoins(ctx, sender, beneficiaryAcc, sdk.NewCoins(gasPayment))
 	if err != nil {
 		return nil, err
 	}
@@ -223,6 +224,17 @@ func (k Keeper) CreateIgp(goCtx context.Context, msg *types.MsgCreateIgp) (*type
 	}
 	newIgp.IgpId = igp_id
 	k.setIgp(ctx, &newIgp)
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeCreateIgp,
+			sdk.NewAttribute(types.AttributeIgpId, strconv.FormatUint(uint64(igp_id), 10)),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
+		),
+	})
+
 	return &types.MsgCreateIgpResponse{IgpId: igp_id}, nil
 }
 
@@ -241,6 +253,18 @@ func (k Keeper) SetBeneficiary(goCtx context.Context, msg *types.MsgSetBeneficia
 
 	igp.Beneficiary = msg.Address
 	k.setIgp(ctx, igp)
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeSetBeneficiary,
+			sdk.NewAttribute(types.AttributeIgpId, strconv.FormatUint(uint64(msg.IgpId), 10)),
+			sdk.NewAttribute(types.AttributeBeneficiary, msg.Address),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
+		),
+	})
 
 	return &types.MsgSetBeneficiaryResponse{}, nil
 }

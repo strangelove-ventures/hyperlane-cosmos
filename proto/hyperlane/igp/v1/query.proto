@@ -69,7 +69,10 @@ message QuoteGasPaymentResponse {
 
 // GetExchangeRateAndGasPriceRequest is the request type for the Query/Tree RPC
 // method.
-message GetExchangeRateAndGasPriceRequest { uint32 destination_domain = 1; }
+message GetExchangeRateAndGasPriceRequest {
+  uint32 destination_domain = 1;
+  uint32 igp_id = 2;
+}
 
 // GetExchangeRateAndGasPriceResponse is the response type for the Query/Tree
 // RPC method.
