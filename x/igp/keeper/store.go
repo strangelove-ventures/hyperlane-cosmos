@@ -43,6 +43,9 @@ func (k Keeper) getIgp(ctx sdk.Context, igp_id uint32) (*types.Igp, error) {
 	}
 
 	err := igp.Unmarshal(igpB)
+	if err == nil && igp.Oracles == nil {
+		igp.Oracles = map[uint32]*types.GasOracle{}
+	}
 	return &igp, err
 }
 

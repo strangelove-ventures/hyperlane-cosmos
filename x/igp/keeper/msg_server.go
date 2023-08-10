@@ -68,7 +68,7 @@ func (k Keeper) PayForGas(goCtx context.Context, msg *types.MsgPayForGas) (*type
 
 	// This implementation does not require that beneficiaries Claim() payments.
 	// The payment is sent directly to the beneficiary (not escrowed).
-	k.sendKeeper.SendCoins(ctx, sender, beneficiaryAcc, sdk.NewCoins(gasPayment))
+	err = k.sendKeeper.SendCoins(ctx, sender, beneficiaryAcc, sdk.NewCoins(gasPayment))
 	if err != nil {
 		return nil, err
 	}
@@ -152,6 +152,7 @@ func (k Keeper) SetDestinationGasOverhead(goCtx context.Context, msg *types.MsgS
 
 // SetGasOracles defines a rpc handler method for MsgSetGasOracles
 func (k Keeper) SetGasOracles(goCtx context.Context, msg *types.MsgSetGasOracles) (*types.MsgSetGasOraclesResponse, error) {
+	var err error
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	if len(msg.Configs) == 0 {
@@ -160,13 +161,15 @@ func (k Keeper) SetGasOracles(goCtx context.Context, msg *types.MsgSetGasOracles
 
 	igps := map[uint32]*types.Igp{}
 
+	events := sdk.Events{}
+
 	for _, oracleConfig := range msg.Configs {
 		var igp *types.Igp
 
 		// Lookup the IGP
 		igp, ok := igps[oracleConfig.IgpId]
 		if !ok {
-			igp, err := k.getIgp(ctx, oracleConfig.IgpId)
+			igp, err = k.getIgp(ctx, oracleConfig.IgpId)
 			if err != nil {
 				return nil, err
 			}
@@ -183,18 +186,35 @@ func (k Keeper) SetGasOracles(goCtx context.Context, msg *types.MsgSetGasOracles
 
 			oracle = &types.GasOracle{}
 			igp.Oracles[oracleConfig.RemoteDomain] = oracle
+
+			events = events.AppendEvent(sdk.NewEvent(
+				types.EventTypeCreateOracle,
+				sdk.NewAttribute(types.AttributeOracleAddress, oracleConfig.GasOracle),
+			))
 		} else {
 			// This is an existing oracle, confirm authorization to update it.
 			// The oracle can be updated if the msg.Sender owns the IGP or the oracle itself.
 			if igp.Owner != msg.Sender && oracle.GasOracle != msg.Sender {
 				return nil, types.ErrOracleUnauthorized.Wrapf("account %s is unauthorized to configure existing oracle for IGP %d with owner %s", msg.Sender, igp.IgpId, igp.Owner)
 			}
+
+			events = events.AppendEvent(sdk.NewEvent(
+				types.EventTypeUpdateOracle,
+				sdk.NewAttribute(types.AttributeOracleAddress, oracleConfig.GasOracle),
+			))
 		}
 
+		// TODO: set gas prices, overhead (optional)
 		// Configure the address that can update the gas oracle config
 		oracle.GasOracle = oracleConfig.GasOracle
-		// TODO: set gas prices, overhead (optional)
+		k.setIgp(ctx, igp)
 	}
+
+	events = events.AppendEvent(sdk.NewEvent(
+		sdk.EventTypeMessage,
+		sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
+	))
+	ctx.EventManager().EmitEvents(events)
 
 	return &types.MsgSetGasOraclesResponse{}, nil
 }

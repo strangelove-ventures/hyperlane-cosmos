@@ -98,6 +98,110 @@ func (suite *KeeperTestSuite) mockCreateIgp(sender string, recipient string, sca
 	return resp.IgpId, err
 }
 
+func (suite *KeeperTestSuite) mockCreateOracle(signer string, gasOracleAddr string, igpId uint32, remoteDomain uint32) (*types.MsgSetGasOraclesResponse, error) {
+	msg := &types.MsgSetGasOracles{
+		Sender: signer,
+		Configs: []*types.GasOracleConfig{
+			{
+				IgpId:        igpId,
+				GasOracle:    gasOracleAddr,
+				RemoteDomain: remoteDomain,
+			},
+		},
+	}
+	return suite.msgServer.SetGasOracles(suite.ctx, msg)
+}
+
+func (suite *KeeperTestSuite) TestCreateOracle() {
+	var igpId uint32
+	var err error
+	var signer string
+	var oracleCreateOrUpdateEvt sdk.Event
+
+	igpBeneficiary := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
+	oracleAddr := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
+	remoteDomain := uint32(1)
+
+	testCases := []struct {
+		name     string
+		malleate func()
+		expPass  bool
+	}{
+		{
+			"success - create new Oracle",
+			func() {
+				signer = "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
+				igpId, err = suite.mockCreateIgp(signer, igpBeneficiary, math.ZeroInt())
+				suite.Require().NoError(err)
+				oracleCreateOrUpdateEvt = sdk.NewEvent(
+					types.EventTypeCreateOracle,
+					sdk.NewAttribute(types.AttributeOracleAddress, oracleAddr),
+				)
+			},
+			true,
+		},
+		{
+			"success - update existing Oracle",
+			func() {
+				signer = "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
+				igpId, err = suite.mockCreateIgp(signer, igpBeneficiary, math.ZeroInt())
+				suite.Require().NoError(err)
+				_, err := suite.mockCreateOracle(signer, oracleAddr, igpId, remoteDomain)
+				suite.Require().NoError(err)
+
+				// Confirms that the oracle was created and persisted to storage (causing an update event on second call to mockCreateOracle)
+				oracleCreateOrUpdateEvt = sdk.NewEvent(
+					types.EventTypeUpdateOracle,
+					sdk.NewAttribute(types.AttributeOracleAddress, oracleAddr),
+				)
+			},
+			true,
+		},
+		{
+			"failed, address unauthorized to update oracle",
+			func() {
+				signer = "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
+				igpId, err = suite.mockCreateIgp(signer, igpBeneficiary, math.ZeroInt())
+				suite.Require().NoError(err)
+				signer = oracleAddr // This will cause an unauthorized response; oracle cannot update an IGP it did not create
+			},
+			false,
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			suite.SetupTest(suite.T())
+			tc.malleate()
+
+			oracleResp, err := suite.mockCreateOracle(signer, oracleAddr, igpId, remoteDomain)
+
+			events := suite.ctx.EventManager().Events()
+
+			// Verify events
+			expectedEvents := sdk.Events{
+				oracleCreateOrUpdateEvt,
+				sdk.NewEvent(
+					sdk.EventTypeMessage,
+					sdk.NewAttribute(types.AttributeKeySender, signer),
+				),
+			}
+
+			if tc.expPass {
+				for _, evt := range expectedEvents {
+					suite.Require().Contains(events, evt)
+				}
+
+				suite.Require().NoError(err)
+				suite.Require().NotNil(oracleResp)
+			} else {
+				suite.Require().Nil(oracleResp)
+				suite.Require().Error(err)
+			}
+		})
+	}
+}
+
 func (suite *KeeperTestSuite) TestSetBeneficiary() {
 	var msg *types.MsgSetBeneficiary
 

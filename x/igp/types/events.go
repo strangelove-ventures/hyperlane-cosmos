@@ -4,9 +4,12 @@ const (
 	EventTypeGasDataSet     = "remotegasdataset"
 	EventTypeSetGasOverhead = "destinationgasoverheadset"
 	EventTypeCreateIgp      = "createigp"
+	EventTypeUpdateOracle   = "updateoracle"
+	EventTypeCreateOracle   = "createoracle"
 	EventTypeSetBeneficiary = "setbeneficiary"
-	AttributeIgpId          = "igpid"
 
+	AttributeIgpId             = "igpid"
+	AttributeOracleAddress     = "oracle"
 	AttributeBeneficiary       = "beneficiary"
 	AttributeRemoteDomain      = "remotedomain"
 	AttributeTokenExchangeRate = "tokenexchangerate"
