@@ -1,6 +1,7 @@
 package types
 
 const (
+	EventTypePayForGas      = "payforgas"
 	EventTypeGasDataSet     = "remotegasdataset"
 	EventTypeSetGasOverhead = "destinationgasoverheadset"
 	EventTypeCreateIgp      = "createigp"
@@ -16,5 +17,6 @@ const (
 	AttributeGasPrice          = "gasprice"
 	AttributeDestination       = "destination"
 	AttributeOverheadAmount    = "amount"
+	AttributePayment           = "payment"
 	AttributeKeySender         = "sender"
 )

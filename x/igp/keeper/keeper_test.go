@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	bankKeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govtestutil "github.com/cosmos/cosmos-sdk/x/gov/testutil"
@@ -31,15 +30,11 @@ var (
 type KeeperTestSuite struct {
 	suite.Suite
 
-	ctx           sdk.Context
-	igpctx        sdk.Context
-	keeper        keeper.Keeper
-	bankKeeper    bankKeeper.Keeper
-	queryClient   types.QueryClient
-	msgServer     types.MsgServer
-	payers        []sdk.AccAddress // Addresses that will be funded so they can send mock gas payments
-	beneficiaries []sdk.AccAddress // Addresses that will receive mock gas payments
-	encCfg        moduletestutil.TestEncodingConfig
+	ctx         sdk.Context
+	keeper      keeper.Keeper
+	queryClient types.QueryClient
+	msgServer   types.MsgServer
+	encCfg      moduletestutil.TestEncodingConfig
 }
 
 func TestKeeperTestSuite(t *testing.T) {
@@ -86,10 +81,4 @@ func (suite *KeeperTestSuite) SetupTest(t *testing.T) {
 	suite.queryClient = queryClient
 	suite.msgServer = msgServer
 	suite.encCfg = encCfg
-}
-
-func (suite *KeeperTestSuite) mockQueryClient(ctx sdk.Context) types.QueryClient {
-	queryHelper := baseapp.NewQueryServerTestHelper(ctx, suite.encCfg.InterfaceRegistry)
-	banktypes.RegisterQueryServer(queryHelper, suite.bankKeeper)
-	return types.NewQueryClient(queryHelper)
 }

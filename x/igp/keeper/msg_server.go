@@ -72,6 +72,20 @@ func (k Keeper) PayForGas(goCtx context.Context, msg *types.MsgPayForGas) (*type
 	if err != nil {
 		return nil, err
 	}
+
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypePayForGas,
+			sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
+			sdk.NewAttribute(types.AttributeBeneficiary, beneficiary),
+			sdk.NewAttribute(types.AttributePayment, gasPayment.String()),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
+		),
+	})
+
 	store.Set([]byte(msg.MessageId), []byte(gasPayment.String()))
 	return &types.MsgPayForGasResponse{}, nil
 }
@@ -230,7 +244,7 @@ func (k Keeper) CreateIgp(goCtx context.Context, msg *types.MsgCreateIgp) (*type
 	newIgp := types.Igp{
 		Owner:                  msg.Sender,
 		Beneficiary:            msg.Beneficiary,
-		TokenExchangeRateScale: msg.TokenExchangeRateScale,
+		TokenExchangeRateScale: math.NewInt(1e10),
 	}
 
 	igp_id := uint32(0)

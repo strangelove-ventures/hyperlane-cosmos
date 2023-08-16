@@ -1,6 +1,9 @@
 package keeper_test
 
 import (
+	"math/big"
+	"strconv"
+
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -112,6 +115,42 @@ func (suite *KeeperTestSuite) mockCreateOracle(signer string, gasOracleAddr stri
 	return suite.msgServer.SetGasOracles(suite.ctx, msg)
 }
 
+func (suite *KeeperTestSuite) mockSetGasOverhead(signer string, igpId uint32, remoteDomain uint32, gasOverhead math.Int) (*types.MsgSetDestinationGasOverheadResponse, error) {
+	msg := &types.MsgSetDestinationGasOverhead{
+		Sender:            signer,
+		DestinationDomain: remoteDomain,
+		GasOverhead:       gasOverhead,
+		IgpId:             igpId,
+	}
+	return suite.msgServer.SetDestinationGasOverhead(suite.ctx, msg)
+}
+
+func (suite *KeeperTestSuite) mockSetGasPrices(signer string, igpId uint32, remoteDomain uint32, gasPrice math.Int, exchRate math.Int) (*types.MsgSetRemoteGasDataResponse, error) {
+	msg := &types.MsgSetRemoteGasData{
+		Sender:            signer,
+		RemoteDomain:      remoteDomain,
+		GasPrice:          gasPrice,
+		IgpId:             igpId,
+		TokenExchangeRate: exchRate,
+	}
+	return suite.msgServer.SetRemoteGasData(suite.ctx, msg)
+}
+
+func (suite *KeeperTestSuite) mockPayForGas(igpId uint32, signer string, messageId string, remoteDomain uint32, gasAmount math.Int, maxPayment sdk.Coin) (*types.MsgPayForGasResponse, error) {
+	msg := &types.MsgPayForGas{
+		Sender:            signer,
+		MessageId:         messageId,
+		DestinationDomain: remoteDomain,
+		GasAmount:         gasAmount,
+		MaximumPayment:    maxPayment,
+		IgpId:             igpId,
+	}
+	return suite.msgServer.PayForGas(suite.ctx, msg)
+}
+
+func (suite *KeeperTestSuite) TestExpectedGasPayments() {
+}
+
 func (suite *KeeperTestSuite) TestCreateOracle() {
 	var igpId uint32
 	var err error
@@ -202,6 +241,171 @@ func (suite *KeeperTestSuite) TestCreateOracle() {
 	}
 }
 
+func (suite *KeeperTestSuite) TestSetGasPrices() {
+	var igpId uint32
+	var err error
+	var gasPriceMsgSigner string
+	var resp *types.MsgSetRemoteGasDataResponse
+	oracleAddr := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
+	igpCreator := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
+	igpBeneficiary := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
+	remoteDomain := uint32(1)
+	gasPrice := math.NewInt(10000)
+	exchangeRate := math.NewInt(10000)
+
+	testCases := []struct {
+		name     string
+		malleate func()
+		expPass  bool
+	}{
+		{
+			"success - oracle sets gas prices",
+			func() {
+				gasPriceMsgSigner = oracleAddr
+				igpId, err = suite.mockCreateIgp(igpCreator, igpBeneficiary, math.ZeroInt())
+				suite.Require().NoError(err)
+				_, err = suite.mockCreateOracle(igpCreator, oracleAddr, igpId, remoteDomain)
+				suite.Require().NoError(err)
+			},
+			true,
+		},
+		{
+			"fail - igp owner sets gas overhead",
+			func() {
+				gasPriceMsgSigner = igpBeneficiary
+				igpId, err = suite.mockCreateIgp(igpCreator, igpBeneficiary, math.ZeroInt())
+				suite.Require().NoError(err)
+				_, err = suite.mockCreateOracle(igpCreator, oracleAddr, igpId, remoteDomain)
+				suite.Require().NoError(err)
+			},
+			false,
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			suite.SetupTest(suite.T())
+			tc.malleate()
+
+			resp, err = suite.mockSetGasPrices(gasPriceMsgSigner, igpId, remoteDomain, gasPrice, exchangeRate)
+			events := suite.ctx.EventManager().Events()
+
+			// Verify events
+			expectedEvents := sdk.Events{
+				sdk.NewEvent(
+					types.EventTypeGasDataSet,
+					sdk.NewAttribute(types.AttributeRemoteDomain, strconv.FormatUint(uint64(remoteDomain), 10)),
+					sdk.NewAttribute(types.AttributeTokenExchangeRate, exchangeRate.String()),
+					sdk.NewAttribute(types.AttributeGasPrice, gasPrice.String()),
+				),
+				sdk.NewEvent(
+					sdk.EventTypeMessage,
+					sdk.NewAttribute(types.AttributeKeySender, gasPriceMsgSigner),
+				),
+			}
+
+			if tc.expPass {
+				for _, evt := range expectedEvents {
+					suite.Require().Contains(events, evt)
+				}
+
+				suite.Require().NoError(err)
+				suite.Require().NotNil(resp)
+			} else {
+				suite.Require().Nil(resp)
+				suite.Require().Error(err)
+			}
+		})
+	}
+}
+
+func (suite *KeeperTestSuite) TestSetGasOverhead() {
+	var igpId uint32
+	var err error
+	var gasOhMsgSigner string
+	var resp *types.MsgSetDestinationGasOverheadResponse
+	oracleAddr := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
+	igpCreator := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
+	igpBeneficiary := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
+	remoteDomain := uint32(1)
+	overhead := math.NewInt(10000)
+
+	testCases := []struct {
+		name     string
+		malleate func()
+		expPass  bool
+	}{
+		{
+			"success - igp owner sets gas overhead",
+			func() {
+				gasOhMsgSigner = igpCreator
+				igpId, err = suite.mockCreateIgp(igpCreator, igpBeneficiary, math.ZeroInt())
+				suite.Require().NoError(err)
+				_, err = suite.mockCreateOracle(igpCreator, oracleAddr, igpId, remoteDomain)
+				suite.Require().NoError(err)
+			},
+			true,
+		},
+		{
+			"success - oracle sets gas overhead",
+			func() {
+				gasOhMsgSigner = oracleAddr
+				igpId, err = suite.mockCreateIgp(igpCreator, igpBeneficiary, math.ZeroInt())
+				suite.Require().NoError(err)
+				_, err = suite.mockCreateOracle(igpCreator, oracleAddr, igpId, remoteDomain)
+				suite.Require().NoError(err)
+			},
+			true,
+		},
+		{
+			"fail - unauthorized address sets gas overhead",
+			func() {
+				gasOhMsgSigner = igpBeneficiary
+				igpId, err = suite.mockCreateIgp(igpCreator, igpBeneficiary, math.ZeroInt())
+				suite.Require().NoError(err)
+				_, err = suite.mockCreateOracle(igpCreator, oracleAddr, igpId, remoteDomain)
+				suite.Require().NoError(err)
+			},
+			false,
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			suite.SetupTest(suite.T())
+			tc.malleate()
+
+			resp, err = suite.mockSetGasOverhead(gasOhMsgSigner, igpId, remoteDomain, overhead)
+			events := suite.ctx.EventManager().Events()
+
+			// Verify events
+			expectedEvents := sdk.Events{
+				sdk.NewEvent(
+					types.EventTypeSetGasOverhead,
+					sdk.NewAttribute(types.AttributeDestination, strconv.FormatUint(uint64(remoteDomain), 10)),
+					sdk.NewAttribute(types.AttributeOverheadAmount, overhead.String()),
+				),
+				sdk.NewEvent(
+					sdk.EventTypeMessage,
+					sdk.NewAttribute(types.AttributeKeySender, gasOhMsgSigner),
+				),
+			}
+
+			if tc.expPass {
+				for _, evt := range expectedEvents {
+					suite.Require().Contains(events, evt)
+				}
+
+				suite.Require().NoError(err)
+				suite.Require().NotNil(resp)
+			} else {
+				suite.Require().Nil(resp)
+				suite.Require().Error(err)
+			}
+		})
+	}
+}
+
 func (suite *KeeperTestSuite) TestSetBeneficiary() {
 	var msg *types.MsgSetBeneficiary
 
@@ -271,6 +475,103 @@ func (suite *KeeperTestSuite) TestSetBeneficiary() {
 				suite.Require().NotNil(resp)
 			} else {
 				suite.Require().Nil(resp)
+				suite.Require().Error(err)
+			}
+		})
+	}
+}
+
+func (suite *KeeperTestSuite) TestPayForGas() {
+	var igpId uint32
+	var err error
+	var nativeTokensOwedResp *types.QuoteGasPaymentResponse
+	var paymentResp *types.MsgPayForGasResponse
+	var exchangeRate math.Int
+	var gasPrice math.Int
+	var maxPayment sdk.Coin
+
+	testGasAmount := math.NewInt(300000)
+	testMessageId := "6ae9a99190641b9ed0c07143340612dde0e9cb7deaa5fe07597858ae9ba5fd7f"
+	oracleAddr := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
+	igpCreator := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
+	igpBeneficiary := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
+	payer := "cosmos1tk52y0w6cwcjzcumlcqwwj0u6l9yzn07mvtchw"
+	testDestinationDomain := uint32(1)
+	bi := big.NewInt(0)
+	bi, biSet := bi.SetString("2250000000000000000000", 10)
+	suite.Require().True(biSet)
+	quoteExpected := math.NewIntFromBigInt(bi)
+
+	// Most test cases based on hyperlane monorepo test cases found at solidity/test/igps/InterchainGasPaymaster.t.sol
+	testCases := []struct {
+		name     string
+		malleate func()
+		expPass  bool
+	}{
+		{
+			// This test case corresponds to the hyperlane monorepo testQuoteGasPaymentRemoteVeryExpensive.
+			// 300,000 destination gas
+			// 1500 gwei = 1500000000000 wei
+			// 300,000 * 1500000000000 = 450000000000000000 (0.45 remote eth)
+			// Using the 5000 token exchange rate, meaning the remote native token
+			// is 5000x more valuable than the local token:
+			// 450000000000000000 * 5000 = 2250000000000000000000 (2250 local eth)
+
+			"success - expensive remote",
+			func() {
+				exchangeRate = math.NewInt(5000 * 1e10)
+				gasPrice = math.NewInt(1500 * 1e9)
+				maxPayment = sdk.NewCoin("stake", math.NewIntFromBigInt(bi))
+
+				igpId, err = suite.mockCreateIgp(igpCreator, igpBeneficiary, math.ZeroInt())
+				suite.Require().NoError(err)
+				_, err = suite.mockCreateOracle(igpCreator, oracleAddr, igpId, testDestinationDomain)
+				suite.Require().NoError(err)
+				_, err = suite.mockSetGasPrices(oracleAddr, igpId, testDestinationDomain, gasPrice, exchangeRate)
+				suite.Require().NoError(err)
+			},
+			true,
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			suite.SetupTest(suite.T())
+			tc.malleate()
+
+			// Get the expected payment amount and denomination
+			nativeTokensOwedResp, err = suite.queryClient.QuoteGasPayment(suite.ctx, &types.QuoteGasPaymentRequest{IgpId: igpId, DestinationDomain: testDestinationDomain, GasAmount: testGasAmount})
+			suite.Require().NoError(err)
+			suite.Require().Equal(quoteExpected, nativeTokensOwedResp.Amount)
+
+			coinExpected := nativeTokensOwedResp.Amount.String() + nativeTokensOwedResp.Denom
+			paymentResp, err = suite.mockPayForGas(igpId, payer, testMessageId, testDestinationDomain, testGasAmount, maxPayment)
+
+			events := suite.ctx.EventManager().Events()
+
+			// Verify events
+			expectedEvents := sdk.Events{
+				sdk.NewEvent(
+					types.EventTypePayForGas,
+					sdk.NewAttribute(types.AttributeKeySender, payer),
+					sdk.NewAttribute(types.AttributeBeneficiary, igpBeneficiary),
+					sdk.NewAttribute(types.AttributePayment, coinExpected),
+				),
+				sdk.NewEvent(
+					sdk.EventTypeMessage,
+					sdk.NewAttribute(types.AttributeKeySender, payer),
+				),
+			}
+
+			if tc.expPass {
+				for _, evt := range expectedEvents {
+					suite.Require().Contains(events, evt)
+				}
+
+				suite.Require().NoError(err)
+				suite.Require().NotNil(paymentResp)
+			} else {
+				suite.Require().Nil(paymentResp)
 				suite.Require().Error(err)
 			}
 		})
