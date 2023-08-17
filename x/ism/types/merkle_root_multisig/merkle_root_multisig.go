@@ -1,9 +1,9 @@
 package merkle_root_multisig
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
-	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"

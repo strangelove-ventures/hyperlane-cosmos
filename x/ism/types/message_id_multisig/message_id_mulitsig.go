@@ -1,9 +1,9 @@
 package message_id_multisig
 
 import (
+	"fmt"
 	"reflect"
 	"strconv"
-	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -79,7 +79,7 @@ func (i *MessageIdMultiSig) VerifyValidatorSignatures(metadata []byte, message [
 				return false
 			}
 			if reflect.DeepEqual(signerAddress.Bytes(), valAddress) {
-				break;
+				break
 			}
 			validatorIndex++
 		}

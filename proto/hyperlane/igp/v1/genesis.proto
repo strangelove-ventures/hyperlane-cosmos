@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package hyperlane.igp.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types";
+
+// Hyperlane InterchainGasPaymaster's keeper genesis state
+message GenesisState { option (gogoproto.goproto_getters) = false; }

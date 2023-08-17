@@ -17,9 +17,9 @@ import (
 	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/message_id_multisig"
-	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
 
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -38,6 +38,10 @@ type KeeperTestSuite struct {
 
 func TestKeeperTestSuite(t *testing.T) {
 	suite.Run(t, new(KeeperTestSuite))
+}
+
+func NewTestKeeperTestSuite(t *testing.T) *KeeperTestSuite {
+	return new(KeeperTestSuite)
 }
 
 func (suite *KeeperTestSuite) SetupTest() {
