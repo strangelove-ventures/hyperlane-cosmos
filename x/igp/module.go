@@ -29,12 +29,12 @@ var (
 // a no-op.
 type AppModuleBasic struct{}
 
-// Name returns the hyperlane ISM module name.
+// Name returns the hyperlane IGP module name.
 func (AppModuleBasic) Name() string {
 	return types.ModuleName
 }
 
-// RegisterLegacyAminoCodec performs a no-op. Hyperlane ISM does not support amino.
+// RegisterLegacyAminoCodec performs a no-op. Hyperlane IGP does not support amino.
 func (AppModuleBasic) RegisterLegacyAminoCodec(*codec.LegacyAmino) {}
 
 // RegisterInterfaces registers module concrete types into protobuf Any.
@@ -98,11 +98,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, bz json.Ra
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal %s genesis state: %s", am.Name(), err)
 	}
-	err = am.keeper.InitGenesis(ctx, gs)
-	if err != nil {
-		return err
-	}
-	return nil
+	return am.keeper.InitGenesis(ctx, gs)
 }
 
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {

@@ -14,6 +14,5 @@ func (k Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
 
 // ExportGenesis returns the hyperlane IGP module's exported genesis.
 func (k Keeper) ExportGenesis(ctx sdk.Context) types.GenesisState {
-	var genesisState types.GenesisState
-	return genesisState
+	return types.GenesisState{}
 }
