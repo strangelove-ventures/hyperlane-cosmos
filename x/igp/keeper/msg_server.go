@@ -109,7 +109,10 @@ func (k Keeper) SetRemoteGasData(goCtx context.Context, msg *types.MsgSetRemoteG
 	// Store the updated exchange rate and gas price for the oracle
 	oracle.GasPrice = msg.GasPrice
 	oracle.TokenExchangeRate = msg.TokenExchangeRate
-	k.setIgp(ctx, igp)
+	err = k.setIgp(ctx, igp)
+	if err != nil {
+		return nil, err
+	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
@@ -148,7 +151,10 @@ func (k Keeper) SetDestinationGasOverhead(goCtx context.Context, msg *types.MsgS
 
 	// Configure the gas overhead for the oracle
 	oracle.GasOverhead = msg.GasOverhead
-	k.setIgp(ctx, igp)
+	err = k.setIgp(ctx, igp)
+	if err != nil {
+		return nil, err
+	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
@@ -218,10 +224,12 @@ func (k Keeper) SetGasOracles(goCtx context.Context, msg *types.MsgSetGasOracles
 			))
 		}
 
-		// TODO: set gas prices, overhead (optional)
 		// Configure the address that can update the gas oracle config
 		oracle.GasOracle = oracleConfig.GasOracle
-		k.setIgp(ctx, igp)
+		err = k.setIgp(ctx, igp)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	events = events.AppendEvent(sdk.NewEvent(
@@ -257,7 +265,11 @@ func (k Keeper) CreateIgp(goCtx context.Context, msg *types.MsgCreateIgp) (*type
 		igp_id += 1
 	}
 	newIgp.IgpId = igp_id
-	k.setIgp(ctx, &newIgp)
+	err := k.setIgp(ctx, &newIgp)
+	if err != nil {
+		return nil, err
+	}
+
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeCreateIgp,
@@ -286,7 +298,10 @@ func (k Keeper) SetBeneficiary(goCtx context.Context, msg *types.MsgSetBeneficia
 	}
 
 	igp.Beneficiary = msg.Address
-	k.setIgp(ctx, igp)
+	err = k.setIgp(ctx, igp)
+	if err != nil {
+		return nil, err
+	}
 
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
