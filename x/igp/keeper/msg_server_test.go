@@ -4,6 +4,8 @@ import (
 	"math/big"
 	"strconv"
 
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
+
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -484,6 +486,7 @@ func (suite *KeeperTestSuite) TestSetBeneficiary() {
 func (suite *KeeperTestSuite) TestPayForGas() {
 	var igpId uint32
 	var err error
+	var oracleAddr, igpCreator, igpBeneficiary, payer string
 	var nativeTokensOwedResp *types.QuoteGasPaymentResponse
 	var paymentResp *types.MsgPayForGasResponse
 	var exchangeRate math.Int
@@ -492,15 +495,9 @@ func (suite *KeeperTestSuite) TestPayForGas() {
 
 	testGasAmount := math.NewInt(300000)
 	testMessageId := "6ae9a99190641b9ed0c07143340612dde0e9cb7deaa5fe07597858ae9ba5fd7f"
-	oracleAddr := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
-	igpCreator := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
-	igpBeneficiary := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
-	payer := "cosmos1tk52y0w6cwcjzcumlcqwwj0u6l9yzn07mvtchw"
 	testDestinationDomain := uint32(1)
 	bi := big.NewInt(0)
-	bi, biSet := bi.SetString("2250000000000000000000", 10)
-	suite.Require().True(biSet)
-	quoteExpected := math.NewIntFromBigInt(bi)
+	var quoteExpected math.Int
 
 	// Most test cases based on hyperlane monorepo test cases found at solidity/test/igps/InterchainGasPaymaster.t.sol
 	testCases := []struct {
@@ -508,6 +505,52 @@ func (suite *KeeperTestSuite) TestPayForGas() {
 		malleate func()
 		expPass  bool
 	}{
+		{
+			// Force an insufficient payment by setting the max allowed payment to one less than the quoteGasPayment (expected amount owed)
+			"failure - insufficient payment",
+			func() {
+				exchangeRate = math.NewInt(1e10)
+				gasPrice = math.NewInt(1)
+				maxPayment = sdk.NewCoin("stake", math.NewIntFromBigInt(bi))
+				quoteExpected = testGasAmount // The exchange rate equals the scale factor (so they divide out to "1", and the price is 1)
+
+				igpId, err = suite.mockCreateIgp(igpCreator, igpBeneficiary, math.ZeroInt())
+				suite.Require().NoError(err)
+				_, err = suite.mockCreateOracle(igpCreator, oracleAddr, igpId, testDestinationDomain)
+				suite.Require().NoError(err)
+				_, err = suite.mockSetGasPrices(oracleAddr, igpId, testDestinationDomain, gasPrice, exchangeRate)
+				suite.Require().NoError(err)
+
+				// Get the expected payment amount and denomination
+				nativeTokensOwedResp, err = suite.queryClient.QuoteGasPayment(suite.ctx, &types.QuoteGasPaymentRequest{IgpId: igpId, DestinationDomain: testDestinationDomain, GasAmount: testGasAmount})
+				suite.Require().NoError(err)
+				maxPayment = sdk.NewCoin("stake", math.NewInt(nativeTokensOwedResp.Amount.Int64()-1))
+			},
+			false,
+		},
+		{
+			// Same exact test case as above, except that the max payment equals the owed payment, so we expect it to pass now
+			"success - max payment is expected payment",
+			func() {
+				exchangeRate = math.NewInt(1e10)
+				gasPrice = math.NewInt(1)
+				maxPayment = sdk.NewCoin("stake", math.NewIntFromBigInt(bi))
+				quoteExpected = testGasAmount // The exchange rate equals the scale factor (so they divide out to "1", and the price is 1)
+
+				igpId, err = suite.mockCreateIgp(igpCreator, igpBeneficiary, math.ZeroInt())
+				suite.Require().NoError(err)
+				_, err = suite.mockCreateOracle(igpCreator, oracleAddr, igpId, testDestinationDomain)
+				suite.Require().NoError(err)
+				_, err = suite.mockSetGasPrices(oracleAddr, igpId, testDestinationDomain, gasPrice, exchangeRate)
+				suite.Require().NoError(err)
+
+				// Get the expected payment amount and denomination
+				nativeTokensOwedResp, err = suite.queryClient.QuoteGasPayment(suite.ctx, &types.QuoteGasPaymentRequest{IgpId: igpId, DestinationDomain: testDestinationDomain, GasAmount: testGasAmount})
+				suite.Require().NoError(err)
+				maxPayment = sdk.NewCoin("stake", math.NewInt(nativeTokensOwedResp.Amount.Int64()))
+			},
+			true,
+		},
 		{
 			// This test case corresponds to the hyperlane monorepo testQuoteGasPaymentRemoteVeryExpensive.
 			// 300,000 destination gas
@@ -519,6 +562,11 @@ func (suite *KeeperTestSuite) TestPayForGas() {
 
 			"success - expensive remote",
 			func() {
+				// From the hyperlane monorepo, we know what the expected value of the quoteGasPayment is for this test case.
+				bi, biSet := bi.SetString("2250000000000000000000", 10)
+				suite.Require().True(biSet)
+				quoteExpected = math.NewIntFromBigInt(bi)
+
 				exchangeRate = math.NewInt(5000 * 1e10)
 				gasPrice = math.NewInt(1500 * 1e9)
 				maxPayment = sdk.NewCoin("stake", math.NewIntFromBigInt(bi))
@@ -534,10 +582,25 @@ func (suite *KeeperTestSuite) TestPayForGas() {
 		},
 	}
 
+	// Create some test addresses initialized with no funds
+	testAddrs := simtestutil.AddTestAddrsIncremental(suite.bankKeeper, suite.stakingKeeper, suite.ctx, 3, math.NewInt(0))
+	oracleAddr = testAddrs[0].String()
+	igpCreator = testAddrs[1].String()
+	igpBeneficiary = testAddrs[2].String()
+
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
 			suite.SetupTest(suite.T())
 			tc.malleate()
+
+			// Fund the payer with more than enough to pay for the expected gas owed
+			payerMinted := quoteExpected.Add(math.NewInt(1000000))
+			testAddrPayer := simtestutil.AddTestAddrsIncremental(suite.bankKeeper, suite.stakingKeeper, suite.ctx, 1, payerMinted)
+			payer = testAddrPayer[0].String()
+
+			// Sanity check that the balance is what we just funded the account with
+			payerCoin := suite.bankKeeper.GetBalance(suite.ctx, testAddrPayer[0], "stake")
+			suite.Require().Equal(payerMinted, payerCoin.Amount)
 
 			// Get the expected payment amount and denomination
 			nativeTokensOwedResp, err = suite.queryClient.QuoteGasPayment(suite.ctx, &types.QuoteGasPaymentRequest{IgpId: igpId, DestinationDomain: testDestinationDomain, GasAmount: testGasAmount})
@@ -570,6 +633,11 @@ func (suite *KeeperTestSuite) TestPayForGas() {
 
 				suite.Require().NoError(err)
 				suite.Require().NotNil(paymentResp)
+
+				// Check that the payer's balance was reduced by the gas paid
+				payerCoinAfterGasPaid := suite.bankKeeper.GetBalance(suite.ctx, testAddrPayer[0], "stake")
+				expectedFundsRemaining := payerMinted.Sub(quoteExpected)
+				suite.Require().Equal(expectedFundsRemaining.Int64(), payerCoinAfterGasPaid.Amount.Int64())
 			} else {
 				suite.Require().Nil(paymentResp)
 				suite.Require().Error(err)

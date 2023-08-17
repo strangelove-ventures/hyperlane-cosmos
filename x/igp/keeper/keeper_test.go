@@ -30,8 +30,11 @@ var (
 type KeeperTestSuite struct {
 	suite.Suite
 
-	ctx         sdk.Context
-	keeper      keeper.Keeper
+	ctx           sdk.Context
+	keeper        keeper.Keeper
+	bankKeeper    *govtestutil.MockBankKeeper
+	stakingKeeper *govtestutil.MockStakingKeeper
+
 	queryClient types.QueryClient
 	msgServer   types.MsgServer
 	encCfg      moduletestutil.TestEncodingConfig
@@ -52,7 +55,9 @@ func (suite *KeeperTestSuite) SetupTest(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	acctKeeper := govtestutil.NewMockAccountKeeper(ctrl)
 	bankKeeper := govtestutil.NewMockBankKeeper(ctrl)
+	suite.bankKeeper = bankKeeper
 	stakingKeeper := govtestutil.NewMockStakingKeeper(ctrl)
+	suite.stakingKeeper = stakingKeeper
 	acctKeeper.EXPECT().GetModuleAddress(types.ModuleName).Return(govAcct).AnyTimes()
 	acctKeeper.EXPECT().GetModuleAccount(gomock.Any(), types.ModuleName).Return(authtypes.NewEmptyModuleAccount(types.ModuleName)).AnyTimes()
 	trackMockBalances(bankKeeper)

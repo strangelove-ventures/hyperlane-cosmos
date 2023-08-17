@@ -23,7 +23,15 @@ func trackMockBalances(bankKeeper *govtestutil.MockBankKeeper) {
 	bankKeeper.EXPECT().MintCoins(gomock.Any(), minttypes.ModuleName, gomock.Any()).AnyTimes()
 	bankKeeper.EXPECT().BurnCoins(gomock.Any(), types.ModuleName, gomock.Any()).AnyTimes()
 	bankKeeper.EXPECT().SendCoinsFromModuleToModule(gomock.Any(), minttypes.ModuleName, types.ModuleName, gomock.Any()).AnyTimes()
-	bankKeeper.EXPECT().SendCoins(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	bankKeeper.EXPECT().SendCoins(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(func(_ sdk.Context, fromAddr sdk.AccAddress, toAddr sdk.AccAddress, coins sdk.Coins) error {
+		newBalance, negative := balances[fromAddr.String()].SafeSub(coins...)
+		if negative {
+			return fmt.Errorf("not enough balance")
+		}
+		balances[fromAddr.String()] = newBalance
+		balances[toAddr.String()] = balances[toAddr.String()].Add(newBalance...)
+		return nil
+	}).AnyTimes()
 
 	// But we do track normal account balances.
 	bankKeeper.EXPECT().SendCoinsFromAccountToModule(gomock.Any(), gomock.Any(), types.ModuleName, gomock.Any()).DoAndReturn(func(_ sdk.Context, sender sdk.AccAddress, _ string, coins sdk.Coins) error {
@@ -42,7 +50,8 @@ func trackMockBalances(bankKeeper *govtestutil.MockBankKeeper) {
 		return balances[addr.String()]
 	}).AnyTimes()
 	bankKeeper.EXPECT().GetBalance(gomock.Any(), gomock.Any(), sdk.DefaultBondDenom).DoAndReturn(func(_ sdk.Context, addr sdk.AccAddress, _ string) sdk.Coin {
-		balances := balances[addr.String()]
+		addrStr := addr.String()
+		balances := balances[addrStr]
 		for _, balance := range balances {
 			if balance.Denom == sdk.DefaultBondDenom {
 				return balance
