@@ -14,9 +14,11 @@ const (
 	AttributeBeneficiary       = "beneficiary"
 	AttributeRemoteDomain      = "remotedomain"
 	AttributeTokenExchangeRate = "tokenexchangerate"
+	AttributeMessageId         = "messageid"
 	AttributeGasPrice          = "gasprice"
 	AttributeDestination       = "destination"
 	AttributeOverheadAmount    = "amount"
+	AttributeGasAmount         = "amount"
 	AttributePayment           = "payment"
 	AttributeKeySender         = "sender"
 )

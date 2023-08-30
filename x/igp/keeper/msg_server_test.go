@@ -1,15 +1,21 @@
 package keeper_test
 
 import (
+	"encoding/hex"
+	"fmt"
 	"math/big"
+	"math/rand"
 	"strconv"
+	"time"
 
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
+	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 )
 
 func (suite *KeeperTestSuite) TestCreateIgp() {
@@ -616,6 +622,8 @@ func (suite *KeeperTestSuite) TestPayForGas() {
 			expectedEvents := sdk.Events{
 				sdk.NewEvent(
 					types.EventTypePayForGas,
+					sdk.NewAttribute(types.AttributeMessageId, testMessageId),
+					sdk.NewAttribute(types.AttributeGasAmount, testGasAmount.String()),
 					sdk.NewAttribute(types.AttributeKeySender, payer),
 					sdk.NewAttribute(types.AttributeBeneficiary, igpBeneficiary),
 					sdk.NewAttribute(types.AttributePayment, coinExpected),
@@ -628,6 +636,7 @@ func (suite *KeeperTestSuite) TestPayForGas() {
 
 			if tc.expPass {
 				for _, evt := range expectedEvents {
+					fmt.Printf("TestPayForGas: found event %s", evt.Type)
 					suite.Require().Contains(events, evt)
 				}
 
@@ -642,6 +651,115 @@ func (suite *KeeperTestSuite) TestPayForGas() {
 				suite.Require().Nil(paymentResp)
 				suite.Require().Error(err)
 			}
+		})
+	}
+}
+
+var ismMap map[uint32]ismtypes.AbstractIsm
+
+func (suite *KeeperTestSuite) SetupIsm() {
+	ismMap = map[uint32]ismtypes.AbstractIsm{}
+
+	for _, originIsm := range defaultIsms {
+		ism := ismtypes.MustUnpackAbstractIsm(originIsm.AbstractIsm)
+		ismMap[originIsm.Origin] = ism
+	}
+}
+
+func (suite *KeeperTestSuite) getTestMessageMetadata(index int) (message []byte, metadata []byte) {
+	var err error
+	message, err = hex.DecodeString(messages[index])
+	suite.Require().NoError(err)
+
+	metadata, err = hex.DecodeString(metadatas[index])
+	suite.Require().NoError(err)
+	return
+}
+
+func (suite *KeeperTestSuite) VerifyMessage(message []byte, metadata []byte) bool {
+	// Verify Merkle Proof & Validator signature (for LegacyMultiSig). TODO: Ask Steve why this isn't the case for other MultiSigs.
+	return ismMap[common.Origin(message)].Verify(metadata, message)
+}
+
+func (suite *KeeperTestSuite) TestDispatchPayProcess() {
+	var igpId uint32
+	var err error
+	var oracleAddr, igpCreator, igpBeneficiary, payer string
+	var nativeTokensOwedResp *types.QuoteGasPaymentResponse
+	var exchangeRate math.Int
+	var gasPrice math.Int
+	var maxPayment sdk.Coin
+	s1 := rand.NewSource(time.Now().UnixNano())
+	r1 := rand.New(s1)
+	idx := r1.Intn((len(messages)))
+	testGasAmount := math.NewInt(300000)
+	testMessageId := common.Id([]byte(messages[idx]))
+
+	testDestinationDomain := uint32(1)
+	bi := big.NewInt(0)
+	var quoteExpected math.Int
+
+	// Create some test addresses initialized with no funds
+	testAddrs := simtestutil.AddTestAddrsIncremental(suite.bankKeeper, suite.stakingKeeper, suite.ctx, 3, math.NewInt(0))
+	oracleAddr = testAddrs[0].String()
+	igpCreator = testAddrs[1].String()
+	igpBeneficiary = testAddrs[2].String()
+
+	testCases := []struct {
+		name     string
+		malleate func()
+		expPass  bool
+	}{
+		{
+			"success - no setup",
+			func() {
+			},
+			true,
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			suite.SetupTest(suite.T())
+
+			// From the hyperlane monorepo, we know what the expected value of the quoteGasPayment is for this test case.
+			bi, biSet := bi.SetString("2250000000000000000000", 10)
+			suite.Require().True(biSet)
+			quoteExpected = math.NewIntFromBigInt(bi)
+
+			exchangeRate = math.NewInt(5000 * 1e10)
+			gasPrice = math.NewInt(1500 * 1e9)
+			maxPayment = sdk.NewCoin("stake", math.NewIntFromBigInt(bi))
+
+			igpId, err = suite.mockCreateIgp(igpCreator, igpBeneficiary, math.ZeroInt())
+			suite.Require().NoError(err)
+			_, err = suite.mockCreateOracle(igpCreator, oracleAddr, igpId, testDestinationDomain)
+			suite.Require().NoError(err)
+			_, err = suite.mockSetGasPrices(oracleAddr, igpId, testDestinationDomain, gasPrice, exchangeRate)
+			suite.Require().NoError(err)
+
+			// Fund the payer with more than enough to pay for the expected gas owed
+			payerMinted := quoteExpected.Add(math.NewInt(1000000))
+			testAddrPayer := simtestutil.AddTestAddrsIncremental(suite.bankKeeper, suite.stakingKeeper, suite.ctx, 1, payerMinted)
+			payer = testAddrPayer[0].String()
+
+			// Get the expected payment amount and denomination
+			nativeTokensOwedResp, err = suite.queryClient.QuoteGasPayment(suite.ctx, &types.QuoteGasPaymentRequest{IgpId: igpId, DestinationDomain: testDestinationDomain, GasAmount: testGasAmount})
+			suite.Require().NoError(err)
+			suite.Require().Equal(quoteExpected, nativeTokensOwedResp.Amount)
+
+			coinExpected := nativeTokensOwedResp.Amount.String() + nativeTokensOwedResp.Denom
+			_, err = suite.mockPayForGas(igpId, payer, string(testMessageId), testDestinationDomain, testGasAmount, maxPayment)
+
+			suite.Require().Contains(suite.ctx.EventManager().Events(), sdk.NewEvent(
+				types.EventTypePayForGas,
+				sdk.NewAttribute(types.AttributeMessageId, string(testMessageId)),
+				sdk.NewAttribute(types.AttributeGasAmount, testGasAmount.String()),
+				sdk.NewAttribute(types.AttributeKeySender, payer),
+				sdk.NewAttribute(types.AttributeBeneficiary, igpBeneficiary),
+				sdk.NewAttribute(types.AttributePayment, coinExpected),
+			))
+
 		})
 	}
 }

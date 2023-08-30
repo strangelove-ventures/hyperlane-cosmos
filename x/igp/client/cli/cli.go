@@ -34,7 +34,10 @@ func NewTxCmd() *cobra.Command {
 	}
 
 	// TODO: Add txs
-	txCmd.AddCommand()
+	txCmd.AddCommand(
+		msgPaymentCmd(),
+		createIgpCmd(),
+	)
 
 	return txCmd
 }

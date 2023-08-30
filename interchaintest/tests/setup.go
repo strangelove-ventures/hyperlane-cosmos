@@ -1,4 +1,4 @@
-package ictest
+package tests
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	igptypes "github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
 
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
@@ -43,6 +44,7 @@ func hyperlaneEncoding() *testutil.TestEncodingConfig {
 	merkle_root_multisig.RegisterInterfaces(cfg.InterfaceRegistry)
 	message_id_multisig.RegisterInterfaces(cfg.InterfaceRegistry)
 	legacy_multisig.RegisterInterfaces(cfg.InterfaceRegistry)
+	igptypes.RegisterInterfaces(cfg.InterfaceRegistry)
 
 	return &cfg
 }
@@ -66,6 +68,68 @@ func CreateSingleHyperlaneSimd(t *testing.T) []ibc.Chain {
 						Version:    "local",
 						UidGid:     "1025:1025",
 					},
+				},
+				Bin:            "simd",
+				Bech32Prefix:   "cosmos",
+				Denom:          "stake",
+				CoinType:       "118",
+				GasPrices:      "0.00stake",
+				GasAdjustment:  1.8,
+				TrustingPeriod: "112h",
+				NoHostMount:    false,
+				// ConfigFileOverrides: nil,
+				EncodingConfig:         hyperlaneEncoding(),
+				ModifyGenesis:          ModifyGenesisProposalTime(votingPeriod, maxDepositPeriod),
+				UsingNewGenesisCommand: true,
+			},
+		},
+	})
+
+	// Get chains from the chain factory
+	chains, err := cf.Chains(t.Name())
+	require.NoError(t, err)
+
+	return chains
+}
+
+func CreateDoubleHyperlaneSimd(t *testing.T, image ibc.DockerImage) []ibc.Chain {
+	// Create chain factory with hyperlane-simd
+
+	votingPeriod := "10s"
+	maxDepositPeriod := "10s"
+
+	cf := interchaintest.NewBuiltinChainFactory(zaptest.NewLogger(t), []*interchaintest.ChainSpec{
+		{
+			ChainName: "simd-1",
+			ChainConfig: ibc.ChainConfig{
+				Type:    "cosmos",
+				Name:    "simd",
+				ChainID: "simd-1",
+				Images: []ibc.DockerImage{
+					image,
+				},
+				Bin:            "simd",
+				Bech32Prefix:   "cosmos",
+				Denom:          "stake",
+				CoinType:       "118",
+				GasPrices:      "0.00stake",
+				GasAdjustment:  1.8,
+				TrustingPeriod: "112h",
+				NoHostMount:    false,
+				// ConfigFileOverrides: nil,
+				EncodingConfig:         hyperlaneEncoding(),
+				ModifyGenesis:          ModifyGenesisProposalTime(votingPeriod, maxDepositPeriod),
+				UsingNewGenesisCommand: true,
+			},
+		},
+		{
+			ChainName: "simd-2",
+			ChainConfig: ibc.ChainConfig{
+				Type:    "cosmos",
+				Name:    "simd",
+				ChainID: "simd-2",
+				Images: []ibc.DockerImage{
+					image,
 				},
 				Bin:            "simd",
 				Bech32Prefix:   "cosmos",
