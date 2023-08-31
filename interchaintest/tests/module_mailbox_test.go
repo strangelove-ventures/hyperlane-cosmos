@@ -4,19 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"path/filepath"
+	"runtime"
+	"strconv"
 	"testing"
 	"time"
 
-	retry "github.com/avast/retry-go/v4"
-	"github.com/cosmos/cosmos-sdk/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authTx "github.com/cosmos/cosmos-sdk/x/auth/tx"
+
+	"cosmossdk.io/math"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
-	mbtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
 	icv7 "github.com/strangelove-ventures/interchaintest/v7"
@@ -109,16 +111,21 @@ func TestHyperlaneMailbox(t *testing.T) {
 
 func TestHyperlaneIgp(t *testing.T) {
 	t.Parallel()
-	// _, filename, _, _ := runtime.Caller(0)
-	// path := filepath.Dir(filename)
-	// tarFilePath := filepath.Join(path, "../../")
-	//goModPath := filepath.Join(path, "../../go.mod")
 
-	// Builds the hyperlane image from the current project (e.g. locally).
-	// The directory at 'tarFilePath' will be tarballed and used for the docker context.
-	// The args 'buildDir' and 'dockerfilePath' are relative to 'tarFilePath' (the context).
-	// Build arguments are derived from 'goModPath' so it must be a full path (not relative).
-	//docker.BuildHeighlinerHyperlaneImage(docker.HyperlaneImageName, tarFilePath, ".", goModPath, "local.Dockerfile")
+	buildsEnabled := true
+	_, filename, _, _ := runtime.Caller(0)
+	path := filepath.Dir(filename)
+	tarFilePath := filepath.Join(path, "../../")
+	goModPath := filepath.Join(path, "../../go.mod")
+
+	// TODO: better caching mechanism to prevent rebuilding the same image
+	if buildsEnabled {
+		// Builds the hyperlane image from the current project (e.g. locally).
+		// The directory at 'tarFilePath' will be tarballed and used for the docker context.
+		// The args 'buildDir' and 'dockerfilePath' are relative to 'tarFilePath' (the context).
+		// Build arguments are derived from 'goModPath' so it must be a full path (not relative).
+		docker.BuildHeighlinerHyperlaneImage(docker.HyperlaneImageName, tarFilePath, ".", goModPath, "local.Dockerfile")
+	}
 
 	DockerImage := ibc.DockerImage{
 		Repository: docker.HyperlaneImageName,
@@ -139,10 +146,12 @@ func TestHyperlaneIgp(t *testing.T) {
 
 	usersSimd := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd)
 	userSimd := usersSimd[0]
+	usersSimdChain1Users2 := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd)
+	chain1Oracle := usersSimdChain1Users2[0]
 	usersSimd2 := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd2)
 	userSimd2 := usersSimd2[0]
 
-	msg := fmt.Sprintf(`{}`)
+	msg := `{}`
 	_, contract := helpers.SetupContract(t, ctx, simd, userSimd.KeyName(), "../contracts/hyperlane.wasm", msg)
 	t.Log("coreContract", contract)
 	_, contract2 := helpers.SetupContract(t, ctx, simd2, userSimd2.KeyName(), "../contracts/hyperlane.wasm", msg)
@@ -182,14 +191,16 @@ func TestHyperlaneIgp(t *testing.T) {
 		require.Equal(t, val.Addr, legacyMultiSig2.ValidatorPubKeys[i])
 	}
 
+	recipientCosmosBech32 := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
+	recipientDispatch := hexutil.Encode([]byte(recipientCosmosBech32))
 	dMsg := []byte("HelloHyperlaneWorld")
 	dispatchedMsg := hexutil.Encode(dMsg)
 	destDomain := 1
 	//Now setup and verification is finished for both chains. Dispatch a message
 	dispatchMsgStruct := helpers.ExecuteMsg{
 		DispatchMsg: &helpers.DispatchMsg{
-			DestinationAddr: uint32(destDomain),
-			RecipientAddr:   "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7",
+			DestinationAddr: uint32(destDomain), // ETH = 10001 ??
+			RecipientAddr:   recipientDispatch,
 			MessageBody:     dispatchedMsg,
 		},
 	}
@@ -197,70 +208,103 @@ func TestHyperlaneIgp(t *testing.T) {
 	require.NoError(t, err)
 	dispatchedTxHash, err := simd.ExecuteContract(ctx, userSimd.KeyName(), contract, string(dipatchMsg))
 	require.NoError(t, err)
+	dispatchedDestDomain, dispatchedRecipientAddrHex, dispatchedMsgBody, dispatchedMsgId, dispatchSender, err := helpers.VerifyDispatchEvents(simd, dispatchedTxHash)
+	require.NoError(t, err)
 
 	// Look up the dispatched TX by hash. Note that this means the TX exists in a block on chain,
 	// and thus can also be searched by any other available RPC method (websocket event subscription, etc).
-	dispatchedTx, err := getTransaction(simd, dispatchedTxHash)
+	dispatchedTx, err := helpers.GetTransaction(simd, dispatchedTxHash)
 	require.NoError(t, err)
 	require.NotNil(t, dispatchedTx)
 
-	// TODO: why does this not work?? Note that getTransaction() as seen above does the same thing, but this would be cleaner.
+	// The formula for native tokens owed, where 'exchRateScale' is 10^10, is:
+	// exchRate := oracle.TokenExchangeRate
+	// gasPrice := oracle.GasPrice
+	// destGasCost := destGasAmount.Mul(gasPrice)
+	// nativePrice := destGasCost.Mul(exchRate).Quo(exchRateScale)
 
-	// simdGrpcConn, err := grpc.Dial(
-	// 	simd.GetGRPCAddress(), // your gRPC server address.
-	// 	grpc.WithTransportCredentials(insecure.NewCredentials()),
-	// 	grpc.WithDefaultCallOptions(grpc.ForceCodec(codec.NewProtoCodec(nil).GRPCCodec())),
-	// )
-	// require.NoError(t, err)
-	// defer simdGrpcConn.Close()
-	// querySimdTxsClient := txTypes.NewServiceClient(simdGrpcConn)
-	// ctx, cancel := GetQueryContext()
-	// defer cancel()
-	// dispatchedTx, err := querySimdTxsClient.GetTx(ctx, &txTypes.GetTxRequest{Hash: dispatchedTxHash})
-	// require.NoError(t, err)
-	// require.NotNil(t, dispatchedTx)
+	// Below, exchange rate equals the scale factor, making the formula:
+	// native tokens owed = destGasAmount.Mul(gasPrice) = 300,000
+	exchangeRate := math.NewInt(1e10)
+	gasPrice := math.NewInt(1)
+	testGasAmount := math.NewInt(300000)
+	quoteExpected := math.NewInt(300000)
 
-	// Check that the queried TX has the events we expect.
-	msgId := ""   //hyperlane ID of the message
-	msgBody := "" //message to be processed
-	allEvents := dispatchedTx.Events
-	for _, evt := range allEvents {
-		// this tx only has a single message broadcast so it will be the first 'dispatch_id' event found.
-		if evt.Type == mbtypes.EventTypeDispatchId {
-			for _, attr := range evt.Attributes {
-				if attr.Key == mbtypes.AttributeKeyID {
-					msgId = attr.Value
-				}
-			}
-		}
-		if evt.Type == mbtypes.EventTypeDispatch {
-			for _, attr := range evt.Attributes {
-				if attr.Key == mbtypes.AttributeKeyMessage {
-					msgBody = attr.Value
-				}
-			}
-		}
-	}
-
-	require.NotEqual(t, msgId, "")
+	require.NotEqual(t, dispatchedMsgId, "")
 	destDomainStr := "1"
-	igpId := "1"
-	destGasStr := "1000000000"
-	maxPayment := "1000000000ustake"
 	beneficiary := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
 
-	// Pay for gas
-	helpers.CallCreateIgp(t, ctx, simd, userSimd.KeyName(), beneficiary)
-	helpers.CallPayForGasMsg(t, ctx, simd, userSimd.KeyName(), msgId, destDomainStr, destGasStr, igpId, maxPayment)
+	// This should be IGP 0, which we will ignore and not use for anything
+	out := helpers.CallCreateIgp(t, ctx, simd, userSimd.KeyName(), beneficiary)
+	igpTxHash := helpers.ParseTxHash(string(out))
+	igpIdUint, err := helpers.VerifyIgpEvents(simd, igpTxHash)
+	require.NoError(t, err)
+	require.Equal(t, uint32(0), igpIdUint)
+
+	// This should be IGP 1
+	createigpout := helpers.CallCreateIgp(t, ctx, simd, userSimd.KeyName(), beneficiary)
+	igpTxHash = helpers.ParseTxHash(string(createigpout))
+	igpIdUint, err = helpers.VerifyIgpEvents(simd, igpTxHash)
+	require.NoError(t, err)
+	require.Equal(t, uint32(1), igpIdUint)
+	igpId := strconv.FormatUint(uint64(igpIdUint), 10)
+
+	// Create the oracle and verify we get the expected address in the events
+	oracle := chain1Oracle.FormattedAddress()
+	createOracleOutput := helpers.CallCreateOracle(t, ctx, simd, userSimd.KeyName(), oracle, igpId, destDomainStr)
+	createOracleTxHash := helpers.ParseTxHash(string(createOracleOutput))
+	oracleEvtAddr, err := helpers.VerifyCreateOracleEvents(simd, createOracleTxHash)
+	require.NoError(t, err)
+	require.Equal(t, oracle, oracleEvtAddr)
+
+	// Make sure this fails, since only the oracle can set the gas prices (e.g. use wrong address intentionally)
+	setGasOutput := helpers.CallSetGasPriceMsg(t, ctx, simd, userSimd.KeyName(), igpId, destDomainStr, gasPrice.String(), exchangeRate.String())
+	setGasTxHash1 := helpers.ParseTxHash(string(setGasOutput))
+	_, _, _, err = helpers.VerifySetGasPriceEvents(simd, setGasTxHash1)
+	require.Error(t, err)
+
+	// This should succeed, and we verify the events contain the expecting domain/exchange rate/gas price.
+	setGasOutput = helpers.CallSetGasPriceMsg(t, ctx, simd, chain1Oracle.KeyName(), igpId, destDomainStr, gasPrice.String(), exchangeRate.String())
+	setGasTxHash2 := helpers.ParseTxHash(string(setGasOutput))
+	setGasDomain, setGasRate, setGasPrice, err := helpers.VerifySetGasPriceEvents(simd, setGasTxHash2)
+	require.NoError(t, err)
+	require.Equal(t, setGasDomain, destDomainStr)
+	require.Equal(t, setGasRate, exchangeRate.String())
+	require.Equal(t, setGasPrice, gasPrice.String())
+
+	// Look up the expected payment and verify it matches what we expected (according to the gas price, exchange rate, and scale).
+	quoteGasPaymentOutput := helpers.QueryQuoteGasPayment(t, ctx, simd, userSimd.KeyName(), igpId, destDomainStr, testGasAmount.String())
+	nativeTokensOwed, denom := helpers.ParseQuoteGasPayment(string(quoteGasPaymentOutput))
+	amountActual, _ := big.NewInt(0).SetString(nativeTokensOwed, 10)
+	require.Equal(t, amountActual.String(), quoteExpected.String())
+	require.Equal(t, denom, "stake")
+
+	maxPayment := sdk.NewCoin(denom, math.NewIntFromBigInt(amountActual))
+	payForGasOutput := helpers.CallPayForGasMsg(t, ctx, simd, userSimd.KeyName(), dispatchedMsgId, destDomainStr, testGasAmount.String(), igpId, maxPayment.String())
+	payForGasTxHash := helpers.ParseTxHash(string(payForGasOutput))
+	paidMsgId, nativePayment, gasAmount, err := helpers.VerifyPayForGasEvents(simd, payForGasTxHash)
+	require.NoError(t, err)
+	require.Equal(t, dispatchedMsgId, paidMsgId)
+	require.Equal(t, nativePayment, nativeTokensOwed+denom)
+	require.Equal(t, gasAmount, testGasAmount.String())
 
 	// sign the message, then send the message to the destination chain
 	// Create first legacy multisig message from counter chain 1
-	sender := "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7"
-	message, proof := counterChainSimd2.CreateMessage(sender, uint32(destDomain), contract, msgBody)
+	// sender := "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7"
+	dispatchedDestDomainUint, err := strconv.ParseUint(dispatchedDestDomain, 10, 64)
+	require.NoError(t, err)
+
+	senderHex := hexutil.Encode([]byte(dispatchSender))
+	dispatchedRecipientAddr := hexutil.MustDecode(dispatchedRecipientAddrHex)
+	message, proof := counterChainSimd2.CreateMessage(senderHex, uint32(dispatchedDestDomainUint), string(dispatchedRecipientAddr), dispatchedMsgBody)
 	metadata := counterChainSimd2.CreateLegacyMetadata(message, proof)
 
 	//CallProcessMsg sends the message and verifies the message and metadata
-	helpers.CallProcessMsg(t, ctx, simd2, userSimd2.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
+	processStdout := helpers.CallProcessMsg(t, ctx, simd2, userSimd2.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
+	processTxHash := helpers.ParseTxHash(string(processStdout))
+	processMsgId, err := helpers.VerifyProcessEvents(simd, processTxHash)
+	require.NoError(t, err)
+	require.Equal(t, dispatchedMsgId, processMsgId)
 
 	err = testutil.WaitForBlocks(ctx, 2, simd2)
 	require.NoError(t, err)
@@ -272,32 +316,6 @@ func GetQueryContext() (context.Context, context.CancelFunc) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	//ctx = metadata.AppendToOutgoingContext(ctx, grpctypes.GRPCBlockHeightHeader, height)
 	return ctx, cancel
-}
-
-func getTransaction(c *cosmos.CosmosChain, txHash string) (*sdk.TxResponse, error) {
-	// Retry because sometimes the tx is not committed to state yet.
-	var txResp *types.TxResponse
-	err := retry.Do(func() error {
-		var err error
-		txResp, err = authTx.QueryTx(getFullNode(c).CliContext(), txHash)
-		return err
-	},
-		// retry for total of 3 seconds
-		retry.Attempts(15),
-		retry.Delay(200*time.Millisecond),
-		retry.DelayType(retry.FixedDelay),
-		retry.LastErrorOnly(true),
-	)
-	return txResp, err
-}
-
-func getFullNode(c *cosmos.CosmosChain) *cosmos.ChainNode {
-	if len(c.FullNodes) > 0 {
-		// use first full node
-		return c.FullNodes[0]
-	}
-	// use first validator
-	return c.Validators[0]
 }
 
 func verifyContractEntryPoints(t *testing.T, ctx context.Context, simd *cosmos.CosmosChain, user ibc.Wallet, contract string) {

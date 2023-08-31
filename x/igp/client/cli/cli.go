@@ -17,9 +17,7 @@ func GetQueryCmd() *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 
-	// TODO: Add queries
-	queryCmd.AddCommand()
-
+	queryCmd.AddCommand(quoteGasPaymentCmd())
 	return queryCmd
 }
 
@@ -33,10 +31,11 @@ func NewTxCmd() *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 
-	// TODO: Add txs
 	txCmd.AddCommand(
 		msgPaymentCmd(),
 		createIgpCmd(),
+		createOracleCmd(),
+		setGasPriceCmd(),
 	)
 
 	return txCmd

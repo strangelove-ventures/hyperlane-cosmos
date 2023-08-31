@@ -2,8 +2,11 @@ package helpers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
+
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
@@ -12,7 +15,7 @@ import (
 )
 
 // simd tx hyperlane-mailbox process <metadata> <message>
-func CallProcessMsg(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain, keyName string, metadata string, message string) {
+func CallProcessMsg(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain, keyName string, metadata string, message string) []byte {
 	cmd := []string{
 		"simd", "tx", "hyperlane-mailbox", "process",
 		metadata,
@@ -34,56 +37,56 @@ func CallProcessMsg(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain
 
 	err = testutil.WaitForBlocks(ctx, 2, chain)
 	require.NoError(t, err)
+	return stdout
 }
 
-// simd tx hyperlane-igp createigp <beneficiary>
-func CallCreateIgp(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain, keyName, beneficiary string) {
-	cmd := []string{
-		"simd", "tx", "hyperlane-igp", "createigp",
-		beneficiary,
-		"--node", chain.GetRPCAddress(),
-		"--home", chain.HomeDir(),
-		"--chain-id", chain.Config().ChainID,
-		"--from", keyName,
-		"--gas", "2500000",
-		"--gas-adjustment", "2.0",
-		"--keyring-dir", chain.HomeDir(),
-		"--keyring-backend", keyring.BackendTest,
-		"-y",
+func VerifyDispatchEvents(c *cosmos.CosmosChain, txHash string) (destDomain, recipientAddress, msgBody, dispatchId, sender string, err error) {
+	// Look up the events for the TX by hash
+	events, err := GetEvents(c, txHash)
+	if err != nil {
+		return "", "", "", "", "", err
 	}
-	stdout, _, err := chain.Exec(ctx, cmd, nil)
-	require.NoError(t, err)
+	var found bool
 
-	fmt.Println("CallCreateIgp stdout: ", string(stdout))
+	sender, found = GetEventAttribute(events, types.EventTypeDispatch, types.AttributeKeySender)
+	if !found {
+		return "", "", "", "", "", errors.New("sender not found in dispatch TX event attrs")
+	}
 
-	err = testutil.WaitForBlocks(ctx, 2, chain)
-	require.NoError(t, err)
+	destDomain, found = GetEventAttribute(events, types.EventTypeDispatch, types.AttributeKeyDestinationDomain)
+	if !found {
+		return "", "", "", "", "", errors.New("destdomain not found in dispatch TX event attrs")
+	}
+
+	recipientAddress, found = GetEventAttribute(events, types.EventTypeDispatch, types.AttributeKeyRecipientAddress)
+	if !found {
+		return "", "", "", "", "", errors.New("msgId not found in dispatch TX event attrs")
+	}
+
+	msgBody, found = GetEventAttribute(events, types.EventTypeDispatch, types.AttributeKeyMessage)
+	if !found {
+		return "", "", "", "", "", errors.New("msgBody not found in dispatch TX event attrs")
+	}
+
+	dispatchId, found = GetEventAttribute(events, types.EventTypeDispatchId, types.AttributeKeyID)
+	if !found {
+		return "", "", "", "", "", errors.New("dispatchid not found in dispatch TX event attrs")
+	}
+
+	return
 }
 
-// simd tx hyperlane-igp msgpay <message-id> <destination-domain> <destination-gas-amount> <igp-id> <max-payment>
-func CallPayForGasMsg(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain, keyName, msgId, domain, destGas, igpId, maxPayment string) {
-	cmd := []string{
-		"simd", "tx", "hyperlane-igp", "msgpay",
-		msgId,
-		domain,
-		destGas,
-		igpId,
-		maxPayment,
-		"--node", chain.GetRPCAddress(),
-		"--home", chain.HomeDir(),
-		"--chain-id", chain.Config().ChainID,
-		"--from", keyName,
-		"--gas", "2500000",
-		"--gas-adjustment", "2.0",
-		"--keyring-dir", chain.HomeDir(),
-		"--keyring-backend", keyring.BackendTest,
-		"-y",
+func VerifyProcessEvents(c *cosmos.CosmosChain, txHash string) (msgId string, err error) {
+	// Look up the events for the TX by hash
+	events, err := GetEvents(c, txHash)
+	if err != nil {
+		return "", err
 	}
-	stdout, _, err := chain.Exec(ctx, cmd, nil)
-	require.NoError(t, err)
+	var found bool
 
-	fmt.Println("CallPayForGasMsg stdout: ", string(stdout))
-
-	err = testutil.WaitForBlocks(ctx, 2, chain)
-	require.NoError(t, err)
+	msgId, found = GetEventAttribute(events, types.EventTypeProcessId, types.AttributeKeyID)
+	if !found {
+		return "", errors.New("msgId not found in process TX event attrs")
+	}
+	return
 }
