@@ -57,8 +57,9 @@ func (k Keeper) VerifyMessage(messageBytes []byte) (string, error) {
 		return "", types.ErrMsgInvalidVersion
 	}
 
+	destGiven := common.Destination(messageBytes)
 	if common.Destination(messageBytes) != k.domain {
-		return "", types.ErrMsgInvalidDomain
+		return "", types.ErrMsgInvalidDomain.Wrapf("Message destination %d is invalid. Acceptable domain is %d", destGiven, k.domain)
 	}
 
 	idBytes := common.Id(messageBytes)

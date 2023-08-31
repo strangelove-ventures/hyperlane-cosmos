@@ -110,6 +110,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 			sdk.NewAttribute(types.AttributeKeyDestinationDomain, strconv.FormatUint(uint64(msg.DestinationDomain), 10)),
 			sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
 			sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
+			sdk.NewAttribute(types.AttributeKeyHyperlaneMessage, string(message)),
 		),
 		sdk.NewEvent(
 			types.EventTypeDispatchId,

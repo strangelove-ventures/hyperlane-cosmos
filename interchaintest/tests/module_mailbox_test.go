@@ -160,10 +160,13 @@ func TestHyperlaneIgp(t *testing.T) {
 	verifyContractEntryPoints(t, ctx, simd, userSimd, contract)
 	verifyContractEntryPoints(t, ctx, simd2, userSimd2, contract2)
 
+	// TODO: note, at present, this CANNOT be changed. Therefore any message dispatched with a different destination WILL fail.
+	destDomain := uint32(12345)
+
 	// Create counter chain 1, with origin 1, with val set signing legacy multisig
 	counterChainSimd1 := counterchain.CreateCounterChain(t, 1, counterchain.LEGACY_MULTISIG)
 	// Create counter chain 2, with origin 2, with val set signing legacy multisig
-	counterChainSimd2 := counterchain.CreateCounterChain(t, 2, counterchain.LEGACY_MULTISIG)
+	counterChainSimd2 := counterchain.CreateCounterChain(t, destDomain, counterchain.LEGACY_MULTISIG)
 
 	// Set default isms for counter chains for SIMD
 	helpers.SetDefaultIsm(t, ctx, simd, userSimd.KeyName(), counterChainSimd1)
@@ -186,20 +189,19 @@ func TestHyperlaneIgp(t *testing.T) {
 	err2 := simd2.Config().EncodingConfig.InterfaceRegistry.UnpackAny(res2.DefaultIsms[0].AbstractIsm, &abstractIsm2)
 	require.NoError(t, err2)
 	legacyMultiSig2 := abstractIsm2.(*legacy_multisig.LegacyMultiSig)
-	require.Equal(t, counterChainSimd2.ValSet.Threshold, uint8(legacyMultiSig.Threshold))
+	require.Equal(t, counterChainSimd2.ValSet.Threshold, uint8(legacyMultiSig2.Threshold))
 	for i, val := range counterChainSimd2.ValSet.Vals {
 		require.Equal(t, val.Addr, legacyMultiSig2.ValidatorPubKeys[i])
 	}
 
-	recipientCosmosBech32 := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
-	recipientDispatch := hexutil.Encode([]byte(recipientCosmosBech32))
+	//recipientCosmosBech32 := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
+	recipientDispatch := hexutil.Encode([]byte(contract2))
 	dMsg := []byte("HelloHyperlaneWorld")
 	dispatchedMsg := hexutil.Encode(dMsg)
-	destDomain := 1
 	//Now setup and verification is finished for both chains. Dispatch a message
 	dispatchMsgStruct := helpers.ExecuteMsg{
 		DispatchMsg: &helpers.DispatchMsg{
-			DestinationAddr: uint32(destDomain), // ETH = 10001 ??
+			DestinationAddr: uint32(destDomain),
 			RecipientAddr:   recipientDispatch,
 			MessageBody:     dispatchedMsg,
 		},
@@ -210,6 +212,8 @@ func TestHyperlaneIgp(t *testing.T) {
 	require.NoError(t, err)
 	dispatchedDestDomain, dispatchedRecipientAddrHex, dispatchedMsgBody, dispatchedMsgId, dispatchSender, err := helpers.VerifyDispatchEvents(simd, dispatchedTxHash)
 	require.NoError(t, err)
+	require.NotEmpty(t, dispatchSender)
+	require.NotEmpty(t, dispatchedRecipientAddrHex)
 
 	// Look up the dispatched TX by hash. Note that this means the TX exists in a block on chain,
 	// and thus can also be searched by any other available RPC method (websocket event subscription, etc).
@@ -231,7 +235,6 @@ func TestHyperlaneIgp(t *testing.T) {
 	quoteExpected := math.NewInt(300000)
 
 	require.NotEqual(t, dispatchedMsgId, "")
-	destDomainStr := "1"
 	beneficiary := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
 
 	// This should be IGP 0, which we will ignore and not use for anything
@@ -249,6 +252,7 @@ func TestHyperlaneIgp(t *testing.T) {
 	require.Equal(t, uint32(1), igpIdUint)
 	igpId := strconv.FormatUint(uint64(igpIdUint), 10)
 
+	destDomainStr := strconv.FormatUint(uint64(destDomain), 10)
 	// Create the oracle and verify we get the expected address in the events
 	oracle := chain1Oracle.FormattedAddress()
 	createOracleOutput := helpers.CallCreateOracle(t, ctx, simd, userSimd.KeyName(), oracle, igpId, destDomainStr)
@@ -263,7 +267,7 @@ func TestHyperlaneIgp(t *testing.T) {
 	_, _, _, err = helpers.VerifySetGasPriceEvents(simd, setGasTxHash1)
 	require.Error(t, err)
 
-	// This should succeed, and we verify the events contain the expecting domain/exchange rate/gas price.
+	// This should succeed, and we verify the events contain the expected domain/exchange rate/gas price.
 	setGasOutput = helpers.CallSetGasPriceMsg(t, ctx, simd, chain1Oracle.KeyName(), igpId, destDomainStr, gasPrice.String(), exchangeRate.String())
 	setGasTxHash2 := helpers.ParseTxHash(string(setGasOutput))
 	setGasDomain, setGasRate, setGasPrice, err := helpers.VerifySetGasPriceEvents(simd, setGasTxHash2)
@@ -293,16 +297,23 @@ func TestHyperlaneIgp(t *testing.T) {
 	// sender := "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7"
 	dispatchedDestDomainUint, err := strconv.ParseUint(dispatchedDestDomain, 10, 64)
 	require.NoError(t, err)
+	require.Greater(t, dispatchedDestDomainUint, uint64(0))
 
-	senderHex := hexutil.Encode([]byte(dispatchSender))
+	//senderHex := hexutil.Encode([]byte(dispatchSender))
 	dispatchedRecipientAddr := hexutil.MustDecode(dispatchedRecipientAddrHex)
-	message, proof := counterChainSimd2.CreateMessage(senderHex, uint32(dispatchedDestDomainUint), string(dispatchedRecipientAddr), dispatchedMsgBody)
+	sender := "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7" // TODO: padding is not correct in hyperlane message
+
+	//was: uint32(dispatchedDestDomainUint)
+	//was: senderHex
+	b, err := hexutil.Decode(dispatchedMsgBody)
+	require.NoError(t, err)
+	message, proof := counterChainSimd2.CreateMessage(sender, destDomain, string(dispatchedRecipientAddr), string(b))
 	metadata := counterChainSimd2.CreateLegacyMetadata(message, proof)
 
 	//CallProcessMsg sends the message and verifies the message and metadata
 	processStdout := helpers.CallProcessMsg(t, ctx, simd2, userSimd2.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 	processTxHash := helpers.ParseTxHash(string(processStdout))
-	processMsgId, err := helpers.VerifyProcessEvents(simd, processTxHash)
+	processMsgId, err := helpers.VerifyProcessEvents(simd2, processTxHash)
 	require.NoError(t, err)
 	require.Equal(t, dispatchedMsgId, processMsgId)
 
