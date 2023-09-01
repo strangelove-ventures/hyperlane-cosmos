@@ -131,34 +131,132 @@ func (m *QueryCurrentTreeMetadataResponse) GetCount() uint32 {
 	return 0
 }
 
+// QueryDomain is the request type for the Query/Domain RPC
+// method.
+type QueryDomainRequest struct{}
+
+func (m *QueryDomainRequest) Reset()         { *m = QueryDomainRequest{} }
+func (m *QueryDomainRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryDomainRequest) ProtoMessage()    {}
+func (*QueryDomainRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_567dd9a34f8715cd, []int{2}
+}
+
+func (m *QueryDomainRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+
+func (m *QueryDomainRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryDomainRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+
+func (m *QueryDomainRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryDomainRequest.Merge(m, src)
+}
+
+func (m *QueryDomainRequest) XXX_Size() int {
+	return m.Size()
+}
+
+func (m *QueryDomainRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryDomainRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryDomainRequest proto.InternalMessageInfo
+
+// QueryDomainResponse is the response type for the Query/Domain RPC method.
+type QueryDomainResponse struct {
+	Domain uint32 `protobuf:"varint,1,opt,name=domain,proto3" json:"domain,omitempty"`
+}
+
+func (m *QueryDomainResponse) Reset()         { *m = QueryDomainResponse{} }
+func (m *QueryDomainResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryDomainResponse) ProtoMessage()    {}
+func (*QueryDomainResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_567dd9a34f8715cd, []int{3}
+}
+
+func (m *QueryDomainResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+
+func (m *QueryDomainResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryDomainResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+
+func (m *QueryDomainResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryDomainResponse.Merge(m, src)
+}
+
+func (m *QueryDomainResponse) XXX_Size() int {
+	return m.Size()
+}
+
+func (m *QueryDomainResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryDomainResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryDomainResponse proto.InternalMessageInfo
+
+func (m *QueryDomainResponse) GetDomain() uint32 {
+	if m != nil {
+		return m.Domain
+	}
+	return 0
+}
+
 func init() {
 	proto.RegisterType((*QueryCurrentTreeMetadataRequest)(nil), "hyperlane.mailbox.v1.QueryCurrentTreeMetadataRequest")
 	proto.RegisterType((*QueryCurrentTreeMetadataResponse)(nil), "hyperlane.mailbox.v1.QueryCurrentTreeMetadataResponse")
+	proto.RegisterType((*QueryDomainRequest)(nil), "hyperlane.mailbox.v1.QueryDomainRequest")
+	proto.RegisterType((*QueryDomainResponse)(nil), "hyperlane.mailbox.v1.QueryDomainResponse")
 }
 
 func init() { proto.RegisterFile("hyperlane/mailbox/v1/query.proto", fileDescriptor_567dd9a34f8715cd) }
 
 var fileDescriptor_567dd9a34f8715cd = []byte{
-	// 299 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x91, 0xb1, 0x4a, 0x03, 0x41,
-	0x10, 0x86, 0xb3, 0xc1, 0x58, 0x2c, 0xda, 0xac, 0x29, 0x42, 0x08, 0xeb, 0x79, 0x55, 0x9a, 0xec,
-	0x12, 0x45, 0x6b, 0xd1, 0x56, 0x0b, 0x83, 0x55, 0xba, 0x4d, 0x1c, 0x2e, 0x07, 0x97, 0x9d, 0xcb,
-	0xee, 0xec, 0x91, 0xb4, 0x3e, 0x81, 0xe0, 0x4b, 0x58, 0xfb, 0x14, 0x96, 0x01, 0x1b, 0x4b, 0x49,
-	0x7c, 0x10, 0x31, 0x27, 0xb1, 0x39, 0x11, 0xbb, 0x5d, 0xf8, 0xfe, 0x8f, 0x7f, 0x66, 0x78, 0x34,
-	0x59, 0xe4, 0xe0, 0x32, 0x63, 0x41, 0x4f, 0x4d, 0x9a, 0x8d, 0x70, 0xae, 0x8b, 0xbe, 0x9e, 0x05,
-	0x70, 0x0b, 0x95, 0x3b, 0x24, 0x14, 0xcd, 0x2d, 0xa1, 0xbe, 0x09, 0x55, 0xf4, 0xdb, 0x9d, 0x04,
-	0x31, 0xc9, 0x40, 0x9b, 0x3c, 0xd5, 0xc6, 0x5a, 0x24, 0x43, 0x29, 0x5a, 0x5f, 0x66, 0xe2, 0x23,
-	0x7e, 0x78, 0xf3, 0xa5, 0xb8, 0x0c, 0xce, 0x81, 0xa5, 0x5b, 0x07, 0x70, 0x0d, 0x64, 0xee, 0x0c,
-	0x99, 0x01, 0xcc, 0x02, 0x78, 0x8a, 0xaf, 0x78, 0xf4, 0x3b, 0xe2, 0x73, 0xb4, 0x1e, 0x84, 0xe0,
-	0x3b, 0x0e, 0x91, 0x5a, 0x2c, 0x62, 0xdd, 0xbd, 0xc1, 0xe6, 0x2d, 0x9a, 0xbc, 0x31, 0xc6, 0x60,
-	0xa9, 0x55, 0x8f, 0x58, 0x77, 0x7f, 0x50, 0x7e, 0x8e, 0x9f, 0x19, 0x6f, 0x6c, 0x74, 0xe2, 0x89,
-	0xf1, 0x83, 0x0a, 0xa7, 0x38, 0x55, 0x55, 0x73, 0xa8, 0x3f, 0x6a, 0xb6, 0xcf, 0xfe, 0x1b, 0x2b,
-	0xab, 0xc7, 0xf1, 0xfd, 0xeb, 0xc7, 0x63, 0xbd, 0x23, 0xda, 0xba, 0x72, 0xc1, 0xe4, 0x00, 0x2e,
-	0x86, 0x2f, 0x2b, 0xc9, 0x96, 0x2b, 0xc9, 0xde, 0x57, 0x92, 0x3d, 0xac, 0x65, 0x6d, 0xb9, 0x96,
-	0xb5, 0xb7, 0xb5, 0xac, 0x0d, 0xcf, 0x93, 0x94, 0x26, 0x61, 0xa4, 0xc6, 0x38, 0xd5, 0x9e, 0x9c,
-	0xb1, 0x09, 0x64, 0x58, 0x40, 0xaf, 0x00, 0x4b, 0xc1, 0x81, 0xff, 0x91, 0xf6, 0xc6, 0xe8, 0xa7,
-	0xe8, 0xf5, 0x7c, 0x6b, 0xa7, 0x45, 0x0e, 0x7e, 0xb4, 0xbb, 0x39, 0xc4, 0xc9, 0x67, 0x00, 0x00,
-	0x00, 0xff, 0xff, 0xed, 0x8d, 0x11, 0x66, 0xe0, 0x01, 0x00, 0x00,
+	// 365 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x92, 0xbf, 0x6a, 0xe3, 0x40,
+	0x10, 0xc6, 0xbd, 0xe6, 0xec, 0x62, 0x39, 0x37, 0x6b, 0x73, 0x18, 0x61, 0x74, 0x3a, 0x71, 0x85,
+	0xaf, 0xb0, 0x16, 0xdf, 0x71, 0xa9, 0x43, 0x92, 0x32, 0x29, 0x22, 0x52, 0xb9, 0x5b, 0xdb, 0x83,
+	0x2c, 0x90, 0x76, 0xe4, 0xdd, 0x95, 0xb0, 0xdb, 0xe4, 0x05, 0x02, 0x79, 0x89, 0x3c, 0x42, 0x1e,
+	0x21, 0xa5, 0x21, 0x4d, 0xca, 0x60, 0xe7, 0x41, 0x42, 0x24, 0xc5, 0xc1, 0xa0, 0xfc, 0xeb, 0x34,
+	0xc3, 0x37, 0xbf, 0xf9, 0xe6, 0xd3, 0x52, 0x67, 0xb6, 0x4c, 0x40, 0x45, 0x42, 0x02, 0x8f, 0x45,
+	0x18, 0x8d, 0x71, 0xc1, 0xb3, 0x21, 0x9f, 0xa7, 0xa0, 0x96, 0x5e, 0xa2, 0xd0, 0x20, 0xeb, 0x6c,
+	0x15, 0x5e, 0xa9, 0xf0, 0xb2, 0xa1, 0xd5, 0x0b, 0x10, 0x83, 0x08, 0xb8, 0x48, 0x42, 0x2e, 0xa4,
+	0x44, 0x23, 0x4c, 0x88, 0x52, 0x17, 0x33, 0xee, 0x2f, 0xfa, 0xf3, 0xf4, 0x19, 0x71, 0x98, 0x2a,
+	0x05, 0xd2, 0x9c, 0x29, 0x80, 0x13, 0x30, 0x62, 0x2a, 0x8c, 0xf0, 0x61, 0x9e, 0x82, 0x36, 0xee,
+	0x31, 0x75, 0xde, 0x96, 0xe8, 0x04, 0xa5, 0x06, 0xc6, 0xe8, 0x37, 0x85, 0x68, 0xba, 0xc4, 0x21,
+	0xfd, 0xef, 0x7e, 0xfe, 0xcd, 0x3a, 0xb4, 0x31, 0xc1, 0x54, 0x9a, 0x6e, 0xdd, 0x21, 0xfd, 0x96,
+	0x5f, 0x14, 0x6e, 0x87, 0xb2, 0x9c, 0x76, 0x84, 0xb1, 0x08, 0xe5, 0xcb, 0x8e, 0x01, 0x6d, 0xef,
+	0x74, 0x4b, 0xec, 0x0f, 0xda, 0x9c, 0xe6, 0x9d, 0x1c, 0xdc, 0xf2, 0xcb, 0xea, 0xef, 0x4d, 0x9d,
+	0x36, 0x72, 0x3d, 0xbb, 0x26, 0xb4, 0x5d, 0x61, 0x8c, 0xfd, 0xf7, 0xaa, 0xc2, 0xf0, 0x3e, 0xb8,
+	0xd5, 0xda, 0xfb, 0xea, 0x58, 0x61, 0xd4, 0x75, 0xcf, 0xef, 0x1e, 0xaf, 0xea, 0x3d, 0x66, 0xf1,
+	0xca, 0xbf, 0x64, 0x14, 0x00, 0xbb, 0x20, 0xb4, 0x59, 0xdc, 0xc7, 0xfa, 0xef, 0xac, 0xd9, 0x09,
+	0xc6, 0xfa, 0xf3, 0x09, 0x65, 0xe9, 0xe1, 0x77, 0xee, 0xc1, 0x66, 0xbd, 0x6a, 0x0f, 0x45, 0x74,
+	0x07, 0xa3, 0xdb, 0xb5, 0x4d, 0x56, 0x6b, 0x9b, 0x3c, 0xac, 0x6d, 0x72, 0xb9, 0xb1, 0x6b, 0xab,
+	0x8d, 0x5d, 0xbb, 0xdf, 0xd8, 0xb5, 0xd1, 0x7e, 0x10, 0x9a, 0x59, 0x3a, 0xf6, 0x26, 0x18, 0x73,
+	0x6d, 0x94, 0x90, 0x01, 0x44, 0x98, 0xc1, 0x20, 0x03, 0x69, 0x52, 0x05, 0xfa, 0x15, 0x3b, 0x98,
+	0xa0, 0x8e, 0x51, 0xf3, 0xc5, 0x96, 0x6f, 0x96, 0x09, 0xe8, 0x71, 0x33, 0x7f, 0x53, 0xff, 0x9e,
+	0x02, 0x00, 0x00, 0xff, 0xff, 0x0c, 0xea, 0x06, 0xa2, 0xab, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -177,6 +275,8 @@ const _ = grpc.SupportPackageIsVersion4
 type QueryClient interface {
 	// Get current tree metadata
 	CurrentTreeMetadata(ctx context.Context, in *QueryCurrentTreeMetadataRequest, opts ...grpc.CallOption) (*QueryCurrentTreeMetadataResponse, error)
+	// Get domain
+	Domain(ctx context.Context, in *QueryDomainRequest, opts ...grpc.CallOption) (*QueryDomainResponse, error)
 }
 
 type queryClient struct {
@@ -196,10 +296,21 @@ func (c *queryClient) CurrentTreeMetadata(ctx context.Context, in *QueryCurrentT
 	return out, nil
 }
 
+func (c *queryClient) Domain(ctx context.Context, in *QueryDomainRequest, opts ...grpc.CallOption) (*QueryDomainResponse, error) {
+	out := new(QueryDomainResponse)
+	err := c.cc.Invoke(ctx, "/hyperlane.mailbox.v1.Query/Domain", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Get current tree metadata
 	CurrentTreeMetadata(context.Context, *QueryCurrentTreeMetadataRequest) (*QueryCurrentTreeMetadataResponse, error)
+	// Get domain
+	Domain(context.Context, *QueryDomainRequest) (*QueryDomainResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -207,6 +318,10 @@ type UnimplementedQueryServer struct{}
 
 func (*UnimplementedQueryServer) CurrentTreeMetadata(ctx context.Context, req *QueryCurrentTreeMetadataRequest) (*QueryCurrentTreeMetadataResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CurrentTreeMetadata not implemented")
+}
+
+func (*UnimplementedQueryServer) Domain(ctx context.Context, req *QueryDomainRequest) (*QueryDomainResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Domain not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -231,6 +346,24 @@ func _Query_CurrentTreeMetadata_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_Domain_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryDomainRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).Domain(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/hyperlane.mailbox.v1.Query/Domain",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).Domain(ctx, req.(*QueryDomainRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "hyperlane.mailbox.v1.Query",
 	HandlerType: (*QueryServer)(nil),
@@ -238,6 +371,10 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CurrentTreeMetadata",
 			Handler:    _Query_CurrentTreeMetadata_Handler,
+		},
+		{
+			MethodName: "Domain",
+			Handler:    _Query_Domain_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -302,6 +439,57 @@ func (m *QueryCurrentTreeMetadataResponse) MarshalToSizedBuffer(dAtA []byte) (in
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryDomainRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryDomainRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryDomainRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryDomainResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryDomainResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryDomainResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Domain != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.Domain))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -335,6 +523,27 @@ func (m *QueryCurrentTreeMetadataResponse) Size() (n int) {
 	}
 	if m.Count != 0 {
 		n += 1 + sovQuery(uint64(m.Count))
+	}
+	return n
+}
+
+func (m *QueryDomainRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *QueryDomainResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Domain != 0 {
+		n += 1 + sovQuery(uint64(m.Domain))
 	}
 	return n
 }
@@ -476,6 +685,127 @@ func (m *QueryCurrentTreeMetadataResponse) Unmarshal(dAtA []byte) error {
 				b := dAtA[iNdEx]
 				iNdEx++
 				m.Count |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+
+func (m *QueryDomainRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryDomainRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryDomainRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+
+func (m *QueryDomainResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryDomainResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryDomainResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Domain", wireType)
+			}
+			m.Domain = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Domain |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

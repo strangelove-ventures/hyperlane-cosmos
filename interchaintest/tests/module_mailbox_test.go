@@ -15,17 +15,19 @@ import (
 
 	"cosmossdk.io/math"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 
-	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
 	icv7 "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
+
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
 )
 
 // TestHyperlaneMailbox ensures the mailbox module & bindings work properly.
@@ -134,12 +136,18 @@ func TestHyperlaneIgp(t *testing.T) {
 	}
 
 	// Base setup
-	chains := CreateDoubleHyperlaneSimd(t, DockerImage)
+	chains := CreateDoubleHyperlaneSimd(t, DockerImage, 23456, 34567)
 	ctx := BuildInitialChain(t, chains)
 
 	// Chains
 	simd := chains[0].(*cosmos.CosmosChain)
 	simd2 := chains[1].(*cosmos.CosmosChain)
+
+	simdDomainOutput := helpers.QueryDomain(t, ctx, simd)
+	simd2DomainOutput := helpers.QueryDomain(t, ctx, simd2)
+	simdDomain := helpers.ParseQueryDomain(string(simdDomainOutput))
+	simd2Domain := helpers.ParseQueryDomain(string(simd2DomainOutput))
+	fmt.Printf("simd mailbox domain: %s, simd2 mailbox domain: %s\n", simdDomain, simd2Domain)
 
 	t.Log("simd.GetHostRPCAddress()", simd.GetHostRPCAddress())
 	t.Log("simd2.GetHostRPCAddress()", simd2.GetHostRPCAddress())
@@ -194,11 +202,11 @@ func TestHyperlaneIgp(t *testing.T) {
 		require.Equal(t, val.Addr, legacyMultiSig2.ValidatorPubKeys[i])
 	}
 
-	//recipientCosmosBech32 := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
+	// recipientCosmosBech32 := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
 	recipientDispatch := hexutil.Encode([]byte(contract2))
 	dMsg := []byte("HelloHyperlaneWorld")
 	dispatchedMsg := hexutil.Encode(dMsg)
-	//Now setup and verification is finished for both chains. Dispatch a message
+	// Now setup and verification is finished for both chains. Dispatch a message
 	dispatchMsgStruct := helpers.ExecuteMsg{
 		DispatchMsg: &helpers.DispatchMsg{
 			DestinationAddr: uint32(destDomain),
@@ -299,18 +307,18 @@ func TestHyperlaneIgp(t *testing.T) {
 	require.NoError(t, err)
 	require.Greater(t, dispatchedDestDomainUint, uint64(0))
 
-	//senderHex := hexutil.Encode([]byte(dispatchSender))
+	// senderHex := hexutil.Encode([]byte(dispatchSender))
 	dispatchedRecipientAddr := hexutil.MustDecode(dispatchedRecipientAddrHex)
 	sender := "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7" // TODO: padding is not correct in hyperlane message
 
-	//was: uint32(dispatchedDestDomainUint)
-	//was: senderHex
+	// was: uint32(dispatchedDestDomainUint)
+	// was: senderHex
 	b, err := hexutil.Decode(dispatchedMsgBody)
 	require.NoError(t, err)
 	message, proof := counterChainSimd2.CreateMessage(sender, destDomain, string(dispatchedRecipientAddr), string(b))
 	metadata := counterChainSimd2.CreateLegacyMetadata(message, proof)
 
-	//CallProcessMsg sends the message and verifies the message and metadata
+	// CallProcessMsg sends the message and verifies the message and metadata
 	processStdout := helpers.CallProcessMsg(t, ctx, simd2, userSimd2.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 	processTxHash := helpers.ParseTxHash(string(processStdout))
 	processMsgId, err := helpers.VerifyProcessEvents(simd2, processTxHash)
@@ -325,7 +333,7 @@ func TestHyperlaneIgp(t *testing.T) {
 func GetQueryContext() (context.Context, context.CancelFunc) {
 	timeout, _ := time.ParseDuration("15s")
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	//ctx = metadata.AppendToOutgoingContext(ctx, grpctypes.GRPCBlockHeightHeader, height)
+	// ctx = metadata.AppendToOutgoingContext(ctx, grpctypes.GRPCBlockHeightHeader, height)
 	return ctx, cancel
 }
 

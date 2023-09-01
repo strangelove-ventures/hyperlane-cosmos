@@ -29,11 +29,12 @@ type Keeper struct {
 	mailboxAddr sdk.AccAddress
 	version     byte
 	domain      uint32
-	Tree        *imt.Tree
-	Delivered   map[string]bool
+
+	Tree      *imt.Tree
+	Delivered map[string]bool
 }
 
-func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwasm.Keeper, ismKeeper *ismkeeper.Keeper, domain uint32) Keeper {
+func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwasm.Keeper, ismKeeper *ismkeeper.Keeper) Keeper {
 	// governance authority
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
 
@@ -45,11 +46,14 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwas
 		authority:   authority.String(),
 		mailboxAddr: authtypes.NewModuleAddress(types.ModuleName),
 		version:     0,
-		domain:      domain,
 		pcwKeeper:   cosmwasm.NewDefaultPermissionKeeper(cwKeeper),
 		Tree:        &imt.Tree{},
 		Delivered:   map[string]bool{},
 	}
+}
+
+func (k *Keeper) SetDomain(domain uint32) {
+	k.domain = domain
 }
 
 func (k Keeper) VerifyMessage(messageBytes []byte) (string, error) {

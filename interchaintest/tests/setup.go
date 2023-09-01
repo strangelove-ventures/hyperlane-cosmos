@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+
 	igptypes "github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
 
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
@@ -79,7 +80,7 @@ func CreateSingleHyperlaneSimd(t *testing.T) []ibc.Chain {
 				NoHostMount:    false,
 				// ConfigFileOverrides: nil,
 				EncodingConfig:         hyperlaneEncoding(),
-				ModifyGenesis:          ModifyGenesisProposalTime(votingPeriod, maxDepositPeriod),
+				ModifyGenesis:          ModifyGenesisProposalTime(votingPeriod, maxDepositPeriod, 12345),
 				UsingNewGenesisCommand: true,
 			},
 		},
@@ -92,7 +93,7 @@ func CreateSingleHyperlaneSimd(t *testing.T) []ibc.Chain {
 	return chains
 }
 
-func CreateDoubleHyperlaneSimd(t *testing.T, image ibc.DockerImage) []ibc.Chain {
+func CreateDoubleHyperlaneSimd(t *testing.T, image ibc.DockerImage, firstChainDomain, secondChainDomain uint32) []ibc.Chain {
 	// Create chain factory with hyperlane-simd
 
 	votingPeriod := "10s"
@@ -118,7 +119,7 @@ func CreateDoubleHyperlaneSimd(t *testing.T, image ibc.DockerImage) []ibc.Chain 
 				NoHostMount:    false,
 				// ConfigFileOverrides: nil,
 				EncodingConfig:         hyperlaneEncoding(),
-				ModifyGenesis:          ModifyGenesisProposalTime(votingPeriod, maxDepositPeriod),
+				ModifyGenesis:          ModifyGenesisProposalTime(votingPeriod, maxDepositPeriod, firstChainDomain),
 				UsingNewGenesisCommand: true,
 			},
 		},
@@ -141,7 +142,7 @@ func CreateDoubleHyperlaneSimd(t *testing.T, image ibc.DockerImage) []ibc.Chain 
 				NoHostMount:    false,
 				// ConfigFileOverrides: nil,
 				EncodingConfig:         hyperlaneEncoding(),
-				ModifyGenesis:          ModifyGenesisProposalTime(votingPeriod, maxDepositPeriod),
+				ModifyGenesis:          ModifyGenesisProposalTime(votingPeriod, maxDepositPeriod, secondChainDomain),
 				UsingNewGenesisCommand: true,
 			},
 		},
@@ -184,8 +185,9 @@ func BuildInitialChain(t *testing.T, chains []ibc.Chain) context.Context {
 	return ctx
 }
 
-func ModifyGenesisProposalTime(votingPeriod string, maxDepositPeriod string) func(ibc.ChainConfig, []byte) ([]byte, error) {
+func ModifyGenesisProposalTime(votingPeriod string, maxDepositPeriod string, domain uint32) func(ibc.ChainConfig, []byte) ([]byte, error) {
 	return func(chainConfig ibc.ChainConfig, genbz []byte) ([]byte, error) {
+		// Modify values that already exist in the genesis
 		g := make(map[string]interface{})
 		if err := json.Unmarshal(genbz, &g); err != nil {
 			return nil, fmt.Errorf("failed to unmarshal genesis file: %w", err)
@@ -199,10 +201,66 @@ func ModifyGenesisProposalTime(votingPeriod string, maxDepositPeriod string) fun
 		if err := dyno.Set(g, chainConfig.Denom, "app_state", "gov", "params", "min_deposit", 0, "denom"); err != nil {
 			return nil, fmt.Errorf("failed to set min deposit in genesis json: %w", err)
 		}
+
+		if err := dyno.Set(g, domain, "app_state", "hyperlane-mailbox", "domain"); err != nil {
+			return nil, fmt.Errorf("failed to set min deposit in genesis json: %w", err)
+		}
 		out, err := json.Marshal(g)
 		if err != nil {
 			return nil, fmt.Errorf("failed to marshal genesis bytes to json: %w", err)
 		}
 		return out, nil
+		// merge in a new section that doesn't exist in the Genesis.
+		// genesisSetMailboxDomain := map[string]interface{}{
+		// 	"hyperlane-mailbox": map[string]interface{}{
+		// 		"domain": domain,
+		// 	},
+		// }
+		//return modifyGenesisAtPath(out, "app_state", "hyperlane-mailbox", domain)
 	}
+}
+
+func modifyGenesisAtPath(genbz []byte, key1 string, key2 string, domain uint32) ([]byte, error) {
+	g := make(map[string]interface{})
+	if err := json.Unmarshal(genbz, &g); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal genesis file: %w", err)
+	}
+
+	// Get the section of the genesis file under the given key (e.g. "app_state")
+	genesisBlockI, ok := g[key1]
+	if !ok {
+		return nil, fmt.Errorf("genesis json does not have top level key: %s", key1)
+	}
+
+	blockBytes, mErr := json.Marshal(genesisBlockI)
+	if mErr != nil {
+		return nil, fmt.Errorf("genesis json marshal error for block with key: %s", key1)
+	}
+
+	genesisBlock := make(map[string]interface{})
+	mErr = json.Unmarshal(blockBytes, &genesisBlock)
+	if mErr != nil {
+		return nil, fmt.Errorf("genesis json unmarshal error for block with key: %s", key1)
+	}
+
+	appMailboxI, ok := genesisBlock[key2]
+	if !ok {
+		return nil, fmt.Errorf("genesis json does not have top level key: %s", key2)
+	}
+	appMailboxBytes, mErr := json.Marshal(appMailboxI)
+	if mErr != nil {
+		return nil, fmt.Errorf("genesis json unmarshal error for block with key: %s", key1)
+	}
+	genesisBlockMailbox := make(map[string]interface{})
+	mErr = json.Unmarshal(appMailboxBytes, &genesisBlockMailbox)
+	if mErr != nil {
+		return nil, fmt.Errorf("genesis json unmarshal error for block with key: %s", key1)
+	}
+
+	genesisBlockMailbox["domain"] = domain
+	out, err := json.Marshal(g)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal genesis bytes to json: %w", err)
+	}
+	return out, nil
 }

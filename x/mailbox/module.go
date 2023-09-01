@@ -50,6 +50,7 @@ func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 			TreeEntries: []*types.TreeEntry{},
 		},
 		DeliveredMessages: []*types.MessageDelivered{},
+		Domain:            1,
 	})
 }
 

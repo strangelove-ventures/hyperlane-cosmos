@@ -10,10 +10,11 @@ import (
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-	"github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
+
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
 )
 
 func VerifyIgpEvents(c *cosmos.CosmosChain, txHash string) (igpId uint32, err error) {
@@ -99,9 +100,9 @@ func VerifyPayForGasEvents(c *cosmos.CosmosChain, txHash string) (msgId string, 
 }
 
 func ParseQuoteGasPayment(input string) (amount, denom string) {
-	//Input will look like this:
-	//amount: "2250000000000000000000"
-	//denom: stake
+	// Input will look like this:
+	// amount: "2250000000000000000000"
+	// denom: stake
 
 	r, _ := regexp.Compile(`(?m)^amount:\s(?P<amount>.*)$`)
 	r2, _ := regexp.Compile(`(?m)^denom:\s(?P<denom>.*)$`)
@@ -152,7 +153,8 @@ func CallCreateOracle(
 	keyName,
 	oracleAddr string,
 	igpId string,
-	remoteDomain string) (stdout []byte) {
+	remoteDomain string,
+) (stdout []byte) {
 	cmd := []string{
 		"simd", "tx", "hyperlane-igp", "createoracle",
 		oracleAddr,
@@ -216,7 +218,8 @@ func CallSetGasPriceMsg(
 	igpId,
 	domain,
 	gasPrice,
-	exchRate string) (stdout []byte) {
+	exchRate string,
+) (stdout []byte) {
 	cmd := []string{
 		"simd", "tx", "hyperlane-igp", "setgasprice",
 		igpId,
@@ -251,7 +254,8 @@ func QueryQuoteGasPayment(
 	keyName,
 	igpId,
 	domain,
-	gasAmount string) (stdout []byte) {
+	gasAmount string,
+) (stdout []byte) {
 	cmd := []string{
 		"simd", "query", "hyperlane-igp", "quoteGasPayment",
 		igpId,

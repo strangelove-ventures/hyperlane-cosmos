@@ -12,6 +12,7 @@ import (
 
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
@@ -759,7 +760,6 @@ func (suite *KeeperTestSuite) TestDispatchPayProcess() {
 				sdk.NewAttribute(types.AttributeBeneficiary, igpBeneficiary),
 				sdk.NewAttribute(types.AttributePayment, coinExpected),
 			))
-
 		})
 	}
 }

@@ -19,6 +19,7 @@ func GetQueryCmd() *cobra.Command {
 
 	queryCmd.AddCommand(
 		getCurrentTreeMetadataCmd(),
+		getDomain(),
 	)
 
 	return queryCmd

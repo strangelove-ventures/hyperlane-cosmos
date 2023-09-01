@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
@@ -88,5 +90,38 @@ func VerifyProcessEvents(c *cosmos.CosmosChain, txHash string) (msgId string, er
 	if !found {
 		return "", errors.New("msgId not found in process TX event attrs")
 	}
+	return
+}
+
+// simd query hyperlane-mailbox domain
+func QueryDomain(
+	t *testing.T,
+	ctx context.Context,
+	chain *cosmos.CosmosChain,
+) (stdout []byte) {
+	cmd := []string{
+		"simd", "query", "hyperlane-mailbox", "domain",
+		"--node", chain.GetRPCAddress(),
+		"--home", chain.HomeDir(),
+		"--chain-id", chain.Config().ChainID,
+	}
+	stdout, _, err := chain.Exec(ctx, cmd, nil)
+	require.NoError(t, err)
+
+	fmt.Println("QueryDomain stdout: ", string(stdout))
+
+	err = testutil.WaitForBlocks(ctx, 2, chain)
+	require.NoError(t, err)
+	return stdout
+}
+
+func ParseQueryDomain(input string) (domain string) {
+	r, _ := regexp.Compile(`(?m)^domain:\s(?P<domain>.*)$`)
+
+	matches := r.FindStringSubmatch(input)
+	dindex := r.SubexpIndex("domain")
+	domain = matches[dindex]
+	domain = strings.Replace(domain, "\"", "", -1)
+
 	return
 }

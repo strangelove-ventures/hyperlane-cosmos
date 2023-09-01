@@ -47,8 +47,8 @@ func (suite *KeeperTestSuite) SetupTest() {
 		key,
 		nil,
 		nil,
-		10, // Use test data from Optimism(10), could be any other chain with their respective test data
 	)
+	suite.keeper.SetDomain(10)
 
 	types.RegisterInterfaces(encCfg.InterfaceRegistry)
 

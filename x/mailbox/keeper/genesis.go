@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"strconv"
 
@@ -14,7 +15,7 @@ import (
 
 // InitGenesis initializes the hyperlane mailbox module's state from a provided genesis
 // state.
-func (k Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
+func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
 	tempTree := make(map[uint32][]byte, gs.Tree.Count)
 	for _, treeEntry := range gs.Tree.TreeEntries {
 		tempTree[treeEntry.Index] = treeEntry.Message
@@ -26,6 +27,12 @@ func (k Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
 	for _, msgDelivered := range gs.DeliveredMessages {
 		k.Delivered[msgDelivered.Id] = true
 	}
+
+	store := ctx.KVStore(k.storeKey)
+	res := make([]byte, 4)
+	binary.LittleEndian.PutUint32(res, gs.Domain)
+	store.Set(types.DomainKey, res)
+
 	return nil
 }
 

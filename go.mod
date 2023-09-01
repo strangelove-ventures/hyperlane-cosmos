@@ -193,3 +193,19 @@ replace (
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 
 )
+
+// replace (
+// 	cosmossdk.io/api => cosmossdk.io/api v0.3.0
+// 	github.com/99designs/keyring => github.com/cosmos/keyring v1.2.0
+// 	github.com/ChainSafe/go-schnorrkel => github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d
+// 	github.com/ChainSafe/go-schnorrkel/1 => github.com/ChainSafe/go-schnorrkel v1.0.0
+// 	github.com/cloudflare/circl => github.com/cloudflare/circl v1.3.1
+// 	github.com/gin-gonic/gin => github.com/gin-gonic/gin v1.9.0
+
+// 	// github.com/CosmWasm/wasmd => github.com/CosmWasm/wasmd v0.40.0-rc.1.0.20230424144037-55647a1fd1f9
+// 	// github.com/CosmWasm/wasmvm => github.com/CosmWasm/wasmvm v1.2.3
+// 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
+// 	github.com/sergi/go-diff => github.com/sergi/go-diff v1.2.0
+// 	// pin version! 126854af5e6d has issues with the store so that queries fail
+// 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
+// )

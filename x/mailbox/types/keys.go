@@ -7,10 +7,13 @@ const (
 	ModuleName = "hyperlane-mailbox"
 
 	// StoreKey is the store key string for hyperlane mailbox
-	StoreKey = ModuleName
-
+	StoreKey            = ModuleName
 	KeyMailboxIMT       = "imt"
 	KeyMailboxDelivered = "delivered"
+)
+
+var (
+	DomainKey = []byte{0x1}
 )
 
 func MailboxIMTKey(index uint32) []byte {
