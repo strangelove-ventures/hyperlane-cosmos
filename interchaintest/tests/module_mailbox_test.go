@@ -61,6 +61,8 @@ func TestHyperlaneMailbox(t *testing.T) {
 	res := helpers.QueryAllDefaultIsms(t, ctx, simd)
 
 	var abstractIsm ismtypes.AbstractIsm
+
+	// TODO: this is a bug. The ordering of DefaultIsms isn't guaranteed so you CANNOT assume [0] is a 'LegacyMultiSig'
 	err := simd.Config().EncodingConfig.InterfaceRegistry.UnpackAny(res.DefaultIsms[0].AbstractIsm, &abstractIsm)
 	require.NoError(t, err)
 	legacyMultiSig := abstractIsm.(*legacy_multisig.LegacyMultiSig)
@@ -72,27 +74,27 @@ func TestHyperlaneMailbox(t *testing.T) {
 	// Create first legacy multisig message from counter chain 1
 	sender := "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7"
 	destDomain := uint32(12345)
-	message, proof := counterChain1.CreateMessage(sender, destDomain, contract, "Legacy Multisig 1")
+	message, proof := counterChain1.CreateMessage(sender, destDomain, destDomain, contract, "Legacy Multisig 1")
 	metadata := counterChain1.CreateLegacyMetadata(message, proof)
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 
 	// Create second legacy multisig message from counter chain 1
-	message, proof = counterChain1.CreateMessage(sender, destDomain, contract, "Legacy Multisig 2")
+	message, proof = counterChain1.CreateMessage(sender, destDomain, destDomain, contract, "Legacy Multisig 2")
 	metadata = counterChain1.CreateLegacyMetadata(message, proof)
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 
 	// Create third legacy multisig message from counter chain 1
-	message, proof = counterChain1.CreateMessage(sender, destDomain, contract, "Legacy Multisig 3")
+	message, proof = counterChain1.CreateMessage(sender, destDomain, destDomain, contract, "Legacy Multisig 3")
 	metadata = counterChain1.CreateLegacyMetadata(message, proof)
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 
 	// Create first message id multisig message from counter chain 2
-	message, _ = counterChain2.CreateMessage(sender, destDomain, contract, "Message Id Multisig 1")
+	message, _ = counterChain2.CreateMessage(sender, destDomain, destDomain, contract, "Message Id Multisig 1")
 	metadata = counterChain2.CreateMessageIdMetadata(message)
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 
 	// Create first merkle root multisig message from counter chain 3
-	message, proof = counterChain3.CreateMessage(sender, destDomain, contract, "Merkle Root Multisig 1")
+	message, proof = counterChain3.CreateMessage(sender, destDomain, destDomain, contract, "Merkle Root Multisig 1")
 	metadata = counterChain3.CreateMerkleRootMetadata(message, proof)
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 
@@ -145,9 +147,13 @@ func TestHyperlaneIgp(t *testing.T) {
 
 	simdDomainOutput := helpers.QueryDomain(t, ctx, simd)
 	simd2DomainOutput := helpers.QueryDomain(t, ctx, simd2)
-	simdDomain := helpers.ParseQueryDomain(string(simdDomainOutput))
-	simd2Domain := helpers.ParseQueryDomain(string(simd2DomainOutput))
-	fmt.Printf("simd mailbox domain: %s, simd2 mailbox domain: %s\n", simdDomain, simd2Domain)
+	simdDomainStr := helpers.ParseQueryDomain(string(simdDomainOutput))
+	simd2DomainStr := helpers.ParseQueryDomain(string(simd2DomainOutput))
+	simdDomain, err := strconv.ParseUint(simdDomainStr, 10, 64)
+	require.NoError(t, err)
+	simd2Domain, err := strconv.ParseUint(simd2DomainStr, 10, 64)
+	require.NoError(t, err)
+	fmt.Printf("simd mailbox domain: %d, simd2 mailbox domain: %d\n", simdDomain, simd2Domain)
 
 	t.Log("simd.GetHostRPCAddress()", simd.GetHostRPCAddress())
 	t.Log("simd2.GetHostRPCAddress()", simd2.GetHostRPCAddress())
@@ -168,37 +174,34 @@ func TestHyperlaneIgp(t *testing.T) {
 	verifyContractEntryPoints(t, ctx, simd, userSimd, contract)
 	verifyContractEntryPoints(t, ctx, simd2, userSimd2, contract2)
 
-	// TODO: note, at present, this CANNOT be changed. Therefore any message dispatched with a different destination WILL fail.
-	destDomain := uint32(12345)
-
-	// Create counter chain 1, with origin 1, with val set signing legacy multisig
-	counterChainSimd1 := counterchain.CreateCounterChain(t, 1, counterchain.LEGACY_MULTISIG)
-	// Create counter chain 2, with origin 2, with val set signing legacy multisig
-	counterChainSimd2 := counterchain.CreateCounterChain(t, destDomain, counterchain.LEGACY_MULTISIG)
+	// Create counter chain 1 with val set signing legacy multisig
+	simdIsmValidator := counterchain.CreateCounterChain(t, uint32(simdDomain), counterchain.LEGACY_MULTISIG)
+	// Create counter chain 2 with val set signing legacy multisig
+	simd2IsmValidator := counterchain.CreateCounterChain(t, uint32(simd2Domain), counterchain.LEGACY_MULTISIG)
 
 	// Set default isms for counter chains for SIMD
-	helpers.SetDefaultIsm(t, ctx, simd, userSimd.KeyName(), counterChainSimd1)
+	helpers.SetDefaultIsm(t, ctx, simd, userSimd.KeyName(), simd2IsmValidator)
 	res := helpers.QueryAllDefaultIsms(t, ctx, simd)
 
 	var abstractIsm ismtypes.AbstractIsm
-	err := simd.Config().EncodingConfig.InterfaceRegistry.UnpackAny(res.DefaultIsms[0].AbstractIsm, &abstractIsm)
+	err = simd.Config().EncodingConfig.InterfaceRegistry.UnpackAny(res.DefaultIsms[0].AbstractIsm, &abstractIsm)
 	require.NoError(t, err)
 	legacyMultiSig := abstractIsm.(*legacy_multisig.LegacyMultiSig)
-	require.Equal(t, counterChainSimd1.ValSet.Threshold, uint8(legacyMultiSig.Threshold))
-	for i, val := range counterChainSimd1.ValSet.Vals {
+	require.Equal(t, simd2IsmValidator.ValSet.Threshold, uint8(legacyMultiSig.Threshold))
+	for i, val := range simd2IsmValidator.ValSet.Vals {
 		require.Equal(t, val.Addr, legacyMultiSig.ValidatorPubKeys[i])
 	}
 
 	// Set default isms for counter chains for SIMD2
-	helpers.SetDefaultIsm(t, ctx, simd2, userSimd2.KeyName(), counterChainSimd2)
+	helpers.SetDefaultIsm(t, ctx, simd2, userSimd2.KeyName(), simdIsmValidator)
 	res2 := helpers.QueryAllDefaultIsms(t, ctx, simd2)
 
 	var abstractIsm2 ismtypes.AbstractIsm
 	err2 := simd2.Config().EncodingConfig.InterfaceRegistry.UnpackAny(res2.DefaultIsms[0].AbstractIsm, &abstractIsm2)
 	require.NoError(t, err2)
 	legacyMultiSig2 := abstractIsm2.(*legacy_multisig.LegacyMultiSig)
-	require.Equal(t, counterChainSimd2.ValSet.Threshold, uint8(legacyMultiSig2.Threshold))
-	for i, val := range counterChainSimd2.ValSet.Vals {
+	require.Equal(t, simdIsmValidator.ValSet.Threshold, uint8(legacyMultiSig2.Threshold))
+	for i, val := range simdIsmValidator.ValSet.Vals {
 		require.Equal(t, val.Addr, legacyMultiSig2.ValidatorPubKeys[i])
 	}
 
@@ -206,10 +209,11 @@ func TestHyperlaneIgp(t *testing.T) {
 	recipientDispatch := hexutil.Encode([]byte(contract2))
 	dMsg := []byte("HelloHyperlaneWorld")
 	dispatchedMsg := hexutil.Encode(dMsg)
+
 	// Now setup and verification is finished for both chains. Dispatch a message
 	dispatchMsgStruct := helpers.ExecuteMsg{
 		DispatchMsg: &helpers.DispatchMsg{
-			DestinationAddr: uint32(destDomain),
+			DestinationAddr: uint32(simd2Domain),
 			RecipientAddr:   recipientDispatch,
 			MessageBody:     dispatchedMsg,
 		},
@@ -260,7 +264,7 @@ func TestHyperlaneIgp(t *testing.T) {
 	require.Equal(t, uint32(1), igpIdUint)
 	igpId := strconv.FormatUint(uint64(igpIdUint), 10)
 
-	destDomainStr := strconv.FormatUint(uint64(destDomain), 10)
+	destDomainStr := strconv.FormatUint(uint64(simd2Domain), 10)
 	// Create the oracle and verify we get the expected address in the events
 	oracle := chain1Oracle.FormattedAddress()
 	createOracleOutput := helpers.CallCreateOracle(t, ctx, simd, userSimd.KeyName(), oracle, igpId, destDomainStr)
@@ -315,8 +319,8 @@ func TestHyperlaneIgp(t *testing.T) {
 	// was: senderHex
 	b, err := hexutil.Decode(dispatchedMsgBody)
 	require.NoError(t, err)
-	message, proof := counterChainSimd2.CreateMessage(sender, destDomain, string(dispatchedRecipientAddr), string(b))
-	metadata := counterChainSimd2.CreateLegacyMetadata(message, proof)
+	message, proof := simd2IsmValidator.CreateMessage(sender, uint32(simdDomain), uint32(simd2Domain), string(dispatchedRecipientAddr), string(b))
+	metadata := simd2IsmValidator.CreateLegacyMetadata(message, proof)
 
 	// CallProcessMsg sends the message and verifies the message and metadata
 	processStdout := helpers.CallProcessMsg(t, ctx, simd2, userSimd2.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))

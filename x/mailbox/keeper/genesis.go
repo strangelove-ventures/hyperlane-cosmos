@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"bytes"
-	"encoding/binary"
 	"fmt"
 	"strconv"
 
@@ -28,11 +27,7 @@ func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
 		k.Delivered[msgDelivered.Id] = true
 	}
 
-	store := ctx.KVStore(k.storeKey)
-	res := make([]byte, 4)
-	binary.LittleEndian.PutUint32(res, gs.Domain)
-	store.Set(types.DomainKey, res)
-
+	k.SetDomain(ctx, gs.Domain)
 	return nil
 }
 

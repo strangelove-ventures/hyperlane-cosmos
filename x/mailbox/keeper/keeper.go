@@ -1,6 +1,9 @@
 package keeper
 
 import (
+	"context"
+	"encoding/binary"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -28,7 +31,6 @@ type Keeper struct {
 	authority   string
 	mailboxAddr sdk.AccAddress
 	version     byte
-	domain      uint32
 
 	Tree      *imt.Tree
 	Delivered map[string]bool
@@ -52,18 +54,27 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwas
 	}
 }
 
-func (k *Keeper) SetDomain(domain uint32) {
-	k.domain = domain
+func (k *Keeper) SetDomain(c context.Context, domain uint32) {
+	ctx := sdk.UnwrapSDKContext(c)
+	store := ctx.KVStore(k.storeKey)
+	res := make([]byte, 4)
+	binary.LittleEndian.PutUint32(res, domain)
+	store.Set(types.DomainKey, res)
 }
 
-func (k Keeper) VerifyMessage(messageBytes []byte) (string, error) {
+func (k Keeper) VerifyMessage(c context.Context, messageBytes []byte) (string, error) {
+	ctx := sdk.UnwrapSDKContext(c)
+	store := ctx.KVStore(k.storeKey)
+	b := store.Get(types.DomainKey)
+	domain := binary.LittleEndian.Uint32(b)
+
 	if common.Version(messageBytes) != k.version {
 		return "", types.ErrMsgInvalidVersion
 	}
 
 	destGiven := common.Destination(messageBytes)
-	if common.Destination(messageBytes) != k.domain {
-		return "", types.ErrMsgInvalidDomain.Wrapf("Message destination %d is invalid. Acceptable domain is %d", destGiven, k.domain)
+	if common.Destination(messageBytes) != domain {
+		return "", types.ErrMsgInvalidDomain.Wrapf("Message destination %d is invalid. Acceptable domain is %d", destGiven, domain)
 	}
 
 	idBytes := common.Id(messageBytes)

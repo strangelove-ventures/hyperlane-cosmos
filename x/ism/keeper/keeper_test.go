@@ -108,12 +108,14 @@ func (suite *KeeperTestSuite) TestVerify() {
 			_, err := suite.msgServer.SetDefaultIsm(suite.ctx, msg)
 			suite.Require().NoError(err)
 
-			pass := suite.keeper.Verify(tc.metadata, tc.message)
+			pass, err := suite.keeper.Verify(tc.metadata, tc.message)
 
 			if tc.expPass {
 				suite.Require().True(pass)
+				suite.Require().NoError(err)
 			} else {
 				suite.Require().False(pass)
+				suite.Require().Error(err)
 			}
 		})
 	}
@@ -147,7 +149,8 @@ func TestVerifyValidatorSignatures(t *testing.T) {
 		require.NoError(t, err)
 
 		// Verify will also verify Merkle Proof now
-		result := ismMap[common.Origin(message)].Verify(metadata, message)
+		result, err := ismMap[common.Origin(message)].Verify(metadata, message)
 		require.True(t, result)
+		require.NoError(t, err)
 	}
 }

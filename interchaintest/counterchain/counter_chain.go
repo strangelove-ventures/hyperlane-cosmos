@@ -38,7 +38,7 @@ func CreateCounterChain(t *testing.T, domain uint32, ismType string) *CounterCha
 	}
 }
 
-func (c *CounterChain) CreateMessage(sender string, destDomain uint32, recipient string, msg string) (message []byte, proof [imt.TreeDepth][32]byte) {
+func (c *CounterChain) CreateMessage(sender string, originDomain uint32, destDomain uint32, recipient string, msg string) (message []byte, proof [imt.TreeDepth][32]byte) {
 	version := make([]byte, 1)
 	message = append(message, version...)
 
@@ -49,7 +49,7 @@ func (c *CounterChain) CreateMessage(sender string, destDomain uint32, recipient
 	message = append(message, nonceBytes...)
 
 	// Local Domain is set on NewKeeper
-	origin := uint32(c.Domain)
+	origin := uint32(originDomain) // was c.Domain
 	originBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(originBytes, origin)
 	message = append(message, originBytes...)

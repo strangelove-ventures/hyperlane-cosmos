@@ -677,7 +677,7 @@ func (suite *KeeperTestSuite) getTestMessageMetadata(index int) (message []byte,
 	return
 }
 
-func (suite *KeeperTestSuite) VerifyMessage(message []byte, metadata []byte) bool {
+func (suite *KeeperTestSuite) VerifyMessage(message []byte, metadata []byte) (bool, error) {
 	// Verify Merkle Proof & Validator signature (for LegacyMultiSig). TODO: Ask Steve why this isn't the case for other MultiSigs.
 	return ismMap[common.Origin(message)].Verify(metadata, message)
 }
