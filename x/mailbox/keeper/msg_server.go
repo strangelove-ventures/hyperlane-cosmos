@@ -94,6 +94,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 		return nil, types.ErrMsgTooLong
 	}
 	message = append(message, messageBytes...)
+	hyperlaneMsg := hexutil.Encode(message)
 
 	// Get the message ID
 	id := common.Id(message)
@@ -105,16 +106,17 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	}
 	// Store that the leaf
 	store.Set(types.MailboxIMTKey(k.Tree.Count()-1), id)
+	hexSender := hexutil.Encode(sender)
 
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeDispatch,
-			sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
+			sdk.NewAttribute(types.AttributeKeySender, hexSender),
 			sdk.NewAttribute(types.AttributeKeyDestinationDomain, strconv.FormatUint(uint64(msg.DestinationDomain), 10)),
 			sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
 			sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
-			sdk.NewAttribute(types.AttributeKeyHyperlaneMessage, string(message)),
+			sdk.NewAttribute(types.AttributeKeyHyperlaneMessage, hyperlaneMsg),
 		),
 		sdk.NewEvent(
 			types.EventTypeDispatchId,

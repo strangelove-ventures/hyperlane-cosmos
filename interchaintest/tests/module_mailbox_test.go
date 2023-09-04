@@ -116,7 +116,7 @@ func TestHyperlaneMailbox(t *testing.T) {
 func TestHyperlaneIgp(t *testing.T) {
 	t.Parallel()
 
-	buildsEnabled := true
+	buildsEnabled := false
 	_, filename, _, _ := runtime.Caller(0)
 	path := filepath.Dir(filename)
 	tarFilePath := filepath.Join(path, "../../")
@@ -206,7 +206,10 @@ func TestHyperlaneIgp(t *testing.T) {
 	}
 
 	// recipientCosmosBech32 := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
-	recipientDispatch := hexutil.Encode([]byte(contract2))
+	recipientAccAddr := sdk.MustAccAddressFromBech32(contract2).Bytes()
+	recipientDispatch := hexutil.Encode([]byte(recipientAccAddr))
+	fmt.Printf("Recipient dispatch addr hex: %s", recipientDispatch)
+
 	dMsg := []byte("HelloHyperlaneWorld")
 	dispatchedMsg := hexutil.Encode(dMsg)
 
@@ -222,7 +225,7 @@ func TestHyperlaneIgp(t *testing.T) {
 	require.NoError(t, err)
 	dispatchedTxHash, err := simd.ExecuteContract(ctx, userSimd.KeyName(), contract, string(dipatchMsg))
 	require.NoError(t, err)
-	dispatchedDestDomain, dispatchedRecipientAddrHex, dispatchedMsgBody, dispatchedMsgId, dispatchSender, err := helpers.VerifyDispatchEvents(simd, dispatchedTxHash)
+	dispatchedDestDomain, dispatchedRecipientAddrHex, dispatchedMsgBody, dispatchedMsgId, dispatchSender, hyperlaneMsg, err := helpers.VerifyDispatchEvents(simd, dispatchedTxHash)
 	require.NoError(t, err)
 	require.NotEmpty(t, dispatchSender)
 	require.NotEmpty(t, dispatchedRecipientAddrHex)
@@ -311,16 +314,25 @@ func TestHyperlaneIgp(t *testing.T) {
 	require.NoError(t, err)
 	require.Greater(t, dispatchedDestDomainUint, uint64(0))
 
-	// senderHex := hexutil.Encode([]byte(dispatchSender))
+	fmt.Printf("Emitted event recipient address hex: %s", dispatchedRecipientAddrHex)
 	dispatchedRecipientAddr := hexutil.MustDecode(dispatchedRecipientAddrHex)
-	sender := "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7" // TODO: padding is not correct in hyperlane message
+	bech32Recipient := sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), dispatchedRecipientAddr)
+	fmt.Printf("Emitted event recipient as bech32: %s. Contract2 which should match: %s", bech32Recipient, contract2)
 
-	// was: uint32(dispatchedDestDomainUint)
-	// was: senderHex
 	b, err := hexutil.Decode(dispatchedMsgBody)
 	require.NoError(t, err)
-	message, proof := simd2IsmValidator.CreateMessage(sender, uint32(simdDomain), uint32(simd2Domain), string(dispatchedRecipientAddr), string(b))
-	metadata := simd2IsmValidator.CreateLegacyMetadata(message, proof)
+	message, proof := simdIsmValidator.CreateMessage(dispatchSender, uint32(simdDomain), uint32(simd2Domain), bech32Recipient, string(b))
+	metadata := simdIsmValidator.CreateLegacyMetadata(message, proof)
+
+	// treeMdOut := helpers.QueryCurrentTreeMetadata(t, ctx, simd)
+	// root, count := helpers.ParseQueryTreeMetadata(string(treeMdOut))
+	// fmt.Printf("root: %s, count: %s\n", root, count)
+
+	hyperlaneMsgDispatched, err := hexutil.Decode(hyperlaneMsg)
+	require.NoError(t, err)
+
+	match := compareBytes(hyperlaneMsgDispatched, message)
+	require.True(t, match)
 
 	// CallProcessMsg sends the message and verifies the message and metadata
 	processStdout := helpers.CallProcessMsg(t, ctx, simd2, userSimd2.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
@@ -331,6 +343,25 @@ func TestHyperlaneIgp(t *testing.T) {
 
 	err = testutil.WaitForBlocks(ctx, 2, simd2)
 	require.NoError(t, err)
+}
+
+func compareBytes(b1 []byte, b2 []byte) bool {
+	lenMatch := len(b1) == len(b2)
+	if !lenMatch {
+		fmt.Printf("byte arrays different length")
+	}
+
+	for i, b1Byte := range b1 {
+		if len(b2) > i {
+			b2Byte := b2[i]
+			if b2Byte != b1Byte {
+				fmt.Printf("Byte mismatch at index %d. b1: %d, b2: %d\n", i, b1Byte, b2Byte)
+				return false
+			}
+		}
+	}
+
+	return lenMatch
 }
 
 // GetQueryContext returns a context that includes the height and uses the timeout from the config
