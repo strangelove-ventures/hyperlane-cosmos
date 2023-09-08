@@ -102,20 +102,19 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.MailboxIMTKey(k.Tree.Count()-1), id)
 
-	err = ctx.EventManager().EmitTypedEvents(
-		&types.DispatchEvent{
-			Name: types.EventTypeDispatch,
-		},
-	)
-
 	dispatch := types.DispatchEvent{
-		Version:     0,
+		Version:     0, // TODO(nix): How to determine the version?
 		Nonce:       nonce,
 		Origin:      origin,
-		Sender:      sender,
+		Sender:      string(sender),
 		Destination: destination,
-		Recipient:   recipient,
-		Body:        []byte{},
+		Recipient:   string(recipient),
+		Body:        msg.MessageBody,
+	}
+
+	err = ctx.EventManager().EmitTypedEvents(&dispatch)
+	if err != nil {
+		return nil, err
 	}
 
 	// Emit the events

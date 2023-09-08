@@ -12,8 +12,8 @@ message DispatchEvent {
   uint32 version = 1;
   uint32 nonce = 2;
   uint32 origin = 3;
-  bytes sender = 4;
+  string sender = 4;
   uint32 destination = 5;
-  bytes recipient = 6;
-  bytes body = 7;
+  string recipient = 6;
+  string body = 7;
 }
