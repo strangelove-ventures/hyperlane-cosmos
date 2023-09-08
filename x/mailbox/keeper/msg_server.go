@@ -102,6 +102,22 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.MailboxIMTKey(k.Tree.Count()-1), id)
 
+	err = ctx.EventManager().EmitTypedEvents(
+		&types.DispatchEvent{
+			Name: types.EventTypeDispatch,
+		},
+	)
+
+	dispatch := types.DispatchEvent{
+		Version:     0,
+		Nonce:       nonce,
+		Origin:      origin,
+		Sender:      sender,
+		Destination: destination,
+		Recipient:   recipient,
+		Body:        []byte{},
+	}
+
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
@@ -123,7 +139,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 
 	return &types.MsgDispatchResponse{
 		MessageId: hexutil.Encode(id),
-	}, nil
+	}, err
 }
 
 // Process defines a rpc handler method for MsgProcess
