@@ -111,10 +111,13 @@ func (suite *KeeperTestSuite) TestDispatch() {
 			expectedEvents := sdk.Events{
 				sdk.NewEvent(
 					types.EventTypeDispatch,
-					sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
 					sdk.NewAttribute(types.AttributeKeyDestination, strconv.FormatUint(uint64(msg.DestinationDomain), 10)),
-					sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
 					sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
+					sdk.NewAttribute(types.AttributeKeyNonce, "0"), // TODO(nix): This is always zero?
+					sdk.NewAttribute(types.AttributeKeyOrigin, strconv.FormatUint(testOriginDomain, 10)),
+					sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
+					sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
+					sdk.NewAttribute(types.AttributeKeyVersion, "0"), // TODO(nix): Figure out version
 				),
 				sdk.NewEvent(
 					types.EventTypeDispatchId,

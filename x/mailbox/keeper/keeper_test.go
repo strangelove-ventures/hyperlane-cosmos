@@ -31,6 +31,8 @@ func TestKeeperTestSuite(t *testing.T) {
 	suite.Run(t, new(KeeperTestSuite))
 }
 
+const testOriginDomain = 10 // Use test data from Optimism(10), could be any other chain with their respective test data
+
 func (suite *KeeperTestSuite) SetupTest() {
 	key := sdk.NewKVStoreKey(types.StoreKey)
 	testCtx := testutil.DefaultContextWithDB(suite.T(), key, sdk.NewTransientStoreKey("transient_test"))
@@ -43,7 +45,7 @@ func (suite *KeeperTestSuite) SetupTest() {
 		key,
 		nil,
 		nil,
-		10, // Use test data from Optimism(10), could be any other chain with their respective test data
+		testOriginDomain,
 	)
 
 	types.RegisterInterfaces(encCfg.InterfaceRegistry)
