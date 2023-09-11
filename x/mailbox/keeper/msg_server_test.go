@@ -112,7 +112,7 @@ func (suite *KeeperTestSuite) TestDispatch() {
 				sdk.NewEvent(
 					types.EventTypeDispatch,
 					sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
-					sdk.NewAttribute(types.AttributeKeyDestinationDomain, strconv.FormatUint(uint64(msg.DestinationDomain), 10)),
+					sdk.NewAttribute(types.AttributeKeyDestination, strconv.FormatUint(uint64(msg.DestinationDomain), 10)),
 					sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
 					sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
 				),

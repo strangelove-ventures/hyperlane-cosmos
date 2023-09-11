@@ -10,10 +10,12 @@ const (
 
 // Hyperlane Mailbox attribute keys
 const (
-	AttributeKeyOrigin            = "origin"
-	AttributeKeySender            = "sender"
-	AttributeKeyDestinationDomain = "destination"
-	AttributeKeyRecipientAddress  = "recipient"
-	AttributeKeyMessage           = "message"
-	AttributeKeyID                = "id"
+	AttributeKeyDestination      = "destination"
+	AttributeKeyID               = "id"
+	AttributeKeyMessage          = "message"
+	AttributeKeyNonce            = "nonce"
+	AttributeKeyOrigin           = "origin"
+	AttributeKeyRecipientAddress = "recipient"
+	AttributeKeySender           = "sender"
+	AttributeKeyVersion          = "version"
 )

@@ -94,7 +94,8 @@ func TestHyperlaneMailbox(t *testing.T) {
 	}
 	dipatchMsg, err := json.Marshal(dispatchMsgStruct)
 	require.NoError(t, err)
-	simd.ExecuteContract(ctx, user.KeyName(), contract, string(dipatchMsg))
+	_, err = simd.ExecuteContract(ctx, user.KeyName(), contract, string(dipatchMsg))
+	require.NoError(t, err)
 
 	err = testutil.WaitForBlocks(ctx, 2, simd)
 	require.NoError(t, err)
