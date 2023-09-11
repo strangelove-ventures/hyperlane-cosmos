@@ -14,17 +14,13 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 
 	"github.com/stretchr/testify/suite"
-
-	ismkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
 )
 
 type KeeperTestSuite struct {
 	suite.Suite
 
 	ctx         sdk.Context
-	ismctx      sdk.Context
 	keeper      keeper.Keeper
-	ismkeeper   ismkeeper.Keeper
 	queryClient types.QueryClient
 	msgServer   types.MsgServer
 
@@ -47,8 +43,8 @@ func (suite *KeeperTestSuite) SetupTest() {
 		key,
 		nil,
 		nil,
-		10, // Use test data from Optimism(10), could be any other chain with their respective test data
 	)
+	suite.keeper.SetDomain(ctx, 10)
 
 	types.RegisterInterfaces(encCfg.InterfaceRegistry)
 

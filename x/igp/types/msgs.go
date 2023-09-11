@@ -1,6 +1,8 @@
 package types
 
 import (
+	"errors"
+
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -80,7 +82,7 @@ func (m MsgCreateIgp) ValidateBasic() error {
 		return err
 	}
 
-	if !m.TokenExchangeRateScale.IsZero() && m.TokenExchangeRateScale.LT(math.OneInt()) {
+	if m.TokenExchangeRateScale.IsNil() || (!m.TokenExchangeRateScale.IsZero() && m.TokenExchangeRateScale.LT(math.OneInt())) {
 		return ErrExchangeRateScale
 	}
 
@@ -150,6 +152,10 @@ func (m MsgPayForGas) ValidateBasic() error {
 	}
 	if err := m.MaximumPayment.Validate(); err != nil {
 		return err
+	}
+
+	if m.GasAmount.IsNil() || m.GasAmount.LT(math.NewInt(1)) {
+		return errors.New("Invalid gas amount, must be integer >= 1")
 	}
 
 	return nil

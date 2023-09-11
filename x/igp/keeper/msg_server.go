@@ -76,6 +76,8 @@ func (k Keeper) PayForGas(goCtx context.Context, msg *types.MsgPayForGas) (*type
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypePayForGas,
+			sdk.NewAttribute(types.AttributeMessageId, msg.MessageId),
+			sdk.NewAttribute(types.AttributeGasAmount, msg.GasAmount.String()),
 			sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
 			sdk.NewAttribute(types.AttributeBeneficiary, beneficiary),
 			sdk.NewAttribute(types.AttributePayment, gasPayment.String()),

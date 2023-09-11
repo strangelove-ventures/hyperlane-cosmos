@@ -15,5 +15,6 @@ const (
 	AttributeKeyDestinationDomain = "destination"
 	AttributeKeyRecipientAddress  = "recipient"
 	AttributeKeyMessage           = "message"
+	AttributeKeyHyperlaneMessage  = "hyperlanemessage"
 	AttributeKeyID                = "id"
 )

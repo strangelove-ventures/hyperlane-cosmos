@@ -1,6 +1,9 @@
 package keeper
 
 import (
+	"context"
+	"encoding/binary"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -28,12 +31,12 @@ type Keeper struct {
 	authority   string
 	mailboxAddr sdk.AccAddress
 	version     byte
-	domain      uint32
-	Tree        *imt.Tree
-	Delivered   map[string]bool
+
+	Tree      *imt.Tree
+	Delivered map[string]bool
 }
 
-func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwasm.Keeper, ismKeeper *ismkeeper.Keeper, domain uint32) Keeper {
+func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwasm.Keeper, ismKeeper *ismkeeper.Keeper) Keeper {
 	// governance authority
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
 
@@ -45,20 +48,33 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwas
 		authority:   authority.String(),
 		mailboxAddr: authtypes.NewModuleAddress(types.ModuleName),
 		version:     0,
-		domain:      domain,
 		pcwKeeper:   cosmwasm.NewDefaultPermissionKeeper(cwKeeper),
 		Tree:        &imt.Tree{},
 		Delivered:   map[string]bool{},
 	}
 }
 
-func (k Keeper) VerifyMessage(messageBytes []byte) (string, error) {
+func (k *Keeper) SetDomain(c context.Context, domain uint32) {
+	ctx := sdk.UnwrapSDKContext(c)
+	store := ctx.KVStore(k.storeKey)
+	res := make([]byte, 4)
+	binary.LittleEndian.PutUint32(res, domain)
+	store.Set(types.DomainKey, res)
+}
+
+func (k Keeper) VerifyMessage(c context.Context, messageBytes []byte) (string, error) {
+	ctx := sdk.UnwrapSDKContext(c)
+	store := ctx.KVStore(k.storeKey)
+	b := store.Get(types.DomainKey)
+	domain := binary.LittleEndian.Uint32(b)
+
 	if common.Version(messageBytes) != k.version {
 		return "", types.ErrMsgInvalidVersion
 	}
 
-	if common.Destination(messageBytes) != k.domain {
-		return "", types.ErrMsgInvalidDomain
+	destGiven := common.Destination(messageBytes)
+	if common.Destination(messageBytes) != domain {
+		return "", types.ErrMsgInvalidDomain.Wrapf("Message destination %d is invalid. Acceptable domain is %d", destGiven, domain)
 	}
 
 	idBytes := common.Id(messageBytes)
