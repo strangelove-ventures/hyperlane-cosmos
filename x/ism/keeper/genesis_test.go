@@ -31,7 +31,7 @@ func (suite *KeeperTestSuite) TestGenesis() {
 	metadata, err := hex.DecodeString(metadatas[0])
 	suite.Require().NoError(err)
 	pass, err := suite.keeper.Verify(metadata, message)
-	suite.Require().NoError(err)
+	suite.Require().Error(err)
 	suite.Require().False(pass)
 
 	err = suite.keeper.InitGenesis(suite.ctx, gs)
