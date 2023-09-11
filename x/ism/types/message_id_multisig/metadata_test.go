@@ -15,7 +15,6 @@ type MultisigIsmMetadata struct {
 	Index         uint32
 	OriginMailbox []byte
 	Proof         []byte
-	signatures    [][]byte
 }
 
 func TestMetadataSuccess(t *testing.T) {

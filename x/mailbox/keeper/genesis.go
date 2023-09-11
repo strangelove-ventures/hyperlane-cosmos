@@ -21,7 +21,10 @@ func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
 	}
 	var index uint32
 	for index = 0; index < gs.Tree.Count; index++ {
-		k.Tree.Insert(tempTree[index])
+		err := k.Tree.Insert(tempTree[index])
+		if err != nil {
+			panic("unreachable")
+		}
 	}
 	for _, msgDelivered := range gs.DeliveredMessages {
 		k.Delivered[msgDelivered.Id] = true

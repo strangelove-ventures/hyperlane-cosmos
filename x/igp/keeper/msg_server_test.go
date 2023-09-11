@@ -1,7 +1,6 @@
 package keeper_test
 
 import (
-	"encoding/hex"
 	"fmt"
 	"math/big"
 	"math/rand"
@@ -665,16 +664,6 @@ func (suite *KeeperTestSuite) SetupIsm() {
 		ism := ismtypes.MustUnpackAbstractIsm(originIsm.AbstractIsm)
 		ismMap[originIsm.Origin] = ism
 	}
-}
-
-func (suite *KeeperTestSuite) getTestMessageMetadata(index int) (message []byte, metadata []byte) {
-	var err error
-	message, err = hex.DecodeString(messages[index])
-	suite.Require().NoError(err)
-
-	metadata, err = hex.DecodeString(metadatas[index])
-	suite.Require().NoError(err)
-	return
 }
 
 func (suite *KeeperTestSuite) VerifyMessage(message []byte, metadata []byte) (bool, error) {
