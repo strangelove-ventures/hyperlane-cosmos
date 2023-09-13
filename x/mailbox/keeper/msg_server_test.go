@@ -191,11 +191,10 @@ func (suite *KeeperTestSuite) TestDispatch() {
 			expectedEvents := sdk.Events{
 				sdk.NewEvent(
 					types.EventTypeDispatch,
-					sdk.NewAttribute(types.AttributeKeySender, hexutil.Encode(senderB)),
 					sdk.NewAttribute(types.AttributeKeyDestination, strconv.FormatUint(uint64(msg.DestinationDomain), 10)),
-					sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
-					sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
 					sdk.NewAttribute(types.AttributeKeyHyperlaneMessage, hyperlaneMsgHex),
+					sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
+					sdk.NewAttribute(types.AttributeKeyNonce, "0"), // TODO: Nonce is always zero
 					sdk.NewAttribute(types.AttributeKeyOrigin, strconv.FormatUint(testOriginDomain, 10)),
 					sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
 					sdk.NewAttribute(types.AttributeKeySender, msg.Sender),

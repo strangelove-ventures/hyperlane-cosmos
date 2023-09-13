@@ -58,7 +58,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	domain := binary.LittleEndian.Uint32(b)
 
 	// Local Domain is set on NewKeeper
-	origin := k.domain
+	origin := domain
 	originBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(originBytes, origin)
 	message = append(message, originBytes...)
@@ -104,23 +104,19 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	}
 	// Store that the leaf
 	store.Set(types.MailboxIMTKey(k.Tree.Count()-1), id)
-	hexSender := hexutil.Encode(sender)
 
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeDispatch,
-			sdk.NewAttribute(types.AttributeKeySender, hexSender),
 			sdk.NewAttribute(types.AttributeKeyDestination, strconv.FormatUint(uint64(msg.DestinationDomain), 10)),
-			sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
-			sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
 			sdk.NewAttribute(types.AttributeKeyHyperlaneMessage, hyperlaneMsg),
+			sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
 			sdk.NewAttribute(types.AttributeKeyNonce, strconv.FormatUint(uint64(nonce), 10)),
 			sdk.NewAttribute(types.AttributeKeyOrigin, strconv.FormatUint(uint64(origin), 10)),
 			sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
 			sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
-			// TODO(nix): How to determine the version? Temporarily set to 0.
-			sdk.NewAttribute(types.AttributeKeyVersion, strconv.FormatUint(0, 10)),
+			sdk.NewAttribute(types.AttributeKeyVersion, strconv.FormatUint(0, 10)), // TODO(nix): How to determine version?
 		),
 		sdk.NewEvent(
 			types.EventTypeDispatchId,

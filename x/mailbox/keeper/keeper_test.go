@@ -45,8 +45,8 @@ func (suite *KeeperTestSuite) SetupTest() {
 		key,
 		nil,
 		nil,
-		testOriginDomain,
 	)
+	suite.keeper.SetDomain(ctx, testOriginDomain)
 
 	types.RegisterInterfaces(encCfg.InterfaceRegistry)
 
