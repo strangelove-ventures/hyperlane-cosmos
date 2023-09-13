@@ -125,7 +125,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 
 	return &types.MsgDispatchResponse{
 		MessageId: hexutil.Encode(id),
-	}, err
+	}, nil
 }
 
 // Process defines a rpc handler method for MsgProcess
