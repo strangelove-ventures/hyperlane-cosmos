@@ -4,60 +4,115 @@
 
 ## Table of Contents
 
-- [hyperlane/igp/v1/genesis.proto](#hyperlane/igp/v1/genesis.proto)
-    - [GenesisState](#hyperlane.igp.v1.GenesisState)
+- [hyperlane/mailbox/v1/types.proto](#hyperlane/mailbox/v1/types.proto)
+    - [MessageDelivered](#hyperlane.mailbox.v1.MessageDelivered)
+    - [Tree](#hyperlane.mailbox.v1.Tree)
+    - [TreeEntry](#hyperlane.mailbox.v1.TreeEntry)
   
-- [hyperlane/igp/v1/types.proto](#hyperlane/igp/v1/types.proto)
-    - [GasOracle](#hyperlane.igp.v1.GasOracle)
-    - [GasOracleConfig](#hyperlane.igp.v1.GasOracleConfig)
+- [hyperlane/mailbox/v1/genesis.proto](#hyperlane/mailbox/v1/genesis.proto)
+    - [GenesisState](#hyperlane.mailbox.v1.GenesisState)
   
-- [hyperlane/igp/v1/igp.proto](#hyperlane/igp/v1/igp.proto)
-    - [Igp](#hyperlane.igp.v1.Igp)
-    - [Igp.OraclesEntry](#hyperlane.igp.v1.Igp.OraclesEntry)
+- [hyperlane/mailbox/v1/query.proto](#hyperlane/mailbox/v1/query.proto)
+    - [QueryCurrentTreeMetadataRequest](#hyperlane.mailbox.v1.QueryCurrentTreeMetadataRequest)
+    - [QueryCurrentTreeMetadataResponse](#hyperlane.mailbox.v1.QueryCurrentTreeMetadataResponse)
+    - [QueryDomainRequest](#hyperlane.mailbox.v1.QueryDomainRequest)
+    - [QueryDomainResponse](#hyperlane.mailbox.v1.QueryDomainResponse)
   
-- [hyperlane/igp/v1/query.proto](#hyperlane/igp/v1/query.proto)
-    - [GetBeneficiaryRequest](#hyperlane.igp.v1.GetBeneficiaryRequest)
-    - [GetBeneficiaryResponse](#hyperlane.igp.v1.GetBeneficiaryResponse)
-    - [GetExchangeRateAndGasPriceRequest](#hyperlane.igp.v1.GetExchangeRateAndGasPriceRequest)
-    - [GetExchangeRateAndGasPriceResponse](#hyperlane.igp.v1.GetExchangeRateAndGasPriceResponse)
-    - [QuoteGasPaymentRequest](#hyperlane.igp.v1.QuoteGasPaymentRequest)
-    - [QuoteGasPaymentResponse](#hyperlane.igp.v1.QuoteGasPaymentResponse)
+    - [Query](#hyperlane.mailbox.v1.Query)
   
-    - [Query](#hyperlane.igp.v1.Query)
+- [hyperlane/mailbox/v1/tx.proto](#hyperlane/mailbox/v1/tx.proto)
+    - [MsgDispatch](#hyperlane.mailbox.v1.MsgDispatch)
+    - [MsgDispatchResponse](#hyperlane.mailbox.v1.MsgDispatchResponse)
+    - [MsgProcess](#hyperlane.mailbox.v1.MsgProcess)
+    - [MsgProcessResponse](#hyperlane.mailbox.v1.MsgProcessResponse)
   
-- [hyperlane/igp/v1/tx.proto](#hyperlane/igp/v1/tx.proto)
-    - [MsgClaim](#hyperlane.igp.v1.MsgClaim)
-    - [MsgClaimResponse](#hyperlane.igp.v1.MsgClaimResponse)
-    - [MsgCreateIgp](#hyperlane.igp.v1.MsgCreateIgp)
-    - [MsgCreateIgpResponse](#hyperlane.igp.v1.MsgCreateIgpResponse)
-    - [MsgPayForGas](#hyperlane.igp.v1.MsgPayForGas)
-    - [MsgPayForGasResponse](#hyperlane.igp.v1.MsgPayForGasResponse)
-    - [MsgSetBeneficiary](#hyperlane.igp.v1.MsgSetBeneficiary)
-    - [MsgSetBeneficiaryResponse](#hyperlane.igp.v1.MsgSetBeneficiaryResponse)
-    - [MsgSetDestinationGasOverhead](#hyperlane.igp.v1.MsgSetDestinationGasOverhead)
-    - [MsgSetDestinationGasOverheadResponse](#hyperlane.igp.v1.MsgSetDestinationGasOverheadResponse)
-    - [MsgSetGasOracles](#hyperlane.igp.v1.MsgSetGasOracles)
-    - [MsgSetGasOraclesResponse](#hyperlane.igp.v1.MsgSetGasOraclesResponse)
-    - [MsgSetRemoteGasData](#hyperlane.igp.v1.MsgSetRemoteGasData)
-    - [MsgSetRemoteGasDataResponse](#hyperlane.igp.v1.MsgSetRemoteGasDataResponse)
-  
-    - [Msg](#hyperlane.igp.v1.Msg)
+    - [Msg](#hyperlane.mailbox.v1.Msg)
   
 - [Scalar Value Types](#scalar-value-types)
 
 
 
-<a name="hyperlane/igp/v1/genesis.proto"></a>
+<a name="hyperlane/mailbox/v1/types.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/igp/v1/genesis.proto
+## hyperlane/mailbox/v1/types.proto
 
 
 
-<a name="hyperlane.igp.v1.GenesisState"></a>
+<a name="hyperlane.mailbox.v1.MessageDelivered"></a>
+
+### MessageDelivered
+Mailbox delivered message
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `id` | [string](#string) |  | Message id (hash) |
+
+
+
+
+
+
+<a name="hyperlane.mailbox.v1.Tree"></a>
+
+### Tree
+Hyperlane's tree
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `count` | [uint32](#uint32) |  | Count of items inserted to tree |
+| `tree_entries` | [TreeEntry](#hyperlane.mailbox.v1.TreeEntry) | repeated | Each item inserted |
+
+
+
+
+
+
+<a name="hyperlane.mailbox.v1.TreeEntry"></a>
+
+### TreeEntry
+Hyperlane's tree entry
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `index` | [uint32](#uint32) |  | index |
+| `message` | [bytes](#bytes) |  | message |
+
+
+
+
+
+ <!-- end messages -->
+
+ <!-- end enums -->
+
+ <!-- end HasExtensions -->
+
+ <!-- end services -->
+
+
+
+<a name="hyperlane/mailbox/v1/genesis.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## hyperlane/mailbox/v1/genesis.proto
+
+
+
+<a name="hyperlane.mailbox.v1.GenesisState"></a>
 
 ### GenesisState
-Hyperlane InterchainGasPaymaster's keeper genesis state
+Hyperlane mailbox's keeper genesis state
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `tree` | [Tree](#hyperlane.mailbox.v1.Tree) |  | Each genesis tree entry |
+| `delivered_messages` | [MessageDelivered](#hyperlane.mailbox.v1.MessageDelivered) | repeated | Each message that has been delivered |
+| `domain` | [uint32](#uint32) |  | The domain of this chain module, assigned by hyperlane |
 
 
 
@@ -73,213 +128,60 @@ Hyperlane InterchainGasPaymaster's keeper genesis state
 
 
 
-<a name="hyperlane/igp/v1/types.proto"></a>
+<a name="hyperlane/mailbox/v1/query.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/igp/v1/types.proto
+## hyperlane/mailbox/v1/query.proto
 
 
 
-<a name="hyperlane.igp.v1.GasOracle"></a>
+<a name="hyperlane.mailbox.v1.QueryCurrentTreeMetadataRequest"></a>
 
-### GasOracle
-Hyperlane's gas oracle to configure exchange rates between origin and
-destination
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `gas_oracle` | [string](#string) |  | Address of the oracle that can update this config |
-| `remote_domain` | [uint32](#uint32) |  | The domain of the message's destination chain |
-| `token_exchange_rate` | [string](#string) |  |  |
-| `gas_price` | [string](#string) |  |  |
-| `gas_overhead` | [string](#string) |  | gas overhead for the remote domain |
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.GasOracleConfig"></a>
-
-### GasOracleConfig
-Hyperlane's gas oracle to configure exchange rates between origin and
-destination
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `igp_id` | [uint32](#uint32) |  | The IGP that this gas oracle config belongs to |
-| `gas_oracle` | [string](#string) |  | The address that can update gas oracle configs for the remote domain |
-| `remote_domain` | [uint32](#uint32) |  | The domain that the gas oracle can update gas related information for |
-
-
-
-
-
- <!-- end messages -->
-
- <!-- end enums -->
-
- <!-- end HasExtensions -->
-
- <!-- end services -->
-
-
-
-<a name="hyperlane/igp/v1/igp.proto"></a>
-<p align="right"><a href="#top">Top</a></p>
-
-## hyperlane/igp/v1/igp.proto
-
-
-
-<a name="hyperlane.igp.v1.Igp"></a>
-
-### Igp
-Hyperlane's IGP. An IGP instance always has one relayer beneficiary.
-Each IGP has gas oracles, one oracle for each destination it serves.
-The gas oracle is a cosmos address that is allowed to update gas prices.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `owner` | [string](#string) |  | Only the owner can update the IGP. |
-| `igp_id` | [uint32](#uint32) |  | An owner can own multiple IGPs. This ID is globally unique. |
-| `beneficiary` | [string](#string) |  | If a beneficiary is set, it will be paid relayer costs instead of the owner. |
-| `token_exchange_rate_scale` | [string](#string) |  |  |
-| `oracles` | [Igp.OraclesEntry](#hyperlane.igp.v1.Igp.OraclesEntry) | repeated | Key is the remote domain of the gas oracle |
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.Igp.OraclesEntry"></a>
-
-### Igp.OraclesEntry
-
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `key` | [uint32](#uint32) |  |  |
-| `value` | [GasOracle](#hyperlane.igp.v1.GasOracle) |  |  |
-
-
-
-
-
- <!-- end messages -->
-
- <!-- end enums -->
-
- <!-- end HasExtensions -->
-
- <!-- end services -->
-
-
-
-<a name="hyperlane/igp/v1/query.proto"></a>
-<p align="right"><a href="#top">Top</a></p>
-
-## hyperlane/igp/v1/query.proto
-
-
-
-<a name="hyperlane.igp.v1.GetBeneficiaryRequest"></a>
-
-### GetBeneficiaryRequest
-GetBeneficiaryRequest is the request type for the Query/Tree RPC method.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `igp_id` | [uint32](#uint32) |  | The IGP of the beneficiary |
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.GetBeneficiaryResponse"></a>
-
-### GetBeneficiaryResponse
-GetBeneficiaryResponse is the response type for the Query/Tree RPC method.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `address` | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.GetExchangeRateAndGasPriceRequest"></a>
-
-### GetExchangeRateAndGasPriceRequest
-GetExchangeRateAndGasPriceRequest is the request type for the Query/Tree RPC
+### QueryCurrentTreeMetadataRequest
+QueryCurrentTreeMetadataRequest is the request type for the Query/Tree RPC
 method.
 
 
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `destination_domain` | [uint32](#uint32) |  |  |
-| `igp_id` | [uint32](#uint32) |  |  |
 
 
 
 
+<a name="hyperlane.mailbox.v1.QueryCurrentTreeMetadataResponse"></a>
 
-
-<a name="hyperlane.igp.v1.GetExchangeRateAndGasPriceResponse"></a>
-
-### GetExchangeRateAndGasPriceResponse
-GetExchangeRateAndGasPriceResponse is the response type for the Query/Tree
-RPC method.
+### QueryCurrentTreeMetadataResponse
+QueryTreeResponse is the response type for the Query/Tree RPC method.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `token_exchange_rate` | [string](#string) |  |  |
-| `gas_price` | [string](#string) |  |  |
+| `root` | [bytes](#bytes) |  |  |
+| `count` | [uint32](#uint32) |  |  |
 
 
 
 
 
 
-<a name="hyperlane.igp.v1.QuoteGasPaymentRequest"></a>
+<a name="hyperlane.mailbox.v1.QueryDomainRequest"></a>
 
-### QuoteGasPaymentRequest
-QuoteGasPaymentRequest is the request type for quoteGasPayment.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `igp_id` | [uint32](#uint32) |  |  |
-| `destination_domain` | [uint32](#uint32) |  |  |
-| `gas_amount` | [string](#string) |  |  |
+### QueryDomainRequest
+QueryDomain is the request type for the Query/Domain RPC
+method.
 
 
 
 
 
 
-<a name="hyperlane.igp.v1.QuoteGasPaymentResponse"></a>
+<a name="hyperlane.mailbox.v1.QueryDomainResponse"></a>
 
-### QuoteGasPaymentResponse
-QuoteGasPaymentResponse is the response type for quoteGasPayment.
-We use amount and denom (instead of Coin) to better match the hyperlane spec.
-The denom will always match the chain's native staking denom.
+### QueryDomainResponse
+QueryDomainResponse is the response type for the Query/Domain RPC method.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `amount` | [string](#string) |  |  |
-| `denom` | [string](#string) |  |  |
+| `domain` | [uint32](#uint32) |  |  |
 
 
 
@@ -292,223 +194,81 @@ The denom will always match the chain's native staking denom.
  <!-- end HasExtensions -->
 
 
-<a name="hyperlane.igp.v1.Query"></a>
+<a name="hyperlane.mailbox.v1.Query"></a>
 
 ### Query
-Query service for hyperlane igp module
+Query service for hyperlane mailbox module
 
 | Method Name | Request Type | Response Type | Description | HTTP Verb | Endpoint |
 | ----------- | ------------ | ------------- | ------------| ------- | -------- |
-| `GetBeneficiary` | [GetBeneficiaryRequest](#hyperlane.igp.v1.GetBeneficiaryRequest) | [GetBeneficiaryResponse](#hyperlane.igp.v1.GetBeneficiaryResponse) | Gets the beneficiary | GET|/hyperlane/igp/v1/get_beneficiary|
-| `QuoteGasPayment` | [QuoteGasPaymentRequest](#hyperlane.igp.v1.QuoteGasPaymentRequest) | [QuoteGasPaymentResponse](#hyperlane.igp.v1.QuoteGasPaymentResponse) | Quotes the amount of native tokens to pay for interchain gas. | GET|/hyperlane/igp/v1/quote_gas_payment|
-| `GetExchangeRateAndGasPrice` | [GetExchangeRateAndGasPriceRequest](#hyperlane.igp.v1.GetExchangeRateAndGasPriceRequest) | [GetExchangeRateAndGasPriceResponse](#hyperlane.igp.v1.GetExchangeRateAndGasPriceResponse) | Gets the token exchange rate and gas price from the configured gas oracle for a given destination domain. | GET|/hyperlane/igp/v1/get_exchange_rate_and_gas_price|
+| `CurrentTreeMetadata` | [QueryCurrentTreeMetadataRequest](#hyperlane.mailbox.v1.QueryCurrentTreeMetadataRequest) | [QueryCurrentTreeMetadataResponse](#hyperlane.mailbox.v1.QueryCurrentTreeMetadataResponse) | Get current tree metadata | GET|/hyperlane/mailbox/v1/tree|
+| `Domain` | [QueryDomainRequest](#hyperlane.mailbox.v1.QueryDomainRequest) | [QueryDomainResponse](#hyperlane.mailbox.v1.QueryDomainResponse) | Get domain | GET|/hyperlane/mailbox/v1/domain|
 
  <!-- end services -->
 
 
 
-<a name="hyperlane/igp/v1/tx.proto"></a>
+<a name="hyperlane/mailbox/v1/tx.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/igp/v1/tx.proto
+## hyperlane/mailbox/v1/tx.proto
 
 
 
-<a name="hyperlane.igp.v1.MsgClaim"></a>
+<a name="hyperlane.mailbox.v1.MsgDispatch"></a>
 
-### MsgClaim
-MsgClaim defines the request type for the Claim rpc.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `sender` | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgClaimResponse"></a>
-
-### MsgClaimResponse
-MsgClaimResponse defines the Claim response type.
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgCreateIgp"></a>
-
-### MsgCreateIgp
-MsgCreateIgp defines the request type to create a hyperlane IGP.
+### MsgDispatch
+MsgDispatch defines the request type for the Dispatch rpc.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | `sender` | [string](#string) |  |  |
-| `beneficiary` | [string](#string) |  | If empty, the sender will be considered the beneficiary |
-| `token_exchange_rate_scale` | [string](#string) |  | TODO: Do we really want this in the IGP creation (as it is in the hyperlane .sol contract)? Or the gas oracle? |
+| `destination_domain` | [uint32](#uint32) |  |  |
+| `recipient_address` | [string](#string) |  |  |
+| `message_body` | [string](#string) |  |  |
 
 
 
 
 
 
-<a name="hyperlane.igp.v1.MsgCreateIgpResponse"></a>
+<a name="hyperlane.mailbox.v1.MsgDispatchResponse"></a>
 
-### MsgCreateIgpResponse
-MsgCreateIgpResponse defines the MsgCreateIgp response type.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `igp_id` | [uint32](#uint32) |  | The unique ID assigned to the newly created IGP |
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgPayForGas"></a>
-
-### MsgPayForGas
-MsgPayForGas submits payment for the relaying of a message to its destination
-chain..
+### MsgDispatchResponse
+MsgDispatchResponse defines the Dispatch response type.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `sender` | [string](#string) |  |  |
 | `message_id` | [string](#string) |  |  |
-| `destination_domain` | [uint32](#uint32) |  |  |
-| `gas_amount` | [string](#string) |  | The amount of destination gas you are willing to pay for |
-| `maximum_payment` | [cosmos.base.v1beta1.Coin](#cosmos.base.v1beta1.Coin) |  | The maximum payment (in the chain's native denom) that will be paid for relaying fees. If the required payment is less than this amount (according to quoteGasPayment), the lesser is charged. If the required payment exceeds this amount, the transaction will fail (no charge). |
-| `igp_id` | [uint32](#uint32) |  | If any IGP other than the default (0) was used, this should be specified. We will use it to check gas costs to make sure the payer is not overpaying. |
 
 
 
 
 
 
-<a name="hyperlane.igp.v1.MsgPayForGasResponse"></a>
+<a name="hyperlane.mailbox.v1.MsgProcess"></a>
 
-### MsgPayForGasResponse
-MsgPayForGasResponse defines the PayForGas response type.
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgSetBeneficiary"></a>
-
-### MsgSetBeneficiary
-MsgSetBeneficiary defines the request type for the SetBeneficiary rpc.
+### MsgProcess
+MsgProcess defines the request type for the Process rpc.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | `sender` | [string](#string) |  |  |
-| `address` | [string](#string) |  |  |
-| `igp_id` | [uint32](#uint32) |  | The IGP the beneficiary is being set for |
+| `metadata` | [string](#string) |  |  |
+| `message` | [string](#string) |  |  |
 
 
 
 
 
 
-<a name="hyperlane.igp.v1.MsgSetBeneficiaryResponse"></a>
+<a name="hyperlane.mailbox.v1.MsgProcessResponse"></a>
 
-### MsgSetBeneficiaryResponse
-MsgSetBeneficiaryResponse defines the MsgSetBeneficiary response type.
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgSetDestinationGasOverhead"></a>
-
-### MsgSetDestinationGasOverhead
-MsgSetDestinationGasOverhead defines the overhead gas amount for the given
-destination.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `sender` | [string](#string) |  |  |
-| `destination_domain` | [uint32](#uint32) |  |  |
-| `gas_overhead` | [string](#string) |  |  |
-| `igp_id` | [uint32](#uint32) |  | Identifies the IGP the gas overhead configuration applies to |
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgSetDestinationGasOverheadResponse"></a>
-
-### MsgSetDestinationGasOverheadResponse
-MsgSetDestinationGasOverheadResponse defines the SetDestinationGasOverhead
-response type.
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgSetGasOracles"></a>
-
-### MsgSetGasOracles
-MsgSetGasOracles set the addresses allowed to define spot prices for relay
-fee payment.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `sender` | [string](#string) |  |  |
-| `configs` | [GasOracleConfig](#hyperlane.igp.v1.GasOracleConfig) | repeated |  |
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgSetGasOraclesResponse"></a>
-
-### MsgSetGasOraclesResponse
-MsgSetGasOraclesResponse defines the Claim response type.
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgSetRemoteGasData"></a>
-
-### MsgSetRemoteGasData
-MsgSetRemoteGasData defines the gas exchange rate and gas price
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `sender` | [string](#string) |  |  |
-| `igp_id` | [uint32](#uint32) |  | The IGP that this gas oracle config belongs to |
-| `remote_domain` | [uint32](#uint32) |  |  |
-| `token_exchange_rate` | [string](#string) |  |  |
-| `gas_price` | [string](#string) |  |  |
-
-
-
-
-
-
-<a name="hyperlane.igp.v1.MsgSetRemoteGasDataResponse"></a>
-
-### MsgSetRemoteGasDataResponse
-MsgSetRemoteGasDataResponse defines the MsgSetRemoteGasData response type.
+### MsgProcessResponse
+MsgProcessResponse defines the Process response type.
 
 
 
@@ -521,19 +281,15 @@ MsgSetRemoteGasDataResponse defines the MsgSetRemoteGasData response type.
  <!-- end HasExtensions -->
 
 
-<a name="hyperlane.igp.v1.Msg"></a>
+<a name="hyperlane.mailbox.v1.Msg"></a>
 
 ### Msg
-Msg defines the hyperlane igp Msg service.
+Msg defines the hyperlane mailbox Msg service.
 
 | Method Name | Request Type | Response Type | Description | HTTP Verb | Endpoint |
 | ----------- | ------------ | ------------- | ------------| ------- | -------- |
-| `CreateIgp` | [MsgCreateIgp](#hyperlane.igp.v1.MsgCreateIgp) | [MsgCreateIgpResponse](#hyperlane.igp.v1.MsgCreateIgpResponse) | Create the IGP, optionally providing a beneficiary. | |
-| `PayForGas` | [MsgPayForGas](#hyperlane.igp.v1.MsgPayForGas) | [MsgPayForGasResponse](#hyperlane.igp.v1.MsgPayForGasResponse) | Deposits a payment for the relaying of a message to its destination chain. | |
-| `SetRemoteGasData` | [MsgSetRemoteGasData](#hyperlane.igp.v1.MsgSetRemoteGasData) | [MsgSetRemoteGasDataResponse](#hyperlane.igp.v1.MsgSetRemoteGasDataResponse) | Sets the gas oracle data for a specific remote domain | |
-| `SetGasOracles` | [MsgSetGasOracles](#hyperlane.igp.v1.MsgSetGasOracles) | [MsgSetGasOraclesResponse](#hyperlane.igp.v1.MsgSetGasOraclesResponse) | Sets the gas oracles for remote domains specified in the config array. | |
-| `SetBeneficiary` | [MsgSetBeneficiary](#hyperlane.igp.v1.MsgSetBeneficiary) | [MsgSetBeneficiaryResponse](#hyperlane.igp.v1.MsgSetBeneficiaryResponse) | Sets the beneficiary. | |
-| `SetDestinationGasOverhead` | [MsgSetDestinationGasOverhead](#hyperlane.igp.v1.MsgSetDestinationGasOverhead) | [MsgSetDestinationGasOverheadResponse](#hyperlane.igp.v1.MsgSetDestinationGasOverheadResponse) | Sets the overhead gas for the destination domain. This is in the destination gas denom and will be added to the required payForGas payment. | |
+| `Dispatch` | [MsgDispatch](#hyperlane.mailbox.v1.MsgDispatch) | [MsgDispatchResponse](#hyperlane.mailbox.v1.MsgDispatchResponse) | Dispatch sends interchain messages | |
+| `Process` | [MsgProcess](#hyperlane.mailbox.v1.MsgProcess) | [MsgProcessResponse](#hyperlane.mailbox.v1.MsgProcessResponse) | Process delivers interchain messages | |
 
  <!-- end services -->
 

@@ -52,6 +52,11 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	binary.BigEndian.PutUint32(nonceBytes, nonce)
 	message = append(message, nonceBytes...)
 
+	// Get this chain's domain
+	store := ctx.KVStore(k.storeKey)
+	b := store.Get(types.DomainKey)
+	domain := binary.LittleEndian.Uint32(b)
+
 	// Local Domain is set on NewKeeper
 	origin := k.domain
 	originBytes := make([]byte, 4)
@@ -87,6 +92,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 		return nil, types.ErrMsgTooLong
 	}
 	message = append(message, messageBytes...)
+	hyperlaneMsg := hexutil.Encode(message)
 
 	// Get the message ID
 	id := common.Id(message)
@@ -97,15 +103,18 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 		return nil, err
 	}
 	// Store that the leaf
-	store := ctx.KVStore(k.storeKey)
 	store.Set(types.MailboxIMTKey(k.Tree.Count()-1), id)
+	hexSender := hexutil.Encode(sender)
 
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeDispatch,
+			sdk.NewAttribute(types.AttributeKeySender, hexSender),
 			sdk.NewAttribute(types.AttributeKeyDestination, strconv.FormatUint(uint64(msg.DestinationDomain), 10)),
+			sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
 			sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
+			sdk.NewAttribute(types.AttributeKeyHyperlaneMessage, hyperlaneMsg),
 			sdk.NewAttribute(types.AttributeKeyNonce, strconv.FormatUint(uint64(nonce), 10)),
 			sdk.NewAttribute(types.AttributeKeyOrigin, strconv.FormatUint(uint64(origin), 10)),
 			sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
@@ -133,14 +142,21 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	messageBytes := hexutil.MustDecode(msg.Message)
-	id, err := k.VerifyMessage(messageBytes)
+	id, err := k.VerifyMessage(goCtx, messageBytes)
 	if err != nil {
 		return nil, err
 	}
 
 	metadataBytes := hexutil.MustDecode(msg.Metadata)
+
 	// Verify message signatures
-	if !k.ismKeeper.Verify(metadataBytes, messageBytes) {
+	verified, err := k.ismKeeper.Verify(metadataBytes, messageBytes)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !verified {
 		fmt.Println("ISM verify failed") // TODO: remove, debug only
 		return nil, types.ErrMsgVerificationFailed
 	}

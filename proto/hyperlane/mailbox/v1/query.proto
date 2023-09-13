@@ -12,6 +12,11 @@ service Query {
       returns (QueryCurrentTreeMetadataResponse) {
     option (google.api.http).get = "/hyperlane/mailbox/v1/tree";
   }
+
+  // Get domain
+  rpc Domain(QueryDomainRequest) returns (QueryDomainResponse) {
+    option (google.api.http).get = "/hyperlane/mailbox/v1/domain";
+  }
 }
 
 // QueryCurrentTreeMetadataRequest is the request type for the Query/Tree RPC
@@ -23,3 +28,10 @@ message QueryCurrentTreeMetadataResponse {
   bytes root = 1;
   uint32 count = 2;
 }
+
+// QueryDomain is the request type for the Query/Domain RPC
+// method.
+message QueryDomainRequest {}
+
+// QueryDomainResponse is the response type for the Query/Domain RPC method.
+message QueryDomainResponse { uint32 domain = 1; }

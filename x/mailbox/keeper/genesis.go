@@ -14,18 +14,23 @@ import (
 
 // InitGenesis initializes the hyperlane mailbox module's state from a provided genesis
 // state.
-func (k Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
+func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
 	tempTree := make(map[uint32][]byte, gs.Tree.Count)
 	for _, treeEntry := range gs.Tree.TreeEntries {
 		tempTree[treeEntry.Index] = treeEntry.Message
 	}
 	var index uint32
 	for index = 0; index < gs.Tree.Count; index++ {
-		k.Tree.Insert(tempTree[index])
+		err := k.Tree.Insert(tempTree[index])
+		if err != nil {
+			panic("unreachable")
+		}
 	}
 	for _, msgDelivered := range gs.DeliveredMessages {
 		k.Delivered[msgDelivered.Id] = true
 	}
+
+	k.SetDomain(ctx, gs.Domain)
 	return nil
 }
 

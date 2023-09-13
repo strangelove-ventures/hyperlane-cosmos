@@ -46,8 +46,12 @@ func (i *MessageIdMultiSig) Validate() error {
 	return nil
 }
 
-func (i *MessageIdMultiSig) Verify(metadata []byte, message []byte) bool {
-	return i.VerifyValidatorSignatures(metadata, message)
+func (i *MessageIdMultiSig) Verify(metadata []byte, message []byte) (bool, error) {
+	if !i.VerifyValidatorSignatures(metadata, message) {
+		return false, types.ErrVerifyValidatorSignatures
+	}
+
+	return true, nil
 }
 
 func (i *MessageIdMultiSig) VerifyValidatorSignatures(metadata []byte, message []byte) bool {

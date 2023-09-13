@@ -1,20 +1,81 @@
 package keeper_test
 
 import (
+	"encoding/binary"
 	"fmt"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
+	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
 
+func createHyperlaneMsg(nonce uint32, origin uint32, destination uint32, senderBech32 string, recipientAddressHex string, hexMsgBody string) (hyperlaneMessageHex string) {
+	// TODO: NewMessage
+	var message []byte
+
+	// TODO: Make sure this is the right version
+	version := make([]byte, 1)
+	message = append(message, version...)
+
+	// Nonce is the tree count.
+	nonceBytes := make([]byte, 4)
+	binary.BigEndian.PutUint32(nonceBytes, nonce)
+	message = append(message, nonceBytes...)
+
+	// Local Domain is set on NewKeeper
+	originBytes := make([]byte, 4)
+	binary.BigEndian.PutUint32(originBytes, origin)
+	message = append(message, originBytes...)
+
+	// Get the Sender address
+	// Since this is a cosmos chain, sender will be a bech32 address
+	sender := sdk.MustAccAddressFromBech32(senderBech32).Bytes()
+	for len(sender) < (common.DESTINATION_OFFSET - common.SENDER_OFFSET) {
+		padding := make([]byte, 1)
+		sender = append(padding, sender...)
+	}
+	message = append(message, sender...)
+
+	// Get the Destination Domain
+	destinationBytes := make([]byte, 4)
+	binary.BigEndian.PutUint32(destinationBytes, destination)
+	message = append(message, destinationBytes...)
+
+	// Get the Recipient address
+	// Since the recipient could be any destination change, the address must be in hex, non-bech32 format
+	recipient := hexutil.MustDecode(recipientAddressHex)
+	for len(recipient) < (common.BODY_OFFSET - common.RECIPIENT_OFFSET) {
+		padding := make([]byte, 1)
+		recipient = append(padding, recipient...)
+	}
+	message = append(message, recipient...)
+
+	// Get the Message Body
+	// messageBytes := []byte(msg.MessageBody)
+	messageBytes := hexutil.MustDecode(hexMsgBody)
+	if len(messageBytes) > MAX_MESSAGE_BODY_BYTES {
+		panic("msg too long")
+	}
+	message = append(message, messageBytes...)
+	hyperlaneMessageHex = hexutil.Encode(message)
+	return
+}
+
+const MAX_MESSAGE_BODY_BYTES = 2_000
+
 func (suite *KeeperTestSuite) TestDispatch() {
 	var (
-		msg *types.MsgDispatch
-		id  string
+		msg             *types.MsgDispatch
+		id              string
+		hyperlaneMsgHex string
+		senderHex       string
 	)
+
+	// This is set in Setuptest for the keeper test suite
+	origin := uint32(10)
 
 	testCases := []struct {
 		name     string
@@ -26,12 +87,16 @@ func (suite *KeeperTestSuite) TestDispatch() {
 			func() {
 				id = "0x806d81a5b017cc51297bb545bc037f39ceecefab8041766c9b733900c9a01242"
 				sender := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
+				senderBytes := sdk.MustAccAddressFromBech32(sender).Bytes()
+				senderHex = hexutil.Encode(senderBytes)
+
 				recipientBech32 := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
 				recipientBytes := sdk.MustAccAddressFromBech32(recipientBech32).Bytes()
 				recipientHex := hexutil.Encode(recipientBytes)
 				domain := uint32(12)
 				msgBody := hexutil.Encode([]byte("Hello!"))
 				msg = types.NewMsgDispatch(sender, domain, recipientHex, msgBody)
+				hyperlaneMsgHex = createHyperlaneMsg(0, origin, domain, sender, recipientHex, msgBody)
 			},
 			true,
 		},
@@ -40,12 +105,17 @@ func (suite *KeeperTestSuite) TestDispatch() {
 			func() {
 				id = "0x0c4024fb3262d8852b1fc5caa9f73f91b9375a1cbe51f6da52d192d272623fd1"
 				sender := "cosmos17lklk2z0gevmdx4tvjac7g7t9prqczg6p6nuw9"
+				senderBytes := sdk.MustAccAddressFromBech32(sender).Bytes()
+				senderHex = hexutil.Encode(senderBytes)
+
 				recipientBech32 := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
 				recipientBytes := sdk.MustAccAddressFromBech32(recipientBech32).Bytes()
 				recipientHex := hexutil.Encode(recipientBytes)
 				domain := uint32(12)
 				msgBody := hexutil.Encode([]byte("Hello!"))
 				msg = types.NewMsgDispatch(sender, domain, recipientHex, msgBody)
+				hyperlaneMsgHex = createHyperlaneMsg(0, origin, domain, sender, recipientHex, msgBody)
+
 			},
 			true,
 		},
@@ -53,13 +123,14 @@ func (suite *KeeperTestSuite) TestDispatch() {
 			"success with hyperlane explorer data w/ sender/recipient padding",
 			func() {
 				id = "0x82fbf348d68e34903627d1f57fa3227211e35134e2a613ce6b78ce2d42e17198"
-				senderHex := "0x0000000000000000000000002b0860e52244f03e59f12cfe413d6a29bc30b893"
+				senderHex = "0x0000000000000000000000002b0860e52244f03e59f12cfe413d6a29bc30b893"
 				senderBytes := hexutil.MustDecode(senderHex)
 				senderBech32 := sdk.MustBech32ifyAddressBytes("cosmos", senderBytes)
 				recipient := "0x00000000000000000000000076a2f655352752af6ce9b03932b9090009dc5d0c"
 				domain := uint32(43114)
 				msgBody := hexutil.Encode([]byte("Hello!"))
 				msg = types.NewMsgDispatch(senderBech32, domain, recipient, msgBody)
+				hyperlaneMsgHex = createHyperlaneMsg(0, origin, domain, senderBech32, recipient, msgBody)
 			},
 			true,
 		},
@@ -67,13 +138,14 @@ func (suite *KeeperTestSuite) TestDispatch() {
 			"success with hyperlane explorer data w/o sender/recipient padding",
 			func() {
 				id = "0x82fbf348d68e34903627d1f57fa3227211e35134e2a613ce6b78ce2d42e17198"
-				senderHex := "0x2b0860e52244f03e59f12cfe413d6a29bc30b893"
+				senderHex = "0x2b0860e52244f03e59f12cfe413d6a29bc30b893"
 				senderBytes := hexutil.MustDecode(senderHex)
 				senderBech32 := sdk.MustBech32ifyAddressBytes("cosmos", senderBytes)
 				recipient := "0x76a2f655352752af6ce9b03932b9090009dc5d0c"
 				domain := uint32(43114)
 				msgBody := hexutil.Encode([]byte("Hello!"))
 				msg = types.NewMsgDispatch(senderBech32, domain, recipient, msgBody)
+				hyperlaneMsgHex = createHyperlaneMsg(0, origin, domain, senderBech32, recipient, msgBody)
 			},
 			true,
 		},
@@ -81,13 +153,14 @@ func (suite *KeeperTestSuite) TestDispatch() {
 			"fails with wrong id match",
 			func() {
 				id = "0x82fbf348d68e34903627d1f57fa3227211e35134e2a613ce6b78ce2d42e17198"
-				senderHex := "0x2b0860e52244f03e59f12cfe413d6a29bc30b893"
+				senderHex = "0x2b0860e52244f03e59f12cfe413d6a29bc30b893"
 				senderBytes := hexutil.MustDecode(senderHex)
 				senderBech32 := sdk.MustBech32ifyAddressBytes("cosmos", senderBytes)
 				recipient := "0x76a2f655352752af6ce9b03932b9090009dc5d0c"
 				domain := uint32(43114)
 				msgBody := hexutil.Encode([]byte("Hello")) // Removed !
 				msg = types.NewMsgDispatch(senderBech32, domain, recipient, msgBody)
+				hyperlaneMsgHex = createHyperlaneMsg(0, origin, domain, senderBech32, recipient, msgBody)
 			},
 			false,
 		},
@@ -107,13 +180,22 @@ func (suite *KeeperTestSuite) TestDispatch() {
 
 			fmt.Println("ID: ", res.MessageId)
 
+			//zero-pad the sender w/ appropriate hyperlane byte length
+			senderB, _ := hexutil.Decode(senderHex)
+			for len(senderB) < (common.DESTINATION_OFFSET - common.SENDER_OFFSET) {
+				padding := make([]byte, 1)
+				senderB = append(padding, senderB...)
+			}
+
 			// Verify events
 			expectedEvents := sdk.Events{
 				sdk.NewEvent(
 					types.EventTypeDispatch,
+					sdk.NewAttribute(types.AttributeKeySender, hexutil.Encode(senderB)),
 					sdk.NewAttribute(types.AttributeKeyDestination, strconv.FormatUint(uint64(msg.DestinationDomain), 10)),
+					sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
 					sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
-					sdk.NewAttribute(types.AttributeKeyNonce, "0"), // TODO(nix): This is always zero?
+					sdk.NewAttribute(types.AttributeKeyHyperlaneMessage, hyperlaneMsgHex),
 					sdk.NewAttribute(types.AttributeKeyOrigin, strconv.FormatUint(testOriginDomain, 10)),
 					sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
 					sdk.NewAttribute(types.AttributeKeySender, msg.Sender),

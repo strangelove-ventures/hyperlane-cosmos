@@ -9,6 +9,6 @@ type AbstractIsm interface {
 	proto.Message
 
 	Validate() error
-	Verify(metadata []byte, message []byte) bool
+	Verify(metadata []byte, message []byte) (bool, error)
 	Event(origin uint32) sdk.Event
 }

@@ -27,11 +27,12 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, authority string)
 	}
 }
 
-func (k Keeper) Verify(metadata, message []byte) bool {
+func (k Keeper) Verify(metadata, message []byte) (bool, error) {
+	msgOrigin := common.Origin(message)
 	// Look up recipient contract's ISM, if 0, use default multi sig (just use default for now)
-	ism := k.defaultIsm[common.Origin(message)]
+	ism := k.defaultIsm[msgOrigin]
 	if ism != nil {
 		return ism.Verify(metadata, message)
 	}
-	return false
+	return false, types.ErrInvalidOriginIsm.Wrapf("no ISM configured for origin %d", msgOrigin)
 }

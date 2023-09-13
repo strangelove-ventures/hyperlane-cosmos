@@ -47,8 +47,15 @@ func (i *LegacyMultiSig) Validate() error {
 	return nil
 }
 
-func (i *LegacyMultiSig) Verify(metadata []byte, message []byte) bool {
-	return VerifyMerkleProof(metadata, message) && i.VerifyValidatorSignatures(metadata, message)
+func (i *LegacyMultiSig) Verify(metadata []byte, message []byte) (bool, error) {
+	if !VerifyMerkleProof(metadata, message) {
+		return false, types.ErrVerifyMerkleProof
+	}
+	if !i.VerifyValidatorSignatures(metadata, message) {
+		return false, types.ErrVerifyValidatorSignatures
+	}
+
+	return true, nil
 }
 
 func (i *LegacyMultiSig) VerifyValidatorSignatures(metadata []byte, message []byte) bool {

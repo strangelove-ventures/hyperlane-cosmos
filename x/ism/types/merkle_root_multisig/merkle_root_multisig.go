@@ -47,8 +47,12 @@ func (i *MerkleRootMultiSig) Validate() error {
 	return nil
 }
 
-func (i *MerkleRootMultiSig) Verify(metadata []byte, message []byte) bool {
-	return i.VerifyValidatorSignatures(metadata, message)
+func (i *MerkleRootMultiSig) Verify(metadata []byte, message []byte) (bool, error) {
+	if !i.VerifyValidatorSignatures(metadata, message) {
+		return false, types.ErrVerifyValidatorSignatures
+	}
+
+	return true, nil
 }
 
 func (i *MerkleRootMultiSig) VerifyValidatorSignatures(metadata []byte, message []byte) bool {
