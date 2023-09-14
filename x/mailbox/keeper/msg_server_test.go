@@ -88,7 +88,7 @@ func (suite *KeeperTestSuite) TestDispatch() {
 				id = "0x806d81a5b017cc51297bb545bc037f39ceecefab8041766c9b733900c9a01242"
 				sender := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
 				senderBytes := sdk.MustAccAddressFromBech32(sender).Bytes()
-				senderHex = hexutil.Encode(senderBytes)
+				senderHex = hexutil.Encode(senderBytes) // no padding
 
 				recipientBech32 := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
 				recipientBytes := sdk.MustAccAddressFromBech32(recipientBech32).Bytes()
@@ -104,9 +104,8 @@ func (suite *KeeperTestSuite) TestDispatch() {
 			"success with account as sender",
 			func() {
 				id = "0x0c4024fb3262d8852b1fc5caa9f73f91b9375a1cbe51f6da52d192d272623fd1"
-				sender := "cosmos17lklk2z0gevmdx4tvjac7g7t9prqczg6p6nuw9"
-				senderBytes := sdk.MustAccAddressFromBech32(sender).Bytes()
-				senderHex = hexutil.Encode(senderBytes)
+				senderHex = "0x000000000000000000000000f7edfb284f4659b69aab64bb8f23cb28460c091a"
+				sender := sdk.MustBech32ifyAddressBytes("cosmos", hexutil.MustDecode(senderHex))
 
 				recipientBech32 := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
 				recipientBytes := sdk.MustAccAddressFromBech32(recipientBech32).Bytes()
@@ -138,7 +137,7 @@ func (suite *KeeperTestSuite) TestDispatch() {
 			"success with hyperlane explorer data w/o sender/recipient padding",
 			func() {
 				id = "0x82fbf348d68e34903627d1f57fa3227211e35134e2a613ce6b78ce2d42e17198"
-				senderHex = "0x2b0860e52244f03e59f12cfe413d6a29bc30b893"
+				senderHex = "0x0000000000000000000000002b0860e52244f03e59f12cfe413d6a29bc30b893"
 				senderBytes := hexutil.MustDecode(senderHex)
 				senderBech32 := sdk.MustBech32ifyAddressBytes("cosmos", senderBytes)
 				recipient := "0x76a2f655352752af6ce9b03932b9090009dc5d0c"
@@ -153,7 +152,7 @@ func (suite *KeeperTestSuite) TestDispatch() {
 			"fails with wrong id match",
 			func() {
 				id = "0x82fbf348d68e34903627d1f57fa3227211e35134e2a613ce6b78ce2d42e17198"
-				senderHex = "0x2b0860e52244f03e59f12cfe413d6a29bc30b893"
+				senderHex = "0x0000000000000000000000002b0860e52244f03e59f12cfe413d6a29bc30b893"
 				senderBytes := hexutil.MustDecode(senderHex)
 				senderBech32 := sdk.MustBech32ifyAddressBytes("cosmos", senderBytes)
 				recipient := "0x76a2f655352752af6ce9b03932b9090009dc5d0c"
@@ -197,7 +196,7 @@ func (suite *KeeperTestSuite) TestDispatch() {
 					sdk.NewAttribute(types.AttributeKeyNonce, "0"), // TODO: Nonce is always zero
 					sdk.NewAttribute(types.AttributeKeyOrigin, strconv.FormatUint(testOriginDomain, 10)),
 					sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
-					sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
+					sdk.NewAttribute(types.AttributeKeySender, senderHex),
 					sdk.NewAttribute(types.AttributeKeyVersion, "0"), // TODO(nix): Figure out version
 				),
 				sdk.NewEvent(
