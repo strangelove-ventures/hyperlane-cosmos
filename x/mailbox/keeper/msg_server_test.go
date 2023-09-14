@@ -54,7 +54,6 @@ func createHyperlaneMsg(nonce uint32, origin uint32, destination uint32, senderB
 	message = append(message, recipient...)
 
 	// Get the Message Body
-	// messageBytes := []byte(msg.MessageBody)
 	messageBytes := hexutil.MustDecode(hexMsgBody)
 	if len(messageBytes) > MAX_MESSAGE_BODY_BYTES {
 		panic("msg too long")
