@@ -47,7 +47,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	message = append(message, version...)
 
 	// Nonce is the tree count.
-	nonce := uint32(k.Tree.Count())
+	nonce := k.Tree.Count()
 	nonceBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(nonceBytes, nonce)
 	message = append(message, nonceBytes...)
@@ -58,7 +58,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	domain := binary.LittleEndian.Uint32(b)
 
 	// Local Domain is set on NewKeeper
-	origin := uint32(domain)
+	origin := domain
 	originBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(originBytes, origin)
 	message = append(message, originBytes...)
@@ -73,9 +73,8 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	message = append(message, sender...)
 
 	// Get the Destination Domain
-	destination := msg.DestinationDomain
 	destinationBytes := make([]byte, 4)
-	binary.BigEndian.PutUint32(destinationBytes, destination)
+	binary.BigEndian.PutUint32(destinationBytes, msg.DestinationDomain)
 	message = append(message, destinationBytes...)
 
 	// Get the Recipient address
@@ -88,7 +87,6 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	message = append(message, recipient...)
 
 	// Get the Message Body
-	// messageBytes := []byte(msg.MessageBody)
 	messageBytes := hexutil.MustDecode(msg.MessageBody)
 	if len(messageBytes) > MAX_MESSAGE_BODY_BYTES {
 		return nil, types.ErrMsgTooLong
@@ -106,21 +104,23 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	}
 	// Store that the leaf
 	store.Set(types.MailboxIMTKey(k.Tree.Count()-1), id)
-	hexSender := hexutil.Encode(sender)
 
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			types.EventTypeDispatch,
-			sdk.NewAttribute(types.AttributeKeySender, hexSender),
-			sdk.NewAttribute(types.AttributeKeyDestinationDomain, strconv.FormatUint(uint64(msg.DestinationDomain), 10)),
-			sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
-			sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
+			sdk.NewAttribute(types.AttributeKeyDestination, strconv.FormatUint(uint64(msg.DestinationDomain), 10)),
 			sdk.NewAttribute(types.AttributeKeyHyperlaneMessage, hyperlaneMsg),
+			sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
+			sdk.NewAttribute(types.AttributeKeyNonce, strconv.FormatUint(uint64(nonce), 10)),
+			sdk.NewAttribute(types.AttributeKeyOrigin, strconv.FormatUint(uint64(origin), 10)),
+			sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
+			sdk.NewAttribute(types.AttributeKeySender, hexutil.Encode(sender)),
+			sdk.NewAttribute(types.AttributeKeyVersion, strconv.FormatUint(0, 10)), // TODO(nix): How to determine version?
 		),
 		sdk.NewEvent(
 			types.EventTypeDispatchId,
-			sdk.NewAttribute(types.AttributeKeyID, string(hexutil.Encode(id))),
+			sdk.NewAttribute(types.AttributeKeyID, hexutil.Encode(id)),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
