@@ -51,6 +51,8 @@ func TestHyperlaneCosmos(t *testing.T) {
 	eRep := rep.RelayerExecReporter(t)
 
 	ctx := context.Background()
+
+	// Note: make sure that both the 'ic' interchain AND the hyperlane network share this client/network
 	client, network := interchaintest.DockerSetup(t)
 
 	err := ic.Build(ctx, eRep, interchaintest.InterchainBuildOptions{

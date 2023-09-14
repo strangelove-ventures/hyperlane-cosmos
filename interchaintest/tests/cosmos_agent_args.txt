@@ -1,0 +1,18 @@
+HYP_BASE_VALIDATOR_KEY="4b31f76352889d96f426e6c49daf227edbb62c6016791b42b17c6a456c704f55"
+address="0xc97C758452f6f7D7aeB4AB1BD67ff658FB29527F"
+HYP_BASE_ORIGINCHAINNAME="SIMD1" ## we'll need another file for SIMD2 so that can also be validated. Or we can do a variable and dynamic update.
+HYP_BASE_REORGPERIOD="1"
+HYP_BASE_CHAINS_ETHEREUM_CONNECTION_URL=""
+HYP_BASE_DB="/tmp/hyperlane_db.txt" ## this must be bind mounted into docker so docker can write to the host machine!
+HYP_BASE_chains.${localchainname}.signer.key
+HYP_BASE_CHECKPOINTSYNCER_TYPE="localStorage"
+HYP_BASE_CHECKPOINTSYNCER_PATH="/tmp/hyperlane-validator-signatures-ethereum" ## bind mount in docker! docker run -v /Users/<path>:/<container path>
+HYP_RELAYER_ALLOWLOCALCHECKPOINTSYNCERS="true" ## this is required to be true for local testing!
+HYP_BASE_RELAYCHAINS="arbitrum,ethereum,bsc" ### How do we relay between two cosmos chains? We can set diff domains for each.
+HYP_BASE_CHAINS_SIMD1_CONNECTION_URL="{SIMD1_RPC_VAR}"
+HYP_BASE_CHAINS_SIMD2_CONNECTION_URL="{SIMD2_RPC_VAR}"
+HYP_BASE_CHAINS_SIMD1_SIGNER_KEY="X"
+HYP_BASE_CHAINS_SIMD2_SIGNER_KEY="Y"
+
+## what happens if the validator can't announce itself? we do not have that contract AFAIK
+## why do we need to port forward the metrics port? assuming it works w/ default of 9090
