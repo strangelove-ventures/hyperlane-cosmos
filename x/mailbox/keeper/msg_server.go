@@ -99,10 +99,11 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 
 	// Insert the message id into the tree
 	err := k.Tree.Insert(id)
-	k.ImtCount++
 	if err != nil {
 		return nil, err
 	}
+	k.ImtCount++
+
 	// Store that the leaf
 	store.Set(types.MailboxIMTKey(k.Tree.Count()-1), id)
 
