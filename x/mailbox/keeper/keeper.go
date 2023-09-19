@@ -34,6 +34,7 @@ type Keeper struct {
 
 	Tree      *imt.Tree
 	Delivered map[string]bool
+	ImtCount  uint32
 }
 
 func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwasm.Keeper, ismKeeper *ismkeeper.Keeper) Keeper {
@@ -51,6 +52,7 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwas
 		pcwKeeper:   cosmwasm.NewDefaultPermissionKeeper(cwKeeper),
 		Tree:        &imt.Tree{},
 		Delivered:   map[string]bool{},
+		ImtCount:    0,
 	}
 }
 

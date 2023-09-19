@@ -15,17 +15,9 @@ import (
 // InitGenesis initializes the hyperlane mailbox module's state from a provided genesis
 // state.
 func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
-	tempTree := make(map[uint32][]byte, gs.Tree.Count)
-	for _, treeEntry := range gs.Tree.TreeEntries {
-		tempTree[treeEntry.Index] = treeEntry.Message
-	}
-	var index uint32
-	for index = 0; index < gs.Tree.Count; index++ {
-		err := k.Tree.Insert(tempTree[index])
-		if err != nil {
-			panic("unreachable")
-		}
-	}
+
+	k.ImtCount = gs.Tree.Count
+
 	for _, msgDelivered := range gs.DeliveredMessages {
 		k.Delivered[msgDelivered.Id] = true
 	}
@@ -39,31 +31,31 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) types.GenesisState {
 	store := ctx.KVStore(k.storeKey)
 
 	var genesisState types.GenesisState
-	genesisState.Tree = ExportTreeGenesis(store)
+	genesisState.Tree.Count = k.ImtCount
+	genesisState.Tree.TreeEntries = ExportTreeEntries(store)
 	genesisState.DeliveredMessages = ExportDeliveredGenesis(store)
 	return genesisState
 }
 
-func ExportTreeGenesis(store sdk.KVStore) types.Tree {
+func ExportTreeEntries(store sdk.KVStore) []*types.TreeEntry {
 	iterator := sdk.KVStorePrefixIterator(store, []byte(types.KeyMailboxIMT))
 	defer iterator.Close()
 
-	var genesisTree types.Tree
-	count := uint32(0)
+	var treeEntries []*types.TreeEntry
+	prefix := []byte(fmt.Sprintf("%s/", types.KeyMailboxIMT))
+
 	for ; iterator.Valid(); iterator.Next() {
-		indexBytes := bytes.TrimPrefix(iterator.Key(), []byte(fmt.Sprintf("%s/", types.KeyMailboxIMT)))
+		indexBytes := bytes.TrimPrefix(iterator.Key(), prefix)
 		index, err := strconv.ParseUint(string(indexBytes), 10, 32)
 		if err != nil {
 			panic(err)
 		}
-		genesisTree.TreeEntries = append(genesisTree.TreeEntries, &types.TreeEntry{
+		treeEntries = append(treeEntries, &types.TreeEntry{
 			Index:   uint32(index),
 			Message: iterator.Value(),
 		})
-		count++
 	}
-	genesisTree.Count = count
-	return genesisTree
+	return treeEntries
 }
 
 func ExportDeliveredGenesis(store sdk.KVStore) []*types.MessageDelivered {
@@ -71,8 +63,10 @@ func ExportDeliveredGenesis(store sdk.KVStore) []*types.MessageDelivered {
 	defer iterator.Close()
 
 	var delivered []*types.MessageDelivered
+	prefix := []byte(fmt.Sprintf("%s/", types.KeyMailboxDelivered))
+
 	for ; iterator.Valid(); iterator.Next() {
-		idBytes := bytes.TrimPrefix(iterator.Key(), []byte(fmt.Sprintf("%s/", types.KeyMailboxDelivered)))
+		idBytes := bytes.TrimPrefix(iterator.Key(), prefix)
 		delivered = append(delivered, &types.MessageDelivered{
 			Id: string(idBytes),
 		})

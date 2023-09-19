@@ -31,7 +31,7 @@ func (suite *KeeperTestSuite) TestGenesis() {
 
 	// Verify tree exported correctly
 	gs := suite.keeper.ExportGenesis(suite.ctx)
-	suite.Require().Equal(uint32(100), gs.Tree.Count)
+	suite.Require().Equal(uint32(100), suite.keeper.ImtCount)
 	count := 0
 	for i := 0; i < 100; i++ {
 		for j := 0; j < 100; j++ {
@@ -60,6 +60,6 @@ func (suite *KeeperTestSuite) TestGenesis() {
 	suite.Require().NoError(err)
 
 	// Check Tree and Delivered
-	suite.Require().Equal(uint32(100), suite.keeper.Tree.Count())
+	suite.Require().Equal(uint32(100), suite.keeper.ImtCount)
 	suite.Require().Equal(100, len(suite.keeper.Delivered))
 }

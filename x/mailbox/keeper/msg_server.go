@@ -31,12 +31,12 @@ type ContractProcessMsg struct {
 }
 
 // NewMsgServerImpl return an implementation of the mailbox MsgServer interface for the provided keeper
-func NewMsgServerImpl(keeper Keeper) types.MsgServer {
+func NewMsgServerImpl(keeper *Keeper) types.MsgServer {
 	return keeper
 }
 
 // Dispatch defines a rpc handler method for MsgDispatch
-func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.MsgDispatchResponse, error) {
+func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.MsgDispatchResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// TODO: NewMessage
@@ -99,6 +99,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 
 	// Insert the message id into the tree
 	err := k.Tree.Insert(id)
+	k.ImtCount++
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +135,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 }
 
 // Process defines a rpc handler method for MsgProcess
-func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.MsgProcessResponse, error) {
+func (k *Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.MsgProcessResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	messageBytes := hexutil.MustDecode(msg.Message)
