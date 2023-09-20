@@ -17,6 +17,11 @@ hyperlane-validator-simd1:
   name: hyperlane-simd1
   type: validator
   env-path: hyperlane-validator-simd1.txt # path to the docker args file
+  cmd-flags:
+    - '--chains.simd1.connection.url' 
+    - 'http://127.0.0.1:8545'
+    - '--chains.simd2.connection' 
+    - 'http://127.0.0.1:8545'
   bind-mounts: /tmp/hyperlane-validator-signatures:/tmp/hyperlane-validator-signatures,/tmp/hyperlane_db.txt:/tmp/hyperlane_db.txt
   bin: ./validator # For heighliner built images, this should be /bin/validator
   images:
@@ -32,6 +37,11 @@ hyperlane-validator-simd2:
   name: hyperlane-simd2
   type: validator
   env-path: hyperlane-validator-simd2.txt # path to the docker args file
+  cmd-flags:
+    - '--chains.simd2.connection.url' 
+    - 'http://127.0.0.1:8545'
+    - '--chains.simd2.connection' 
+    - 'http://127.0.0.1:8545'
   bind-mounts: /tmp/hyperlane-validator-signatures:/tmp/hyperlane-validator-signatures,/tmp/hyperlane_db.txt:/tmp/hyperlane_db.txt
   bin: ./validator # For heighliner built images, this should be /bin/validator
   images:
