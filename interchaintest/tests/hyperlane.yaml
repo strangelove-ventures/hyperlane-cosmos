@@ -20,9 +20,13 @@ hyperlane-validator-simd1:
   cmd-flags:
     - '--chains.simd1.connection.url' 
     - 'http://127.0.0.1:8545'
-    - '--chains.simd2.connection' 
+    - '--chains.simd1.connection' 
     - 'http://127.0.0.1:8545'
-  bind-mounts: /tmp/hyperlane-validator-signatures:/tmp/hyperlane-validator-signatures,/tmp/hyperlane_db.txt:/tmp/hyperlane_db.txt
+    - '--chains.simd1.addresses.interchainGasPaymaster'
+    - '0x6cA0B6D22da47f091B7613223cD4BB03a2d77918'
+    - '--chains.simd1.addresses.validatorAnnounce'
+    - '0x9bBdef63594D5FFc2f370Fe52115DdFFe97Bc524'
+  bind-mounts: /tmp/hyperlane-validator-signatures:/tmp/hyperlane-validator-signatures,/tmp/hyperlane_simd1_db.txt:/tmp/hyperlane_simd1_db.txt
   bin: ./validator # For heighliner built images, this should be /bin/validator
   images:
     - repository: hyperlane-monorepo
@@ -39,10 +43,14 @@ hyperlane-validator-simd2:
   env-path: hyperlane-validator-simd2.txt # path to the docker args file
   cmd-flags:
     - '--chains.simd2.connection.url' 
-    - 'http://127.0.0.1:8545'
+    - 'http://127.0.0.1:8546'
     - '--chains.simd2.connection' 
-    - 'http://127.0.0.1:8545'
-  bind-mounts: /tmp/hyperlane-validator-signatures:/tmp/hyperlane-validator-signatures,/tmp/hyperlane_db.txt:/tmp/hyperlane_db.txt
+    - 'http://127.0.0.1:8546'
+    - '--chains.simd2.addresses.interchainGasPaymaster'
+    - '0x6cA0B6D22da47f091B7613223cD4BB03a2d77918'
+    - '--chains.simd2.addresses.validatorAnnounce'
+    - '0x9bBdef63594D5FFc2f370Fe52115DdFFe97Bc524'
+  bind-mounts: /tmp/hyperlane-validator-signatures-simd2:/tmp/hyperlane-validator-signatures-simd2,/tmp/hyperlane_simd2_db.txt:/tmp/hyperlane_simd2_db.txt
   bin: ./validator # For heighliner built images, this should be /bin/validator
   images:
     - repository: hyperlane-monorepo
