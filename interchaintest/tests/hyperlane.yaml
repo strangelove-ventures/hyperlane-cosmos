@@ -1,0 +1,44 @@
+hyperlane-relayer:
+  name: hyperlane-simd1-simd2 # hyperlane relayers can relay on multiple chains
+  type: relayer
+  bin: ./relayer # For heighliner built images, this should be /bin/validator
+  env-path: hyperlane-relayer-args.txt # path to the docker args file
+  bind-mounts: /tmp/hyperlane-validator-signatures:/tmp/hyperlane-validator-signatures,/tmp/hyperlane_db.txt:/tmp/hyperlane_db.txt
+  images:
+    - repository: hyperlane-monorepo
+      uid-gid: 1025:1025
+      version: latest
+    #- repository: ghcr.io/strangelove-ventures/heighliner/hyperlane-agents
+    #  uid-gid: 1025:1025
+    #  version: v1.5.1
+  no-host-mount: true
+
+hyperlane-validator-simd1:
+  name: hyperlane-simd1
+  type: validator
+  env-path: hyperlane-validator-simd1.txt # path to the docker args file
+  bind-mounts: /tmp/hyperlane-validator-signatures:/tmp/hyperlane-validator-signatures,/tmp/hyperlane_db.txt:/tmp/hyperlane_db.txt
+  bin: ./validator # For heighliner built images, this should be /bin/validator
+  images:
+    - repository: hyperlane-monorepo
+      uid-gid: 1025:1025
+      version: latest
+    #- repository: ghcr.io/strangelove-ventures/heighliner/hyperlane-agents
+    #  uid-gid: 1025:1025
+    #  version: v1.5.1
+  no-host-mount: true
+
+hyperlane-validator-simd2:
+  name: hyperlane-simd2
+  type: validator
+  env-path: hyperlane-validator-simd2.txt # path to the docker args file
+  bind-mounts: /tmp/hyperlane-validator-signatures:/tmp/hyperlane-validator-signatures,/tmp/hyperlane_db.txt:/tmp/hyperlane_db.txt
+  bin: ./validator # For heighliner built images, this should be /bin/validator
+  images:
+    - repository: hyperlane-monorepo
+      uid-gid: 1025:1025
+      version: latest
+    #- repository: ghcr.io/strangelove-ventures/heighliner/hyperlane-agents
+    #  uid-gid: 1025:1025
+    #  version: v1.5.1
+  no-host-mount: true

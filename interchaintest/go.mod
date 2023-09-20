@@ -291,7 +291,8 @@ replace (
 	github.com/strangelove-ventures/heighliner => github.com/KyleMoser/heighliner v0.0.0-20230829230844-9070cc213a11
 	// For this nested module, you always want to replace the parent reference with the current worktree.
 	github.com/strangelove-ventures/hyperlane-cosmos => ../
-	github.com/strangelove-ventures/interchaintest/v7 => github.com/KyleMoser/interchaintest/v7 v7.0.1-hyperlane
+	github.com/strangelove-ventures/interchaintest/v7 => github.com/KyleMoser/interchaintest/v7 v7.0.0-20230920162107-a311a2650895
+	//github.com/strangelove-ventures/interchaintest/v7 => /home/kyle/projects/KyleMoser/interchaintest
 	// pin version! 126854af5e6d has issues with the store so that queries fail
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 )
