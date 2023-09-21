@@ -73,3 +73,5 @@ contract_tests/*
 
 **/packages/*/schema
 **/contracts/*/schema
+./interchaintest/tests/hyperlane-simd1-val.json
+./interchaintest/tests/hyperlane-simd2-val.json
