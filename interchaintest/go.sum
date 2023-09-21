@@ -231,8 +231,8 @@ github.com/FactomProject/btcutilecc v0.0.0-20130527213604-d3a63a5752ec/go.mod h1
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
 github.com/KyleMoser/heighliner v0.0.0-20230829230844-9070cc213a11 h1:Y0ICPGur2xzOi2qsgNPsQmuzvrmRJWLjxhX6aoIPm7g=
 github.com/KyleMoser/heighliner v0.0.0-20230829230844-9070cc213a11/go.mod h1:rPfwN8szPw5mBrSwpZ1Z0Cbj+66SpLyP/OC8bUSg6so=
-github.com/KyleMoser/interchaintest/v7 v7.0.0-20230920175808-356c7350e4f7 h1:vg7XzY/JRLGrAH7F1xrleeOcbaDWmJKh5czALDQbZPI=
-github.com/KyleMoser/interchaintest/v7 v7.0.0-20230920175808-356c7350e4f7/go.mod h1:PaJRHGMb9vsS37F6XvMujiw6cVwjMCv1qBEawrJ3F/4=
+github.com/KyleMoser/interchaintest/v7 v7.0.0-20230921024409-54452b7c77f7 h1:1SvdJTzkchYqkSQNWNFOMqspp/WQWuQMgX5xCoyR5lM=
+github.com/KyleMoser/interchaintest/v7 v7.0.0-20230921024409-54452b7c77f7/go.mod h1:PaJRHGMb9vsS37F6XvMujiw6cVwjMCv1qBEawrJ3F/4=
 github.com/Microsoft/go-winio v0.5.2/go.mod h1:WpS1mjBmmwHBEWmogvA2mj8546UReBk4v8QkMxJ6pZY=
 github.com/Microsoft/go-winio v0.6.0 h1:slsWYD/zyx7lCXoZVlvQrj0hPTM1HI4+v1sIda2yDvg=
 github.com/Microsoft/go-winio v0.6.0/go.mod h1:cTAf44im0RAYeL23bpB+fzCyDH2MJiz2BO69KH/soAE=
