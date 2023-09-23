@@ -53,12 +53,10 @@ func TestHyperlaneAgentInit(t *testing.T) {
 	require.NoError(t, err)
 
 	logger := NewLogger(t)
-	hyperlaneNetwork := hyperlane.HyperlaneNetwork{
-		// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build".
-		// Also make sure that the tags in hyperlane.yaml match the local docker image repo and version.
-		DisableImagePull: true,
-	}
-	hyperlaneNetwork.Build(ctx, *valSimd1, *valSimd2, *rly, logger, eRep, opts)
+	// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build".
+	// Also make sure that the tags in hyperlane.yaml match the local docker image repo and version.
+	hyperlaneNetwork := hyperlane.NewHyperlaneNetwork(false, true)
+	hyperlaneNetwork.Build(ctx, logger, eRep, opts, *valSimd1, *valSimd2, *rly)
 }
 
 // e2e style test that spins up two Cosmos nodes (with different origin domains),
@@ -89,7 +87,7 @@ func TestHyperlaneCosmos(t *testing.T) {
 	}
 
 	// Base setup
-	chains := CreateDoubleHyperlaneSimd(t, DockerImage, 23456, 34567)
+	chains := CreateHyperlaneSimds(t, DockerImage, []uint32{23456, 34567})
 
 	// Create a new Interchain object which describes the chains, relayers, and IBC connections we want to use
 	ic := interchaintest.NewInterchain()
@@ -135,10 +133,8 @@ func TestHyperlaneCosmos(t *testing.T) {
 	require.NoError(t, err)
 
 	logger := NewLogger(t)
-	hyperlaneNetwork := hyperlane.HyperlaneNetwork{
-		// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build".
-		// Also make sure that the tags in hyperlane.yaml match the local docker image repo and version.
-		DisableImagePull: true,
-	}
-	hyperlaneNetwork.Build(ctx, *valSimd1, *valSimd2, *rly, logger, eRep, opts)
+	// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build".
+	// Also make sure that the tags in hyperlane.yaml match the local docker image repo and version.
+	hyperlaneNetwork := hyperlane.NewHyperlaneNetwork(false, true)
+	hyperlaneNetwork.Build(ctx, logger, eRep, opts, *valSimd1, *valSimd2, *rly)
 }

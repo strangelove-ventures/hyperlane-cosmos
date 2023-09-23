@@ -1,0 +1,11 @@
+- Must build the avalanchego binary by running ./script/build.sh from avalanchego root directory.
+  - Copy the ./build/avalanchego to e.g. ${go env GOPATH}/src/github.com/ava-labs/avalanchego/build/avalanchego
+- Build subnet-evm by running ./scripts/build.sh in github.com/ConsiderItDone/subnet-evm AILC-141 branch
+  - ls ${go env GOPATH}/github.com/ava-labs/avalanchego/build/plugins, there should be a plugin (binary) from above in there.
+
+Basically, the subnet-evm plugin should be in a plugins directory wherever the avalanchego binary is.
+This is true for running the binary locally but also in a docker container or wherever.
+
+Once the Avalanche network is running the hyperlane contracts need to be deployed.
+The standard way to do this is shown here: https://docs.hyperlane.xyz/docs/deploy/deploy-hyperlane#2.-deploy-contracts.
+Obviously we need to modify the config files for base contracts and ISMs to point to the local Ava network.
