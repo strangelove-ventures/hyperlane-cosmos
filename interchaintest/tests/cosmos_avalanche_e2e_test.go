@@ -32,7 +32,9 @@ func TestLaunchAvalanche(t *testing.T) {
 	}
 
 	localNodeUri := "http://127.0.0.1:9650"
-	launchAvalanche(subnetEvmPath, localNodeUri)
+	cmd, err := launchAvalanche(subnetEvmPath, localNodeUri)
+	require.NoError(t, err)
+	defer cmd.Stop()
 }
 
 // Gets the subnet-evm RPC Uri
