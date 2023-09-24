@@ -20,24 +20,24 @@ func RunCommand(bin string, args ...string) (*cmd.Cmd, error) {
 	_ = curCmd.Start()
 
 	// to stream outputs
-	ticker := time.NewTicker(10 * time.Millisecond)
-	go func() {
-		prevLine := ""
-		for range ticker.C {
-			status := curCmd.Status()
-			n := len(status.Stdout)
-			if n == 0 {
-				continue
-			}
+	// ticker := time.NewTicker(10 * time.Millisecond)
+	// go func() {
+	// 	prevLine := ""
+	// 	for range ticker.C {
+	// 		status := curCmd.Status()
+	// 		n := len(status.Stdout)
+	// 		if n == 0 {
+	// 			continue
+	// 		}
 
-			line := status.Stdout[n-1]
-			if prevLine != line && line != "" {
-				fmt.Println("[streaming output]", line)
-			}
+	// 		line := status.Stdout[n-1]
+	// 		if prevLine != line && line != "" {
+	// 			fmt.Println("[streaming output]", line)
+	// 		}
 
-			prevLine = line
-		}
-	}()
+	// 		prevLine = line
+	// 	}
+	// }()
 
 	return curCmd, nil
 }
@@ -94,19 +94,18 @@ func AwaitHealthy(avaNodeHealthcheckUri string, maxWait time.Duration, retryInte
 // Launch Avalanche local node network.
 // subnetEvmPath - The path to the subnet-evm repo cloned from github.com/ava-labs/subnet-evm.git.
 // localNodeUri - Will usually be "http://127.0.0.1:9650"
-func launchAvalanche(subnetEvmPath, localNodeUri string) error {
+func launchAvalanche(subnetEvmPath, localNodeUri string) (*cmd.Cmd, error) {
 	// TODO: wait for build to finish somehow
 	_, err := RunCommand(subnetEvmPath + "/scripts/build.sh")
 	if err != nil {
-		return err
+		return nil, err
 	}
 	time.Sleep(2 * time.Second)
 
 	cmd, err := RunCommand(subnetEvmPath + "/scripts/run.sh")
 	if err != nil {
-		return err
+		return nil, err
 	}
-	defer cmd.Stop()
 
-	return AwaitHealthy(localNodeUri+"/ext/health", 5*time.Minute, 5*time.Second)
+	return cmd, AwaitHealthy(localNodeUri+"/ext/health", 5*time.Minute, 5*time.Second)
 }

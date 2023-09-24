@@ -37,6 +37,18 @@ func TestLaunchAvalanche(t *testing.T) {
 
 // Gets the subnet-evm RPC Uri
 func TestAvalancheGetRpcUri(t *testing.T) {
+	// The path to the subnet-evm repo cloned from github.com/ava-labs/subnet-evm.git.
+	subnetEvmPath, ok := os.LookupEnv("AVALANCHE_SUBNETEVM_PATH")
+	if !ok {
+		fmt.Print("set AVALANCHE_SUBNETEVM_PATH to the directory where github.com/ava-labs/subnet-evm resides")
+		t.FailNow()
+	}
+
+	localNodeUri := "http://127.0.0.1:9650"
+	cmd, err := launchAvalanche(subnetEvmPath, localNodeUri)
+	require.NoError(t, err)
+	defer cmd.Stop()
+
 	jsonBody := []byte(`{"jsonrpc": "2.0","id": 1,"method": "info.getNodeID"}`)
 	bodyReader := bytes.NewReader(jsonBody)
 
