@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
+	"time"
 
 	"github.com/oriser/regroup"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
@@ -21,6 +23,29 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/testreporter"
 	"github.com/stretchr/testify/require"
 )
+
+func TestLaunchAvalanche(t *testing.T) {
+	// The path to the subnet-evm repo cloned from github.com/ava-labs/subnet-evm.git.
+	subnetEvmPath, ok := os.LookupEnv("AVALANCHE_SUBNETEVM_PATH")
+	if !ok {
+		fmt.Print("set AVALANCHE_SUBNETEVM_PATH to the directory where github.com/ava-labs/subnet-evm resides")
+		t.FailNow()
+	}
+
+	localNodeUri := "http://127.0.0.1:9650"
+
+	// TODO: wait for build to finish somehow
+	_, err := RunCommand(subnetEvmPath + "/scripts/build.sh")
+	require.NoError(t, err)
+	time.Sleep(2 * time.Second)
+
+	cmd, err := RunCommand(subnetEvmPath + "/scripts/run.sh")
+	require.NoError(t, err)
+	defer cmd.Stop()
+
+	err = AwaitHealthy(localNodeUri+"/ext/health", 5*time.Minute, 5*time.Second)
+	require.NoError(t, err)
+}
 
 // Gets the subnet-evm RPC Uri
 func TestAvalancheGetRpcUri(t *testing.T) {

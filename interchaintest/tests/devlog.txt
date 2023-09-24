@@ -6,3 +6,5 @@
    - For the time being, I tried removing the dependency on subnet-evm and upgrading to avalanchego v1.10.10.
       - wallet.NewWalletFromURI(ctx, nodeURI, kc) now has a compile error since the Avalanche team removed that function.
       - I am not sure what they replaced it with, the other wallet functions make no sense. 
+- Rewrote AwaitHealthy endpoint for Avalanche (cannot import Avalanchego into this project due to go.mod conflicts w/ cosmos-sdk).
+- 
