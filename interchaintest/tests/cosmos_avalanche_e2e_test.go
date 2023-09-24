@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
-	"time"
 
 	"github.com/oriser/regroup"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
@@ -33,18 +32,7 @@ func TestLaunchAvalanche(t *testing.T) {
 	}
 
 	localNodeUri := "http://127.0.0.1:9650"
-
-	// TODO: wait for build to finish somehow
-	_, err := RunCommand(subnetEvmPath + "/scripts/build.sh")
-	require.NoError(t, err)
-	time.Sleep(2 * time.Second)
-
-	cmd, err := RunCommand(subnetEvmPath + "/scripts/run.sh")
-	require.NoError(t, err)
-	defer cmd.Stop()
-
-	err = AwaitHealthy(localNodeUri+"/ext/health", 5*time.Minute, 5*time.Second)
-	require.NoError(t, err)
+	launchAvalanche(subnetEvmPath, localNodeUri)
 }
 
 // Gets the subnet-evm RPC Uri

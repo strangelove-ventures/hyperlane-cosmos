@@ -90,3 +90,23 @@ func AwaitHealthy(avaNodeHealthcheckUri string, maxWait time.Duration, retryInte
 		}
 	}
 }
+
+// Launch Avalanche local node network.
+// subnetEvmPath - The path to the subnet-evm repo cloned from github.com/ava-labs/subnet-evm.git.
+// localNodeUri - Will usually be "http://127.0.0.1:9650"
+func launchAvalanche(subnetEvmPath, localNodeUri string) error {
+	// TODO: wait for build to finish somehow
+	_, err := RunCommand(subnetEvmPath + "/scripts/build.sh")
+	if err != nil {
+		return err
+	}
+	time.Sleep(2 * time.Second)
+
+	cmd, err := RunCommand(subnetEvmPath + "/scripts/run.sh")
+	if err != nil {
+		return err
+	}
+	defer cmd.Stop()
+
+	return AwaitHealthy(localNodeUri+"/ext/health", 5*time.Minute, 5*time.Second)
+}
