@@ -13,13 +13,13 @@ import (
 // chainName e.g. simd1 or simd2
 // rpcUrl is the node RPC endpoint for e.g. simd1
 // hyperlaneDomain is the chain's hyperlane domain, as configured in the chain app state or genesis
-func preconfigureHyperlane(node *hyperlane.HyperlaneChainConfig, tmpDir string, chainName string, chainRpcUrl string, hyperlaneDomain uint32) error {
+func preconfigureHyperlane(node *hyperlane.HyperlaneChainConfig, tmpDir string, chainName string, chainRpcUrl string, chainGrpcUrl string, hyperlaneDomain uint32) error {
 	path := filepath.Dir(tmpDir)
 	hyperlaneConfigPath := filepath.Join(path, chainName+".json")
 
 	// Write the hyperlane CONFIG_FILES to disk where the bind mount will expect it.
 	// See also https://docs.hyperlane.xyz/docs/operators/agent-configuration#config-files-with-docker.
-	valJson := generateHyperlaneValidatorConfig(chainName, chainRpcUrl, hyperlaneDomain)
+	valJson := generateHyperlaneValidatorConfig(chainName, chainRpcUrl, chainGrpcUrl, hyperlaneDomain)
 	err := os.WriteFile(hyperlaneConfigPath, []byte(valJson), 777)
 	if err != nil {
 		return err
@@ -35,11 +35,11 @@ func preconfigureHyperlane(node *hyperlane.HyperlaneChainConfig, tmpDir string, 
 	return nil
 }
 
-func generateHyperlaneValidatorConfig(chainName string, connectionUrl string, domain uint32) string {
+func generateHyperlaneValidatorConfig(chainName, rpcUrl, grpcUrl string, domain uint32) string {
 	rawJson := `{
 		"chains": {
 		  "%s": {
-			"connection": { "url": "%s" },
+			"connection": { "rpc_url": "%s", "grpc_url": "%s" },
 			"name": "%s",
 			"domain": %d,
 			"addresses": {
@@ -47,7 +47,7 @@ func generateHyperlaneValidatorConfig(chainName string, connectionUrl string, do
 			  "interchainGasPaymaster": "0x6cA0B6D22da47f091B7613223cD4BB03a2d77918",
 			  "validatorAnnounce": "0x9bBdef63594D5FFc2f370Fe52115DdFFe97Bc524"
 			},
-			"protocol": "ethereum",
+			"protocol": "cosmosModules",
 			"finalityBlocks": 1,
 			"index": {
 			  "from": 0
@@ -55,5 +55,5 @@ func generateHyperlaneValidatorConfig(chainName string, connectionUrl string, do
 		  }
 		}
 	  }`
-	return fmt.Sprintf(rawJson, chainName, connectionUrl, chainName, domain)
+	return fmt.Sprintf(rawJson, chainName, rpcUrl, grpcUrl, chainName, domain)
 }

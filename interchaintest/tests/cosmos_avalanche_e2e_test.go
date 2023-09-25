@@ -246,7 +246,7 @@ func TestHyperlaneAvalancheCosmosDispatch(t *testing.T) {
 	valSimd1, ok := hyperlaneCfg["hyperlane-avalanche-validator"]
 	require.True(t, ok)
 
-	err = preconfigureHyperlane(valSimd1, tmpDir1, "simd1", chains[0].GetHostRPCAddress(), domain)
+	err = preconfigureHyperlane(valSimd1, tmpDir1, "simd1", chains[0].GetHostRPCAddress(), chains[0].GetHostGRPCAddress(), domain)
 	require.NoError(t, err)
 
 	logger := NewLogger(t)

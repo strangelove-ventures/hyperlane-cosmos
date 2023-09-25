@@ -47,9 +47,9 @@ func TestHyperlaneAgentInit(t *testing.T) {
 	rly, ok := hyperlaneCfg["hyperlane-relayer"]
 	require.True(t, ok)
 
-	err = preconfigureHyperlane(valSimd1, tmpDir1, "simd1", "http://simd1-rpc-url", 23456)
+	err = preconfigureHyperlane(valSimd1, tmpDir1, "simd1", "http://simd1-rpc-url", "http://simd1-grpc-url", 23456)
 	require.NoError(t, err)
-	err = preconfigureHyperlane(valSimd2, tmpDir2, "simd2", "http://simd2-rpc-url", 34567)
+	err = preconfigureHyperlane(valSimd2, tmpDir2, "simd2", "http://simd2-rpc-url", "http://simd1-grpc-url", 34567)
 	require.NoError(t, err)
 
 	logger := NewLogger(t)
@@ -127,13 +127,13 @@ func TestHyperlaneCosmos(t *testing.T) {
 	rly, ok := hyperlaneCfg["hyperlane-relayer"]
 	require.True(t, ok)
 
-	err = preconfigureHyperlane(valSimd1, tmpDir1, "simd1", chains[0].GetHostRPCAddress(), 23456)
+	err = preconfigureHyperlane(valSimd1, tmpDir1, "simd1", chains[0].GetHostRPCAddress(), chains[0].GetHostGRPCAddress(), 23456)
 	require.NoError(t, err)
-	err = preconfigureHyperlane(valSimd2, tmpDir2, "simd2", chains[1].GetHostRPCAddress(), 34567)
+	err = preconfigureHyperlane(valSimd2, tmpDir2, "simd2", chains[1].GetHostRPCAddress(), chains[1].GetHostGRPCAddress(), 34567)
 	require.NoError(t, err)
 
 	logger := NewLogger(t)
-	// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build".
+	// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build .".
 	// Also make sure that the tags in hyperlane.yaml match the local docker image repo and version.
 	hyperlaneNetwork := hyperlane.NewHyperlaneNetwork(false, true)
 	hyperlaneNetwork.Build(ctx, logger, eRep, opts, *valSimd1, *valSimd2, *rly)
