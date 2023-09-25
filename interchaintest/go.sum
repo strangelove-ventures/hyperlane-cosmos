@@ -229,8 +229,10 @@ github.com/FactomProject/basen v0.0.0-20150613233007-fe3947df716e/go.mod h1:kGUq
 github.com/FactomProject/btcutilecc v0.0.0-20130527213604-d3a63a5752ec h1:1Qb69mGp/UtRPn422BH4/Y4Q3SLUrD9KHuDkm8iodFc=
 github.com/FactomProject/btcutilecc v0.0.0-20130527213604-d3a63a5752ec/go.mod h1:CD8UlnlLDiqb36L110uqiP2iSflVjx9g/3U9hCI4q2U=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
-github.com/KyleMoser/heighliner v0.0.0-20230829230844-9070cc213a11 h1:Y0ICPGur2xzOi2qsgNPsQmuzvrmRJWLjxhX6aoIPm7g=
-github.com/KyleMoser/heighliner v0.0.0-20230829230844-9070cc213a11/go.mod h1:rPfwN8szPw5mBrSwpZ1Z0Cbj+66SpLyP/OC8bUSg6so=
+github.com/KyleMoser/heighliner v0.0.0-20230925171550-18a836e324c3 h1:hDgUJKDb1usi18J8cuSUfUWizsDBpQkubKSgkpB8LP8=
+github.com/KyleMoser/heighliner v0.0.0-20230925171550-18a836e324c3/go.mod h1:rPfwN8szPw5mBrSwpZ1Z0Cbj+66SpLyP/OC8bUSg6so=
+github.com/KyleMoser/interchaintest/v7 v7.0.0-20230925162241-73673bf6634e h1:1STUfNuh28NSe/wMBIRs/l7pLmIwRkXUlgM4y3jeIrI=
+github.com/KyleMoser/interchaintest/v7 v7.0.0-20230925162241-73673bf6634e/go.mod h1:jpaAeq27orQFDFVlVxFtnqsOsdPS/xOQ1KooFALXsDo=
 github.com/Microsoft/go-winio v0.5.2/go.mod h1:WpS1mjBmmwHBEWmogvA2mj8546UReBk4v8QkMxJ6pZY=
 github.com/Microsoft/go-winio v0.6.0 h1:slsWYD/zyx7lCXoZVlvQrj0hPTM1HI4+v1sIda2yDvg=
 github.com/Microsoft/go-winio v0.6.0/go.mod h1:cTAf44im0RAYeL23bpB+fzCyDH2MJiz2BO69KH/soAE=
@@ -546,6 +548,7 @@ github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/go-stack/stack v1.8.1 h1:ntEHSVwIt7PNXNpgPmVfMrNhLtgjlmnZha2kOpuRiDw=
 github.com/go-stack/stack v1.8.1/go.mod h1:dcoOX6HbPZSZptuspn9bctJ+N/CnF5gGygcUP3XYfe4=
+github.com/go-test/deep v1.1.0 h1:WOcxcdHcvdgThNXjw0t76K42FXTU7HpNQWHpA2HHNlg=
 github.com/gobwas/httphead v0.0.0-20180130184737-2c6c146eadee h1:s+21KNqlpePfkah2I+gwHF8xmJWRjooY+5248k6m4A0=
 github.com/gobwas/httphead v0.0.0-20180130184737-2c6c146eadee/go.mod h1:L0fX3K22YWvt/FAX9NnzrNzcI4wNYi9Yku4O0LKYflo=
 github.com/gobwas/pool v0.2.0 h1:QEmUOlnSjWtnpRGHF3SauEiOsy82Cup83Vf2LcMlnc8=

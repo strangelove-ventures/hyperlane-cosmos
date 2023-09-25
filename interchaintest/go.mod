@@ -21,6 +21,7 @@ require (
 	cosmossdk.io/math v1.0.1
 	github.com/avast/retry-go/v4 v4.3.4
 	github.com/cometbft/cometbft v0.37.2
+	github.com/go-cmd/cmd v1.4.2
 	github.com/oriser/regroup v0.0.0-20230527212431-1b00c9bdbc5b
 )
 
@@ -103,7 +104,6 @@ require (
 	github.com/felixge/httpsnoop v1.0.2 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gin-gonic/gin v1.8.1 // indirect
-	github.com/go-cmd/cmd v1.4.2 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.4.0 // indirect
 	github.com/go-git/go-git/v5 v5.5.2 // indirect
@@ -291,17 +291,17 @@ replace (
 	github.com/99designs/keyring => github.com/cosmos/keyring v1.2.0
 	github.com/ChainSafe/go-schnorrkel => github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d
 	github.com/ChainSafe/go-schnorrkel/1 => github.com/ChainSafe/go-schnorrkel v1.0.0
-	github.com/ava-labs/subnet-evm => /home/kyle/projects/Strangelove/CIDT/subnet-evm
+	//github.com/ava-labs/subnet-evm => /home/kyle/projects/Strangelove/CIDT/subnet-evm
 	github.com/cloudflare/circl => github.com/cloudflare/circl v1.3.1
-	//github.com/strangelove-ventures/heighliner => github.com/KyleMoser/heighliner v0.0.0-20230828204213-7d95b9698bf3
 	github.com/gin-gonic/gin => github.com/gin-gonic/gin v1.9.0
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/sergi/go-diff => github.com/sergi/go-diff v1.2.0
-	github.com/strangelove-ventures/heighliner => github.com/KyleMoser/heighliner v0.0.0-20230829230844-9070cc213a11
+	github.com/strangelove-ventures/heighliner => github.com/KyleMoser/heighliner v0.0.0-20230925171550-18a836e324c3
+	//github.com/strangelove-ventures/heighliner => /home/kyle/projects/heighliner
 	// For this nested module, you always want to replace the parent reference with the current worktree.
 	github.com/strangelove-ventures/hyperlane-cosmos => ../
-	//github.com/strangelove-ventures/interchaintest/v7 => github.com/KyleMoser/interchaintest/v7 v7.0.0-20230921024409-54452b7c77f7
-	github.com/strangelove-ventures/interchaintest/v7 => /home/kyle/projects/KyleMoser/interchaintest
+	github.com/strangelove-ventures/interchaintest/v7 => github.com/KyleMoser/interchaintest/v7 v7.0.0-20230925162241-73673bf6634e
+	//github.com/strangelove-ventures/interchaintest/v7 => /home/kyle/projects/KyleMoser/interchaintest
 	// pin version! 126854af5e6d has issues with the store so that queries fail
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 //github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d
