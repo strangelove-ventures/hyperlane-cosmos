@@ -6,10 +6,11 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	hyperlane "github.com/strangelove-ventures/interchaintest/v7/chain/hyperlane"
 	"go.uber.org/zap/zaptest"
+
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
 
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/strangelove-ventures/interchaintest/v7/testreporter"

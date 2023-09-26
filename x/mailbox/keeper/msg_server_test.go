@@ -113,7 +113,6 @@ func (suite *KeeperTestSuite) TestDispatch() {
 				msgBody := hexutil.Encode([]byte("Hello!"))
 				msg = types.NewMsgDispatch(sender, domain, recipientHex, msgBody)
 				hyperlaneMsgHex = createHyperlaneMsg(0, origin, domain, sender, recipientHex, msgBody)
-
 			},
 			true,
 		},
@@ -178,7 +177,7 @@ func (suite *KeeperTestSuite) TestDispatch() {
 
 			fmt.Println("ID: ", res.MessageId)
 
-			//zero-pad the sender w/ appropriate hyperlane byte length
+			// zero-pad the sender w/ appropriate hyperlane byte length
 			senderB, _ := hexutil.Decode(senderHex)
 			for len(senderB) < (common.DESTINATION_OFFSET - common.SENDER_OFFSET) {
 				padding := make([]byte, 1)

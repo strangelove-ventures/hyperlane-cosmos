@@ -15,10 +15,10 @@ import (
 // getCurrentTreeMetadataCmd defines the command to query the current tree metadata
 func getCurrentTreeMetadataCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "tree",
-		Short:   "Query tree",
+		Use:     "tree-metadata",
+		Short:   "Query tree-metadata",
 		Long:    "Query current tree metadata",
-		Example: fmt.Sprintf("%s query %s tree", version.AppName, types.ModuleName),
+		Example: fmt.Sprintf("%s query %s tree-metadata", version.AppName, types.ModuleName),
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
@@ -30,6 +30,37 @@ func getCurrentTreeMetadataCmd() *cobra.Command {
 			req := types.QueryCurrentTreeMetadataRequest{}
 
 			res, err := queryClient.CurrentTreeMetadata(context.Background(), &req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// getCurrentTreeCmd defines the command to query the current tree
+func getCurrentTreeCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "tree",
+		Short:   "Query tree",
+		Long:    "Query current tree",
+		Example: fmt.Sprintf("%s query %s tree", version.AppName, types.ModuleName),
+		Args:    cobra.ExactArgs(0),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := types.QueryCurrentTreeRequest{}
+
+			res, err := queryClient.CurrentTree(context.Background(), &req)
 			if err != nil {
 				return err
 			}
