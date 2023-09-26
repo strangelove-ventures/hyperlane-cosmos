@@ -126,7 +126,7 @@ func QueryCurrentTreeMetadata(
 	chain *cosmos.CosmosChain,
 ) (stdout []byte) {
 	cmd := []string{
-		"simd", "query", "hyperlane-mailbox", "tree",
+		"simd", "query", "hyperlane-mailbox", "tree-metadata",
 		"--node", chain.GetRPCAddress(),
 		"--home", chain.HomeDir(),
 		"--chain-id", chain.Config().ChainID,
@@ -138,6 +138,26 @@ func QueryCurrentTreeMetadata(
 
 	err = testutil.WaitForBlocks(ctx, 2, chain)
 	require.NoError(t, err)
+	return stdout
+}
+
+// simd query hyperlane-mailbox tree
+func QueryCurrentTree(
+	t *testing.T,
+	ctx context.Context,
+	chain *cosmos.CosmosChain,
+) (stdout []byte) {
+	cmd := []string{
+		"simd", "query", "hyperlane-mailbox", "tree",
+		"--node", chain.GetRPCAddress(),
+		"--home", chain.HomeDir(),
+		"--chain-id", chain.Config().ChainID,
+	}
+	stdout, _, err := chain.Exec(ctx, cmd, nil)
+	require.NoError(t, err)
+
+	fmt.Println("QueryCurrentTree stdout: ", string(stdout))
+
 	return stdout
 }
 

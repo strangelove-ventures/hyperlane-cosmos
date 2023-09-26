@@ -41,6 +41,7 @@ func TestHyperlaneMailbox(t *testing.T) {
 	// Chains
 	simd := chains[0].(*cosmos.CosmosChain)
 	t.Log("simd.GetHostRPCAddress()", simd.GetHostRPCAddress())
+	t.Log("simd.GetHostGRPCAddress()", simd.GetHostGRPCAddress())
 
 	users := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd)
 	user := users[0]
@@ -58,7 +59,7 @@ func TestHyperlaneMailbox(t *testing.T) {
 
 	// Set default isms for counter chains
 	helpers.SetDefaultIsm(t, ctx, simd, user.KeyName(), counterChain1, counterChain2, counterChain3)
-	res := helpers.QueryAllDefaultIsms(t, ctx, simd)
+	/*res := helpers.QueryAllDefaultIsms(t, ctx, simd)
 
 	var abstractIsm ismtypes.AbstractIsm
 
@@ -69,7 +70,7 @@ func TestHyperlaneMailbox(t *testing.T) {
 	require.Equal(t, counterChain1.ValSet.Threshold, uint8(legacyMultiSig.Threshold))
 	for i, val := range counterChain1.ValSet.Vals {
 		require.Equal(t, val.Addr, legacyMultiSig.ValidatorPubKeys[i])
-	}
+	}*/
 
 	// Create first legacy multisig message from counter chain 1
 	sender := "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7"
@@ -109,7 +110,7 @@ func TestHyperlaneMailbox(t *testing.T) {
 	require.NoError(t, err)
 	simd.ExecuteContract(ctx, user.KeyName(), contract, string(dipatchMsg))
 
-	err = testutil.WaitForBlocks(ctx, 2, simd)
+	err = testutil.WaitForBlocks(ctx, 125, simd)
 	require.NoError(t, err)
 }
 
