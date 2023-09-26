@@ -2,6 +2,7 @@ package tests
 
 import (
 	"bytes"
+	"os"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -36,13 +37,26 @@ func NewLogger(t zaptest.TestingT) *zap.Logger {
 		zap.ErrorOutput(writer.WithMarkFailed(true)),
 	}
 	zapOptions = append(zapOptions, cfg.zapOptions...)
+	consoleEncoder := zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig())
+	level := zap.NewAtomicLevelAt(zap.DebugLevel)
+
+	c := zapcore.NewCore(
+		consoleEncoder,
+		writer,
+		cfg.Level,
+	)
+
+	// Now create a second logger for logging everything to stdout
+	stdout := zapcore.AddSync(os.Stdout)
+
+	// Combine the loggers
+	core := zapcore.NewTee(
+		c,
+		zapcore.NewCore(consoleEncoder, stdout, level),
+	)
 
 	return zap.New(
-		zapcore.NewCore(
-			zapcore.NewConsoleEncoder(zap.NewDevelopmentEncoderConfig()),
-			writer,
-			cfg.Level,
-		),
+		core,
 		zapOptions...,
 	)
 }

@@ -14,8 +14,8 @@ import (
 // rpcUrl is the node RPC endpoint for e.g. simd1
 // hyperlaneDomain is the chain's hyperlane domain, as configured in the chain app state or genesis
 func preconfigureHyperlane(node *hyperlane.HyperlaneChainConfig, tmpDir string, chainName string, chainRpcUrl string, chainGrpcUrl string, hyperlaneDomain uint32) error {
-	path := filepath.Dir(tmpDir)
-	hyperlaneConfigPath := filepath.Join(path, chainName+".json")
+	hyperlaneConfigPath := filepath.Join(tmpDir, chainName+".json")
+	fmt.Printf("Chain: %s, RPC Uri: %s, GRPC Uri: %s\n", chainName, chainRpcUrl, chainGrpcUrl)
 
 	// Write the hyperlane CONFIG_FILES to disk where the bind mount will expect it.
 	// See also https://docs.hyperlane.xyz/docs/operators/agent-configuration#config-files-with-docker.
@@ -27,6 +27,7 @@ func preconfigureHyperlane(node *hyperlane.HyperlaneChainConfig, tmpDir string, 
 
 	// Search and replace for the Docker env vars, cmd-flags, and bind-mounts, see hyperlane.yaml
 	node.SetReplacements(map[string]string{
+		"${val_dir}":          tmpDir,
 		"${val_config_mount}": hyperlaneConfigPath,
 		"${chainName}":        chainName,
 		"${CHAINNAME}":        strings.ToUpper(chainName),
@@ -48,10 +49,7 @@ func generateHyperlaneValidatorConfig(chainName, rpcUrl, grpcUrl string, domain 
 			  "validatorAnnounce": "0x9bBdef63594D5FFc2f370Fe52115DdFFe97Bc524"
 			},
 			"protocol": "cosmosModules",
-			"finalityBlocks": 1,
-			"index": {
-			  "from": 0
-			}
+			"finalityBlocks": 1
 		  }
 		}
 	  }`

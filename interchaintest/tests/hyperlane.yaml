@@ -18,11 +18,11 @@ hyperlane-validator-simd1:
   type: validator
   env-path: hyperlane-validator.txt # path to the docker args file
   cmd-flags:
-    - --db /tmp/hyp/validator/simd1
-  bind-mounts: ${val_config_mount}:/config/${chainName}_val.json,/tmp/hyp/validator/simd1:/tmp/hyp/validator/simd1,/tmp/hyperlane-validator-signatures-simd1:/tmp/hyperlane-validator-signatures-simd1,/tmp/hyperlane_simd1_db.txt:/tmp/hyperlane_simd1_db.txt
+    - --db ${val_dir}/${chainName}_db.txt
+  bind-mounts: ${val_config_mount}:/config/${chainName}_val.json,${val_dir}/${chainName}:${val_dir}/${chainName},${val_dir}/signatures-${chainName}:${val_dir}/signatures-${chainName},${val_dir}/${chainName}_db.txt:${val_dir}/${chainName}_db.txt
   bin: ./validator # For heighliner built images, this should be /bin/validator
   images:
-    - repository: hyperlane-monorepo
+    - repository: 'hyperlane-monorepo'
       uid-gid: 1025:1025
       version: latest
     #- repository: ghcr.io/strangelove-ventures/heighliner/hyperlane-agents
@@ -35,11 +35,11 @@ hyperlane-validator-simd2:
   type: validator
   env-path: hyperlane-validator.txt # path to the docker args file
   cmd-flags:
-    - --db /tmp/hyp/validator/simd2
-  bind-mounts: ${val_config_mount}:/config/${chainName}_val.json,/tmp/hyp/validator/simd2:/tmp/hyp/validator/simd2,/tmp/hyperlane-validator-signatures-simd2:/tmp/hyperlane-validator-signatures-simd2,/tmp/hyperlane_simd2_db.txt:/tmp/hyperlane_simd2_db.txt
+    - --db ${val_dir}/${chainName}_db.txt
+  bind-mounts: ${val_config_mount}:/config/${chainName}_val.json,${val_dir}/${chainName}:${val_dir}/${chainName},${val_dir}/signatures-${chainName}:${val_dir}/signatures-${chainName},${val_dir}/${chainName}_db.txt:${val_dir}/${chainName}_db.txt
   bin: ./validator # For heighliner built images, this should be /bin/validator
   images:
-    - repository: hyperlane-monorepo
+    - repository: 'hyperlane-monorepo'
       uid-gid: 1025:1025
       version: latest
     #- repository: ghcr.io/strangelove-ventures/heighliner/hyperlane-agents

@@ -95,19 +95,19 @@ func CreateSingleHyperlaneSimd(t *testing.T) []ibc.Chain {
 
 // Create a hyperlane ibc.Chain for each chain domain passed in.
 func CreateHyperlaneSimds(t *testing.T, image ibc.DockerImage, chainDomains []uint32) []ibc.Chain {
-	chainNameFormat := "simd-%d"
+	chainNameFormat := "simd%d"
 	// Create chain factory with hyperlane-simd
 	votingPeriod := "10s"
 	maxDepositPeriod := "10s"
 	chainSpecs := []*interchaintest.ChainSpec{}
 
 	for i, domain := range chainDomains {
-		chainName := fmt.Sprintf(chainNameFormat, chainDomains[i])
+		chainName := fmt.Sprintf(chainNameFormat, i+1)
 		spec := &interchaintest.ChainSpec{
 			ChainName: chainName,
 			ChainConfig: ibc.ChainConfig{
 				Type:    "cosmos",
-				Name:    "simd",
+				Name:    chainName,
 				ChainID: chainName,
 				Images: []ibc.DockerImage{
 					image,
