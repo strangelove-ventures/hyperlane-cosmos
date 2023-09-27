@@ -2,12 +2,14 @@ package tests
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -60,9 +62,14 @@ func TestHyperlaneAgentInit(t *testing.T) {
 	// rly, ok := hyperlaneCfg["hyperlane-relayer"]
 	// require.True(t, ok)
 
-	err = preconfigureHyperlane(valSimd1, tmpDir1, "simd1", "http://simd1-rpc-url", "http://simd1-grpc-url", 23456)
+	mailboxHex := "000000000000000000000000cc2a110c8df654a38749178a04402e88f65091d3"
+	prefixedMailboxHex := "0x" + mailboxHex
+	//originMailbox, err := hex.DecodeString(mailboxHex)
 	require.NoError(t, err)
-	err = preconfigureHyperlane(valSimd2, tmpDir2, "simd2", "http://simd2-rpc-url", "http://simd1-grpc-url", 34567)
+
+	_, err = preconfigureHyperlane(valSimd1, tmpDir1, "simd1", "http://simd1-rpc-url", "http://simd1-grpc-url", prefixedMailboxHex, 23456)
+	require.NoError(t, err)
+	_, err = preconfigureHyperlane(valSimd2, tmpDir2, "simd2", "http://simd2-rpc-url", "http://simd1-grpc-url", prefixedMailboxHex, 34567)
 	require.NoError(t, err)
 
 	// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build".
@@ -163,10 +170,6 @@ func TestHyperlaneCosmos(t *testing.T) {
 	verifyContractEntryPoints(t, ctx, simd1, userSimd, contract)
 	verifyContractEntryPoints(t, ctx, simd2, userSimd2, contract2)
 
-	// TODO: Right now the test case is not working because we need the validator private key in order to properly
-	// set up the counterchain (and set the chain's ISM).
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 	// Create counter chain 1 with val set signing legacy multisig
 	// The private key used here MUST be the one from the validator config file. TODO: cleanup this test to read it from the file.
 	simd1IsmValidator := counterchain.CreateEmperorValidator(t, uint32(simdDomain), counterchain.LEGACY_MULTISIG, "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61")
@@ -191,10 +194,25 @@ func TestHyperlaneCosmos(t *testing.T) {
 	// rly, ok := hyperlaneCfg["hyperlane-relayer"]
 	// require.True(t, ok)
 
-	logger.Info("Preconfiguring Hyperlane (getting configs)")
-	err = preconfigureHyperlane(valSimd1, tmpDir1, chains[0].Config().Name, chains[0].GetRPCAddress(), "http://"+chains[0].GetGRPCAddress(), 23456)
+	mailboxHex := "000000000000000000000000cc2a110c8df654a38749178a04402e88f65091d3"
+	prefixedMailboxHex := "0x" + mailboxHex
 	require.NoError(t, err)
-	err = preconfigureHyperlane(valSimd2, tmpDir2, chains[1].Config().Name, chains[1].GetRPCAddress(), "http://"+chains[1].GetGRPCAddress(), 34567)
+
+	logger.Info("Preconfiguring Hyperlane (getting configs)")
+	valJson, err := preconfigureHyperlane(valSimd1, tmpDir1, chains[0].Config().Name, chains[0].GetRPCAddress(), "http://"+chains[0].GetGRPCAddress(), prefixedMailboxHex, 23456)
+	require.NoError(t, err)
+	simd1MailboxHex, err := getMailbox(valJson, chains[0].Config().Name)
+	require.NoError(t, err)
+	expectedMailbox, _ := hex.DecodeString("000000000000000000000000cc2a110c8df654a38749178a04402e88f65091d3")
+	_, simd1MailboxUnprefixed, found := strings.Cut(simd1MailboxHex, "0x")
+	require.True(t, found)
+	simd1Mailbox, err := hex.DecodeString(simd1MailboxUnprefixed)
+	require.NoError(t, err)
+
+	originMailboxB := []byte(simd1Mailbox)
+	require.Equal(t, expectedMailbox, originMailboxB)
+
+	valJson, err = preconfigureHyperlane(valSimd2, tmpDir2, chains[1].Config().Name, chains[1].GetRPCAddress(), "http://"+chains[1].GetGRPCAddress(), prefixedMailboxHex, 34567)
 	require.NoError(t, err)
 
 	simd1ValidatorSignaturesDir := filepath.Join(tmpDir1, "signatures-"+chains[0].Config().Name) //${val_dir}/signatures-${chainName}
@@ -206,7 +224,7 @@ func TestHyperlaneCosmos(t *testing.T) {
 	require.NoError(t, err)
 
 	// Give the hyperlane validators time to start up and start watching the mailbox for the chain
-	time.Sleep(10 * time.Second)
+	time.Sleep(1 * time.Minute)
 
 	// Dispatch a message to SIMD1
 	dMsg := []byte("CosmosSimd1ToCosmosSimd2")
@@ -233,7 +251,8 @@ func TestHyperlaneCosmos(t *testing.T) {
 
 	// Wait for the hyperlane validator to sign it. The first message will show up as 0_with_id.json
 	// TODO: ask the hyperlane team to explain what 1.json is.
-	simd1FirstSignedCheckpoint := filepath.Join(simd1ValidatorSignaturesDir, "0_with_id.json")
+	expectedSigFile := "0.json"
+	simd1FirstSignedCheckpoint := filepath.Join(simd1ValidatorSignaturesDir, expectedSigFile)
 
 	// Wait for the 0_with_id.json file to show up in the validator's bind mount on the host
 	err = Await(func() (bool, error) {
@@ -257,7 +276,7 @@ func TestHyperlaneCosmos(t *testing.T) {
 
 	// First we must 'fake' the relayer's portion of the data. We DO NOT SIGN, since we get the real signature from the validator.
 	message, proof := simd1IsmValidator.CreateMessage(dispatchSender, uint32(simdDomain), uint32(simd2Domain), bech32Recipient, string(b))
-	metadata := simd1IsmValidator.CreateRelayerLegacyMetadata(message, proof)
+	metadata := simd1IsmValidator.CreateRelayerLegacyMetadata(message, proof, originMailboxB)
 
 	//Append the signature from the validator to the metadata.
 	metadata = append(metadata, decodedValidatorSignature...)

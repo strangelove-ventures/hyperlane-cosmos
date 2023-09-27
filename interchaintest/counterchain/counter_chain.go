@@ -47,7 +47,7 @@ func CreateEmperorValidator(t *testing.T, domain uint32, ismType string, privKey
 
 	return &CounterChain{
 		T:       t,
-		ValSet:  *CreateValSet(t, 3, 2),
+		ValSet:  valSet,
 		Tree:    &imt.Tree{},
 		Domain:  domain,
 		IsmType: ismType,

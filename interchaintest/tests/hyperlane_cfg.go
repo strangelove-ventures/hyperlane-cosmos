@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,16 +14,16 @@ import (
 // chainName e.g. simd1 or simd2
 // rpcUrl is the node RPC endpoint for e.g. simd1
 // hyperlaneDomain is the chain's hyperlane domain, as configured in the chain app state or genesis
-func preconfigureHyperlane(node *hyperlane.HyperlaneChainConfig, tmpDir string, chainName string, chainRpcUrl string, chainGrpcUrl string, hyperlaneDomain uint32) error {
+func preconfigureHyperlane(node *hyperlane.HyperlaneChainConfig, tmpDir string, chainName string, chainRpcUrl string, chainGrpcUrl string, originMailbox string, hyperlaneDomain uint32) (valJson string, err error) {
 	hyperlaneConfigPath := filepath.Join(tmpDir, chainName+".json")
 	fmt.Printf("Chain: %s, RPC Uri: %s, GRPC Uri: %s\n", chainName, chainRpcUrl, chainGrpcUrl)
 
 	// Write the hyperlane CONFIG_FILES to disk where the bind mount will expect it.
 	// See also https://docs.hyperlane.xyz/docs/operators/agent-configuration#config-files-with-docker.
-	valJson := generateHyperlaneValidatorConfig(chainName, chainRpcUrl, chainGrpcUrl, hyperlaneDomain)
-	err := os.WriteFile(hyperlaneConfigPath, []byte(valJson), 777)
+	valJson = generateHyperlaneValidatorConfig(chainName, chainRpcUrl, chainGrpcUrl, originMailbox, hyperlaneDomain)
+	err = os.WriteFile(hyperlaneConfigPath, []byte(valJson), 777)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Search and replace for the Docker env vars, cmd-flags, and bind-mounts, see hyperlane.yaml
@@ -33,10 +34,10 @@ func preconfigureHyperlane(node *hyperlane.HyperlaneChainConfig, tmpDir string, 
 		"${CHAINNAME}":        strings.ToUpper(chainName),
 	})
 
-	return nil
+	return valJson, nil
 }
 
-func generateHyperlaneValidatorConfig(chainName, rpcUrl, grpcUrl string, domain uint32) string {
+func generateHyperlaneValidatorConfig(chainName, rpcUrl, grpcUrl string, originMailboxHex string, domain uint32) string {
 	rawJson := `{
 		"chains": {
 		  "%s": {
@@ -44,7 +45,7 @@ func generateHyperlaneValidatorConfig(chainName, rpcUrl, grpcUrl string, domain 
 			"name": "%s",
 			"domain": %d,
 			"addresses": {
-			  "mailbox": "0x35231d4c2D8B8ADcB5617A638A0c4548684c7C70",
+			  "mailbox": "%s",
 			  "interchainGasPaymaster": "0x6cA0B6D22da47f091B7613223cD4BB03a2d77918",
 			  "validatorAnnounce": "0x9bBdef63594D5FFc2f370Fe52115DdFFe97Bc524"
 			},
@@ -53,5 +54,22 @@ func generateHyperlaneValidatorConfig(chainName, rpcUrl, grpcUrl string, domain 
 		  }
 		}
 	  }`
-	return fmt.Sprintf(rawJson, chainName, rpcUrl, grpcUrl, chainName, domain)
+	return fmt.Sprintf(rawJson, chainName, rpcUrl, grpcUrl, chainName, domain, originMailboxHex)
+}
+
+func getMailbox(valJson string, chain string) (mailbox string, err error) {
+	data := map[string]interface{}{}
+	err = json.Unmarshal([]byte(valJson), &data)
+	if err != nil {
+		return
+	}
+	ichains := data["chains"]
+	imChains := ichains.(map[string]interface{})
+	ichain := imChains[chain]
+	imChain := ichain.(map[string]interface{})
+	iAddr := imChain["addresses"]
+	imAddr := iAddr.(map[string]interface{})
+	iMailbox := imAddr["mailbox"]
+	mailbox = iMailbox.(string)
+	return
 }
