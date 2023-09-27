@@ -38,6 +38,22 @@ func CreateCounterChain(t *testing.T, domain uint32, ismType string) *CounterCha
 	}
 }
 
+// He's the emperor because he's the only one
+func CreateEmperorValidator(t *testing.T, domain uint32, ismType string, privKey string) *CounterChain {
+	var valSet ValSet
+	valSet.Vals = []Val{*CreateValFromKey(t, privKey)}
+	valSet.Threshold = 1
+	valSet.Total = 1
+
+	return &CounterChain{
+		T:       t,
+		ValSet:  *CreateValSet(t, 3, 2),
+		Tree:    &imt.Tree{},
+		Domain:  domain,
+		IsmType: ismType,
+	}
+}
+
 func (c *CounterChain) CreateMessage(sender string, originDomain uint32, destDomain uint32, recipient string, msg string) (message []byte, proof [imt.TreeDepth][32]byte) {
 	version := make([]byte, 1)
 	message = append(message, version...)

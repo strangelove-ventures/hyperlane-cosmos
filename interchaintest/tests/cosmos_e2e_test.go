@@ -168,9 +168,10 @@ func TestHyperlaneCosmos(t *testing.T) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	// Create counter chain 1 with val set signing legacy multisig
-	simd1IsmValidator := counterchain.CreateCounterChain(t, uint32(simdDomain), counterchain.LEGACY_MULTISIG)
+	// The private key used here MUST be the one from the validator config file. TODO: cleanup this test to read it from the file.
+	simd1IsmValidator := counterchain.CreateEmperorValidator(t, uint32(simdDomain), counterchain.LEGACY_MULTISIG, "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61")
 	// Create counter chain 2 with val set signing legacy multisig
-	simd2IsmValidator := counterchain.CreateCounterChain(t, uint32(simd2Domain), counterchain.LEGACY_MULTISIG)
+	simd2IsmValidator := counterchain.CreateEmperorValidator(t, uint32(simd2Domain), counterchain.LEGACY_MULTISIG, "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61")
 
 	// Set default isms for counter chains for SIMD
 	helpers.SetDefaultIsm(t, ctx, simd1, userSimd.KeyName(), simd2IsmValidator)
