@@ -20,6 +20,8 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	hyperlane "github.com/strangelove-ventures/interchaintest/v7/chain/hyperlane"
 
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
+
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/strangelove-ventures/interchaintest/v7/testreporter"
 	"github.com/stretchr/testify/require"

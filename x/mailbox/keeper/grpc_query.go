@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
 
@@ -22,6 +23,22 @@ func (k Keeper) CurrentTreeMetadata(c context.Context, req *types.QueryCurrentTr
 	return &types.QueryCurrentTreeMetadataResponse{
 		Root:  k.Tree.Root(),
 		Count: k.Tree.Count(),
+	}, nil
+}
+
+func (k Keeper) CurrentTree(c context.Context, req *types.QueryCurrentTreeRequest) (*types.QueryCurrentTreeResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	/*branches := [][]byte{}
+	for _, branch := range k.Tree.GetProofForNextIndex() {
+		branches = append(branches, branch[:])
+	}*/
+
+	return &types.QueryCurrentTreeResponse{
+		Branches: k.Tree.Branch[:],
+		Count:    k.Tree.Count(),
 	}, nil
 }
 
