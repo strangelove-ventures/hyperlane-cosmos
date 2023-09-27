@@ -2,13 +2,22 @@ package tests
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"testing"
 	"time"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
+	icv7 "github.com/strangelove-ventures/interchaintest/v7"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
+	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	hyperlane "github.com/strangelove-ventures/interchaintest/v7/chain/hyperlane"
 
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
@@ -94,6 +103,8 @@ func TestHyperlaneCosmos(t *testing.T) {
 
 	// Base setup
 	chains := CreateHyperlaneSimds(t, DockerImage, []uint32{23456, 34567})
+	simd1 := chains[0].(*cosmos.CosmosChain)
+	simd2 := chains[1].(*cosmos.CosmosChain)
 
 	// Create a new Interchain object which describes the chains, relayers, and IBC connections we want to use
 	ic := interchaintest.NewInterchain()
@@ -124,6 +135,45 @@ func TestHyperlaneCosmos(t *testing.T) {
 		_ = ic.Close()
 	})
 
+	// The initialization stage just finished and now the docker network is running for simd1 and simd2.
+	// Now we need to configure the Hyperlane modules and setup some test users...
+
+	simdDomainOutput := helpers.QueryDomain(t, ctx, simd1)
+	simd2DomainOutput := helpers.QueryDomain(t, ctx, simd2)
+	simdDomainStr := helpers.ParseQueryDomain(string(simdDomainOutput))
+	simd2DomainStr := helpers.ParseQueryDomain(string(simd2DomainOutput))
+	simdDomain, err := strconv.ParseUint(simdDomainStr, 10, 64)
+	require.NoError(t, err)
+	simd2Domain, err := strconv.ParseUint(simd2DomainStr, 10, 64)
+	require.NoError(t, err)
+	fmt.Printf("simd mailbox domain: %d, simd2 mailbox domain: %d\n", simdDomain, simd2Domain)
+
+	userSimd := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd1)[0]
+	userSimd2 := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd2)[0]
+
+	msg := `{}`
+	_, contract := helpers.SetupContract(t, ctx, simd1, userSimd.KeyName(), "../contracts/hyperlane.wasm", msg)
+	t.Log("coreContract", contract)
+	_, contract2 := helpers.SetupContract(t, ctx, simd2, userSimd2.KeyName(), "../contracts/hyperlane.wasm", msg)
+	t.Log("coreContract", contract2)
+
+	verifyContractEntryPoints(t, ctx, simd1, userSimd, contract)
+	verifyContractEntryPoints(t, ctx, simd2, userSimd2, contract2)
+
+	// Create counter chain 1 with val set signing legacy multisig
+	simd1IsmValidator := counterchain.CreateCounterChain(t, uint32(simdDomain), counterchain.LEGACY_MULTISIG)
+	// Create counter chain 2 with val set signing legacy multisig
+	simd2IsmValidator := counterchain.CreateCounterChain(t, uint32(simd2Domain), counterchain.LEGACY_MULTISIG)
+
+	// Set default isms for counter chains for SIMD
+	helpers.SetDefaultIsm(t, ctx, simd1, userSimd.KeyName(), simd2IsmValidator)
+	// Set default isms for counter chains for SIMD2
+	helpers.SetDefaultIsm(t, ctx, simd2, userSimd2.KeyName(), simd1IsmValidator)
+
+	recipientAccAddr := sdk.MustAccAddressFromBech32(contract2).Bytes()
+	recipientDispatch := hexutil.Encode([]byte(recipientAccAddr))
+	fmt.Printf("Recipient dispatch addr hex: %s", recipientDispatch)
+
 	hyperlaneCfg, err := hyperlane.ReadHyperlaneConfig(hyperlaneConfigPath, logger)
 	require.NoError(t, err)
 	valSimd1, ok := hyperlaneCfg["hyperlane-validator-simd1"]
@@ -145,7 +195,42 @@ func TestHyperlaneCosmos(t *testing.T) {
 	err = hyperlaneNetwork.Build(ctx, logger, eRep, opts, *valSimd1, *valSimd2)
 	require.NoError(t, err)
 
+	// Give the hyperlane validators time to start up and start watching the mailbox for the chain
+	time.Sleep(1 * time.Minute)
+
+	// Dispatch a message to SIMD1
+	dMsg := []byte("CosmosSimd1ToCosmosSimd2")
+	dispatchedMsg := hexutil.Encode(dMsg)
+
+	dispatchMsgStruct := helpers.ExecuteMsg{
+		DispatchMsg: &helpers.DispatchMsg{
+			DestinationAddr: uint32(simd2Domain),
+			RecipientAddr:   recipientDispatch,
+			MessageBody:     dispatchedMsg,
+		},
+	}
+	dipatchMsg, err := json.Marshal(dispatchMsgStruct)
+	require.NoError(t, err)
+	dispatchedTxHash, err := simd1.ExecuteContract(ctx, userSimd.KeyName(), contract, string(dipatchMsg))
+	require.NoError(t, err)
+	logger.Info("Message dispatched to simd1")
+	dispatchedDestDomain, dispatchedRecipientAddrHex, _, _, dispatchSender, _, err := helpers.VerifyDispatchEvents(simd1, dispatchedTxHash)
+	require.NoError(t, err)
+	require.NotEmpty(t, dispatchSender)
+	require.NotEmpty(t, dispatchedRecipientAddrHex)
+	require.Equal(t, fmt.Sprintf("%d", simd2Domain), dispatchedDestDomain)
+	// Finished sending message to simd1!
+
+	// TODO: 2. Wait for the hyperlane validator to sign it
+	//
+
+	// TODO: 3. Find the message that the hyperlane validator signed, and Process() it on SIMD2
+
 	for {
 		time.Sleep(5 * time.Minute)
 	}
+}
+
+func dispatchMessage() {
+
 }
