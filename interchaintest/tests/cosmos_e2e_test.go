@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strconv"
@@ -13,12 +14,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
-	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
 	icv7 "github.com/strangelove-ventures/interchaintest/v7"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	hyperlane "github.com/strangelove-ventures/interchaintest/v7/chain/hyperlane"
+	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
 
@@ -162,6 +163,10 @@ func TestHyperlaneCosmos(t *testing.T) {
 	verifyContractEntryPoints(t, ctx, simd1, userSimd, contract)
 	verifyContractEntryPoints(t, ctx, simd2, userSimd2, contract2)
 
+	// TODO: Right now the test case is not working because we need the validator private key in order to properly
+	// set up the counterchain (and set the chain's ISM).
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 	// Create counter chain 1 with val set signing legacy multisig
 	simd1IsmValidator := counterchain.CreateCounterChain(t, uint32(simdDomain), counterchain.LEGACY_MULTISIG)
 	// Create counter chain 2 with val set signing legacy multisig
@@ -191,6 +196,8 @@ func TestHyperlaneCosmos(t *testing.T) {
 	err = preconfigureHyperlane(valSimd2, tmpDir2, chains[1].Config().Name, chains[1].GetRPCAddress(), "http://"+chains[1].GetGRPCAddress(), 34567)
 	require.NoError(t, err)
 
+	simd1ValidatorSignaturesDir := filepath.Join(tmpDir1, "signatures-"+chains[0].Config().Name) //${val_dir}/signatures-${chainName}
+
 	// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build .".
 	// Also make sure that the tags in hyperlane.yaml match the local docker image repo and version.
 	hyperlaneNetwork := hyperlane.NewHyperlaneNetwork(false, true)
@@ -198,7 +205,7 @@ func TestHyperlaneCosmos(t *testing.T) {
 	require.NoError(t, err)
 
 	// Give the hyperlane validators time to start up and start watching the mailbox for the chain
-	time.Sleep(1 * time.Minute)
+	time.Sleep(10 * time.Second)
 
 	// Dispatch a message to SIMD1
 	dMsg := []byte("CosmosSimd1ToCosmosSimd2")
@@ -216,21 +223,62 @@ func TestHyperlaneCosmos(t *testing.T) {
 	dispatchedTxHash, err := simd1.ExecuteContract(ctx, userSimd.KeyName(), contract, string(dipatchMsg))
 	require.NoError(t, err)
 	logger.Info("Message dispatched to simd1")
-	dispatchedDestDomain, dispatchedRecipientAddrHex, _, _, dispatchSender, _, err := helpers.VerifyDispatchEvents(simd1, dispatchedTxHash)
+	dispatchedDestDomain, dispatchedRecipientAddrHex, dispatchedMsgBody, dispatchedMsgId, dispatchSender, hyperlaneMsg, err := helpers.VerifyDispatchEvents(simd1, dispatchedTxHash)
 	require.NoError(t, err)
 	require.NotEmpty(t, dispatchSender)
 	require.NotEmpty(t, dispatchedRecipientAddrHex)
 	require.Equal(t, fmt.Sprintf("%d", simd2Domain), dispatchedDestDomain)
 	// Finished sending message to simd1!
 
-	// TODO: 2. Wait for the hyperlane validator to sign it
-	//
+	// Wait for the hyperlane validator to sign it. The first message will show up as 0_with_id.json
+	// TODO: ask the hyperlane team to explain what 1.json is.
+	simd1FirstSignedCheckpoint := filepath.Join(simd1ValidatorSignaturesDir, "0_with_id.json")
 
-	// TODO: 3. Find the message that the hyperlane validator signed, and Process() it on SIMD2
+	// Wait for the 0_with_id.json file to show up in the validator's bind mount on the host
+	err = Await(func() (bool, error) {
+		return fileExists(simd1FirstSignedCheckpoint), nil
+	}, 1*time.Minute, 1*time.Second)
+	require.NoError(t, err)
+	valSig, err := os.ReadFile(simd1FirstSignedCheckpoint)
+	require.NoError(t, err)
+	signature := &ValidatorCheckpoint{}
+	err = json.Unmarshal(valSig, signature)
+	require.NoError(t, err)
+	require.NotEmpty(t, signature.SerializedSignature)
+	decodedValidatorSignature, err := hexutil.Decode(signature.SerializedSignature)
+	require.NoError(t, err)
 
-	for {
-		time.Sleep(5 * time.Minute)
-	}
+	// Find the message that the hyperlane validator signed, and Process() it on SIMD2.
+	dispatchedRecipientAddr := hexutil.MustDecode(dispatchedRecipientAddrHex)
+	bech32Recipient := sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), dispatchedRecipientAddr)
+	b, err := hexutil.Decode(dispatchedMsgBody)
+	require.NoError(t, err)
+
+	// First we must 'fake' the relayer's portion of the data. We DO NOT SIGN, since we get the real signature from the validator.
+	message, proof := simd1IsmValidator.CreateMessage(dispatchSender, uint32(simdDomain), uint32(simd2Domain), bech32Recipient, string(b))
+	metadata := simd1IsmValidator.CreateRelayerLegacyMetadata(message, proof)
+
+	//Append the signature from the validator to the metadata.
+	metadata = append(metadata, decodedValidatorSignature...)
+
+	hyperlaneMsgDispatched, err := hexutil.Decode(hyperlaneMsg)
+	require.NoError(t, err)
+	match := compareBytes(hyperlaneMsgDispatched, message)
+	require.True(t, match)
+
+	// CallProcessMsg sends the message and verifies the message and metadata
+	processStdout := helpers.CallProcessMsg(t, ctx, simd2, userSimd2.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
+	processTxHash := helpers.ParseTxHash(string(processStdout))
+	processMsgId, err := helpers.VerifyProcessEvents(simd2, processTxHash)
+	require.NoError(t, err)
+	require.Equal(t, dispatchedMsgId, processMsgId)
+
+	err = testutil.WaitForBlocks(ctx, 2, simd2)
+	require.NoError(t, err)
+}
+
+type ValidatorCheckpoint struct {
+	SerializedSignature string `json:"serialized_signature"`
 }
 
 func dispatchMessage() {

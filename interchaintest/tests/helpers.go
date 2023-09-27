@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/go-cmd/cmd"
@@ -65,7 +66,15 @@ func healthCheck(avaNodeHealthcheckUri string) (bool, error) {
 	return healthy, nil
 }
 
-func AwaitHealthy(avaNodeHealthcheckUri string, maxWait time.Duration, retryInterval time.Duration) error {
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if err != nil {
+		return false
+	}
+	return !info.IsDir()
+}
+
+func Await(f func() (bool, error), maxWait time.Duration, retryInterval time.Duration) error {
 	if retryInterval > maxWait {
 		return errors.New("retryInterval must be less than maxWait")
 	}
@@ -81,10 +90,10 @@ func AwaitHealthy(avaNodeHealthcheckUri string, maxWait time.Duration, retryInte
 	for {
 		select {
 		case <-done:
-			return errors.New("chain unhealthy after maxWait exceeded")
+			return errors.New("maxWait exceeded")
 		case _ = <-ticker.C:
-			isHealthy, _ := healthCheck(avaNodeHealthcheckUri)
-			if isHealthy {
+			success, _ := f()
+			if success {
 				return nil
 			}
 		}
@@ -107,5 +116,8 @@ func launchAvalanche(subnetEvmPath, localNodeUri string) (*cmd.Cmd, error) {
 		return nil, err
 	}
 
-	return cmd, AwaitHealthy(localNodeUri+"/ext/health", 5*time.Minute, 5*time.Second)
+	f := func() (bool, error) {
+		return healthCheck(localNodeUri + "/ext/health")
+	}
+	return cmd, Await(f, 5*time.Minute, 5*time.Second)
 }

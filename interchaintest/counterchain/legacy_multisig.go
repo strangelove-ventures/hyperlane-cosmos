@@ -44,3 +44,27 @@ func (c *CounterChain) CreateLegacyMetadata(message []byte, proof [imt.TreeDepth
 
 	return metadata
 }
+
+// Relayer assembles message, metadata, and proof but does not sign
+func (c *CounterChain) CreateRelayerLegacyMetadata(message []byte, proof [imt.TreeDepth][32]byte) (metadata []byte) {
+	require.Equal(c.T, LEGACY_MULTISIG, c.IsmType)
+
+	merkleRoot := c.Tree.Root() // comes from origin, this should be queried from the simd mailbox QueryCurrentTreeMetadataResponse
+	metadata = append(metadata, merkleRoot...)
+
+	// comes from origin, this should be queried from the simd mailbox QueryCurrentTreeMetadataResponse
+	index := common.Nonce(message)
+	indexBytes := make([]byte, 4)
+	binary.BigEndian.PutUint32(indexBytes, index)
+	metadata = append(metadata, indexBytes...)
+
+	originMailbox := []byte("12345678901234567890123456789012") // Shouldn't matter
+	metadata = append(metadata, originMailbox...)
+
+	for i := 0; i < imt.TreeDepth; i++ {
+		metadata = append(metadata, proof[i][:]...)
+	}
+
+	metadata = append(metadata, c.ValSet.Threshold)
+	return metadata
+}
