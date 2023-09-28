@@ -151,7 +151,6 @@ func TestHyperlaneCosmos(t *testing.T) {
 
 	// The initialization stage just finished and now the docker network is running for simd1 and simd2.
 	// Now we need to configure the Hyperlane modules and setup some test users...
-
 	simdDomainOutput := helpers.QueryDomain(t, ctx, simd1)
 	simd2DomainOutput := helpers.QueryDomain(t, ctx, simd2)
 	simdDomainStr := helpers.ParseQueryDomain(string(simdDomainOutput))
