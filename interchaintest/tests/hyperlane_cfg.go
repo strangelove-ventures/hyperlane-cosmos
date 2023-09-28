@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"testing"
 
 	"github.com/strangelove-ventures/interchaintest/v7/chain/hyperlane"
 )
@@ -14,7 +15,7 @@ import (
 // chainName e.g. simd1 or simd2
 // rpcUrl is the node RPC endpoint for e.g. simd1
 // hyperlaneDomain is the chain's hyperlane domain, as configured in the chain app state or genesis
-func preconfigureHyperlane(node *hyperlane.HyperlaneChainConfig, tmpDir string, chainName string, chainRpcUrl string, chainGrpcUrl string, originMailbox string, hyperlaneDomain uint32) (valJson string, err error) {
+func preconfigureHyperlane(t *testing.T, node *hyperlane.HyperlaneChainConfig, tmpDir string, chainName string, chainRpcUrl string, chainGrpcUrl string, originMailbox string, hyperlaneDomain uint32) (valJson string, err error) {
 	hyperlaneConfigPath := filepath.Join(tmpDir, chainName+".json")
 	fmt.Printf("Chain: %s, RPC Uri: %s, GRPC Uri: %s\n", chainName, chainRpcUrl, chainGrpcUrl)
 

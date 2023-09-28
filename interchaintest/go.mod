@@ -300,8 +300,8 @@ replace (
 	//github.com/strangelove-ventures/heighliner => /home/kyle/projects/heighliner
 	// For this nested module, you always want to replace the parent reference with the current worktree.
 	github.com/strangelove-ventures/hyperlane-cosmos => ../
-	github.com/strangelove-ventures/interchaintest/v7 => github.com/KyleMoser/interchaintest/v7 v7.0.0-20230928155440-2ca25d69fef2
-	//github.com/strangelove-ventures/interchaintest/v7 => /home/kyle/projects/KyleMoser/interchaintest
+	//github.com/strangelove-ventures/interchaintest/v7 => github.com/KyleMoser/interchaintest/v7 v7.0.0-20230928155440-2ca25d69fef2
+	github.com/strangelove-ventures/interchaintest/v7 => /home/kyle/projects/KyleMoser/interchaintest
 	// pin version! 126854af5e6d has issues with the store so that queries fail
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 //github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d

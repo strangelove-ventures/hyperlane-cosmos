@@ -21,6 +21,7 @@ import (
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	hyperlane "github.com/strangelove-ventures/interchaintest/v7/chain/hyperlane"
+	"go.uber.org/zap"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
 
@@ -66,9 +67,9 @@ func TestHyperlaneAgentInit(t *testing.T) {
 	//originMailbox, err := hex.DecodeString(mailboxHex)
 	require.NoError(t, err)
 
-	_, err = preconfigureHyperlane(valSimd1, tmpDir1, "simd1", "http://simd1-rpc-url", "http://simd1-grpc-url", prefixedMailboxHex, 23456)
+	_, err = preconfigureHyperlane(t, valSimd1, tmpDir1, "simd1", "http://simd1-rpc-url", "http://simd1-grpc-url", prefixedMailboxHex, 23456)
 	require.NoError(t, err)
-	_, err = preconfigureHyperlane(valSimd2, tmpDir2, "simd2", "http://simd2-rpc-url", "http://simd1-grpc-url", prefixedMailboxHex, 34567)
+	_, err = preconfigureHyperlane(t, valSimd2, tmpDir2, "simd2", "http://simd2-rpc-url", "http://simd1-grpc-url", prefixedMailboxHex, 34567)
 	require.NoError(t, err)
 
 	// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build".
@@ -104,6 +105,10 @@ func TestHyperlaneCosmos(t *testing.T) {
 		docker.BuildHeighlinerHyperlaneImage(docker.HyperlaneImageName, tarFilePath, ".", goModPath, "local.Dockerfile")
 	}
 
+	if t.Failed() {
+		logger.Fatal("Test marked failed")
+	}
+
 	DockerImage := ibc.DockerImage{
 		Repository: docker.HyperlaneImageName,
 		Version:    "local",
@@ -126,17 +131,15 @@ func TestHyperlaneCosmos(t *testing.T) {
 
 	rep := testreporter.NewNopReporter()
 	eRep := rep.RelayerExecReporter(t)
-
 	ctx := context.Background()
 
 	// Note: make sure that both the 'ic' interchain AND the hyperlane network share this client/network
 	client, network := interchaintest.DockerSetup(t)
 	opts := interchaintest.InterchainBuildOptions{
-		TestName:          t.Name(),
-		Client:            client,
-		NetworkID:         network,
-		SkipPathCreation:  true,
-		BlockDatabaseFile: interchaintest.DefaultBlockDatabaseFilepath(),
+		TestName:         t.Name(),
+		Client:           client,
+		NetworkID:        network,
+		SkipPathCreation: true,
 	}
 
 	err := ic.Build(ctx, eRep, opts)
@@ -158,15 +161,14 @@ func TestHyperlaneCosmos(t *testing.T) {
 	simd2Domain, err := strconv.ParseUint(simd2DomainStr, 10, 64)
 	require.NoError(t, err)
 	fmt.Printf("simd mailbox domain: %d, simd2 mailbox domain: %d\n", simdDomain, simd2Domain)
-
 	userSimd := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd1)[0]
 	userSimd2 := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd2)[0]
 
 	msg := `{}`
 	_, contract := helpers.SetupContract(t, ctx, simd1, userSimd.KeyName(), "../contracts/hyperlane.wasm", msg)
-	t.Log("coreContract", contract)
+	logger.Info("simd1 contract", zap.String("address", contract))
 	_, contract2 := helpers.SetupContract(t, ctx, simd2, userSimd2.KeyName(), "../contracts/hyperlane.wasm", msg)
-	t.Log("coreContract", contract2)
+	logger.Info("simd2 contract", zap.String("address", contract2))
 
 	verifyContractEntryPoints(t, ctx, simd1, userSimd, contract)
 	verifyContractEntryPoints(t, ctx, simd2, userSimd2, contract2)
@@ -197,11 +199,11 @@ func TestHyperlaneCosmos(t *testing.T) {
 
 	mailboxHex := "000000000000000000000000cc2a110c8df654a38749178a04402e88f65091d3"
 	prefixedMailboxHex := "0x" + mailboxHex
+	logger.Info("Preconfiguring Hyperlane (getting configs)")
+
+	valJson, err := preconfigureHyperlane(t, valSimd1, tmpDir1, chains[0].Config().Name, chains[0].GetRPCAddress(), "http://"+chains[0].GetGRPCAddress(), prefixedMailboxHex, 23456)
 	require.NoError(t, err)
 
-	logger.Info("Preconfiguring Hyperlane (getting configs)")
-	valJson, err := preconfigureHyperlane(valSimd1, tmpDir1, chains[0].Config().Name, chains[0].GetRPCAddress(), "http://"+chains[0].GetGRPCAddress(), prefixedMailboxHex, 23456)
-	require.NoError(t, err)
 	simd1MailboxHex, err := getMailbox(valJson, chains[0].Config().Name)
 	require.NoError(t, err)
 	expectedMailbox, _ := hex.DecodeString("000000000000000000000000cc2a110c8df654a38749178a04402e88f65091d3")
@@ -209,13 +211,11 @@ func TestHyperlaneCosmos(t *testing.T) {
 	require.True(t, found)
 	simd1Mailbox, err := hex.DecodeString(simd1MailboxUnprefixed)
 	require.NoError(t, err)
-
 	originMailboxB := []byte(simd1Mailbox)
 	require.Equal(t, expectedMailbox, originMailboxB)
 
-	valJson, err = preconfigureHyperlane(valSimd2, tmpDir2, chains[1].Config().Name, chains[1].GetRPCAddress(), "http://"+chains[1].GetGRPCAddress(), prefixedMailboxHex, 34567)
+	valJson, err = preconfigureHyperlane(t, valSimd2, tmpDir2, chains[1].Config().Name, chains[1].GetRPCAddress(), "http://"+chains[1].GetGRPCAddress(), prefixedMailboxHex, 34567)
 	require.NoError(t, err)
-
 	simd1ValidatorSignaturesDir := filepath.Join(tmpDir1, "signatures-"+chains[0].Config().Name) //${val_dir}/signatures-${chainName}
 
 	// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build .".
@@ -238,6 +238,7 @@ func TestHyperlaneCosmos(t *testing.T) {
 			MessageBody:     dispatchedMsg,
 		},
 	}
+
 	dipatchMsg, err := json.Marshal(dispatchMsgStruct)
 	require.NoError(t, err)
 	dispatchedTxHash, err := simd1.ExecuteContract(ctx, userSimd.KeyName(), contract, string(dipatchMsg))
@@ -290,6 +291,7 @@ func TestHyperlaneCosmos(t *testing.T) {
 	processStdout := helpers.CallProcessMsg(t, ctx, simd2, userSimd2.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 	processTxHash := helpers.ParseTxHash(string(processStdout))
 	processMsgId, err := helpers.VerifyProcessEvents(simd2, processTxHash)
+
 	require.NoError(t, err)
 	require.Equal(t, dispatchedMsgId, processMsgId)
 }
