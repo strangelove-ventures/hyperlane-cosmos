@@ -470,6 +470,8 @@ github.com/KyleMoser/interchaintest/v7 v7.0.0-20230921024409-54452b7c77f7 h1:1Sv
 github.com/KyleMoser/interchaintest/v7 v7.0.0-20230921024409-54452b7c77f7/go.mod h1:PaJRHGMb9vsS37F6XvMujiw6cVwjMCv1qBEawrJ3F/4=
 github.com/KyleMoser/interchaintest/v7 v7.0.0-20230926013318-850cd34a7dff h1:vUdl1cdUjUlnz4UJ+MaoVNc4M6XZuu1Bi0DpbgT/b1o=
 github.com/KyleMoser/interchaintest/v7 v7.0.0-20230926013318-850cd34a7dff/go.mod h1:jpaAeq27orQFDFVlVxFtnqsOsdPS/xOQ1KooFALXsDo=
+github.com/KyleMoser/interchaintest/v7 v7.0.0-20230928155440-2ca25d69fef2 h1:8NwEkzNvQLuBEpeYCeyIg8kvPyNh5ndCpK9BhqxEcw8=
+github.com/KyleMoser/interchaintest/v7 v7.0.0-20230928155440-2ca25d69fef2/go.mod h1:jpaAeq27orQFDFVlVxFtnqsOsdPS/xOQ1KooFALXsDo=
 github.com/Masterminds/semver v1.5.0/go.mod h1:MB6lktGJrhw8PrUyiEoblNEGEQ+RzHPF078ddwwvV3Y=
 github.com/Masterminds/semver/v3 v3.0.3/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
 github.com/Masterminds/semver/v3 v3.1.0/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=

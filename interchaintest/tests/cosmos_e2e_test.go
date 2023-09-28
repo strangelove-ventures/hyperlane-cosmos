@@ -21,7 +21,6 @@ import (
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	hyperlane "github.com/strangelove-ventures/interchaintest/v7/chain/hyperlane"
-	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
 
@@ -114,7 +113,9 @@ func TestHyperlaneCosmos(t *testing.T) {
 	// Base setup
 	chains := CreateHyperlaneSimds(t, DockerImage, []uint32{23456, 34567})
 	simd1 := chains[0].(*cosmos.CosmosChain)
+	simd1.SkipImagePull = true
 	simd2 := chains[1].(*cosmos.CosmosChain)
+	simd2.SkipImagePull = true
 
 	// Create a new Interchain object which describes the chains, relayers, and IBC connections we want to use
 	ic := interchaintest.NewInterchain()
@@ -224,7 +225,7 @@ func TestHyperlaneCosmos(t *testing.T) {
 	require.NoError(t, err)
 
 	// Give the hyperlane validators time to start up and start watching the mailbox for the chain
-	time.Sleep(1 * time.Minute)
+	time.Sleep(10 * time.Second)
 
 	// Dispatch a message to SIMD1
 	dMsg := []byte("CosmosSimd1ToCosmosSimd2")
@@ -249,8 +250,7 @@ func TestHyperlaneCosmos(t *testing.T) {
 	require.Equal(t, fmt.Sprintf("%d", simd2Domain), dispatchedDestDomain)
 	// Finished sending message to simd1!
 
-	// Wait for the hyperlane validator to sign it. The first message will show up as 0_with_id.json
-	// TODO: ask the hyperlane team to explain what 1.json is.
+	// Wait for the hyperlane validator to sign it. The first message will show up as 0.json
 	expectedSigFile := "0.json"
 	simd1FirstSignedCheckpoint := filepath.Join(simd1ValidatorSignaturesDir, expectedSigFile)
 
@@ -292,9 +292,6 @@ func TestHyperlaneCosmos(t *testing.T) {
 	processMsgId, err := helpers.VerifyProcessEvents(simd2, processTxHash)
 	require.NoError(t, err)
 	require.Equal(t, dispatchedMsgId, processMsgId)
-
-	err = testutil.WaitForBlocks(ctx, 2, simd2)
-	require.NoError(t, err)
 }
 
 type ValidatorCheckpoint struct {
