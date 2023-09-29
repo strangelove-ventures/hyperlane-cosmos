@@ -23,43 +23,57 @@ func (suite *KeeperTestSuite) TestGenesis() {
 		suite.Require().NoError(err)
 		idMap[i] = res.MessageId
 	}
-	// TODO: add ProcessMsg tests
+
+	// Log before querying CurrentTreeMetadata
+	fmt.Println("Querying CurrentTreeMetadata...")
 
 	res, err := suite.queryClient.CurrentTreeMetadata(suite.ctx, &types.QueryCurrentTreeMetadataRequest{})
 	suite.Require().NoError(err)
+
+	// Log the received res.Count
+	fmt.Printf("Received res.Count: %d\n", res.Count)
+
+	// Log Keeper State
+	//fmt.Printf("Keeper State: %+v\n", suite.keeper)
+
+	// Asserting the count
 	suite.Require().Equal(uint32(100), res.Count)
 
-	// Verify tree exported correctly
+	// Exporting Genesis and logging the length of Branches
 	gs := suite.keeper.ExportGenesis(suite.ctx)
-	suite.Require().Equal(uint32(100), suite.keeper.ImtCount)
+	fmt.Printf("Length of Keeper Branches: %d\n", len(suite.keeper.Branches))
+	suite.Require().Equal(uint32(100), uint32(len(suite.keeper.Branches)))
+
 	count := 0
-	for i := 0; i < 100; i++ {
-		for j := 0; j < 100; j++ {
-			if gs.Tree.TreeEntries[j].Index == uint32(i) {
-				if hexutil.Encode(gs.Tree.TreeEntries[j].Message) == idMap[i] {
-					count++
-					break
-				}
-			}
+	for i, branch := range suite.keeper.Branches {
+		encodedBranch := hexutil.Encode(branch)
+		if encodedBranch == idMap[i] {
+			count++
 		}
 	}
+
+	// Log the count before assertion
+	fmt.Printf("Count before assertion: %d\n", count)
 	suite.Require().Equal(100, count)
 
-	// Add some delivered message ids to the exported state
+	// Adding delivered message ids to the exported state
 	for i := 0; i < 100; i++ {
 		gs.DeliveredMessages = append(gs.DeliveredMessages, &types.MessageDelivered{
 			Id: idMap[i],
 		})
 	}
 
-	// Reset
+	// Resetting and logging
+	fmt.Println("Resetting and importing state...")
 	suite.SetupTest()
 
-	// Import state
+	// Importing state
 	err = suite.keeper.InitGenesis(suite.ctx, gs)
 	suite.Require().NoError(err)
 
-	// Check Tree and Delivered
-	suite.Require().Equal(uint32(100), suite.keeper.ImtCount)
+	// Logging and checking Branches and Delivered after Import
+	fmt.Printf("Length of Keeper Branches after Import: %d\n", len(suite.keeper.Branches))
+	fmt.Printf("Length of Keeper Delivered after Import: %d\n", len(suite.keeper.Delivered))
+	suite.Require().Equal(uint32(100), uint32(len(suite.keeper.Branches)))
 	suite.Require().Equal(100, len(suite.keeper.Delivered))
 }

@@ -33,8 +33,8 @@ type Keeper struct {
 	version     byte
 
 	Tree      *imt.Tree
+	Branches  [][]byte
 	Delivered map[string]bool
-	ImtCount  uint32
 }
 
 func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwasm.Keeper, ismKeeper *ismkeeper.Keeper) Keeper {
@@ -51,8 +51,8 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwas
 		version:     0,
 		pcwKeeper:   cosmwasm.NewDefaultPermissionKeeper(cwKeeper),
 		Tree:        &imt.Tree{},
+		Branches:    [][]byte{},
 		Delivered:   map[string]bool{},
-		ImtCount:    0,
 	}
 }
 
@@ -62,6 +62,21 @@ func (k *Keeper) SetDomain(c context.Context, domain uint32) {
 	res := make([]byte, 4)
 	binary.LittleEndian.PutUint32(res, domain)
 	store.Set(types.DomainKey, res)
+}
+
+func (k *Keeper) GetDomain(c context.Context) uint32 {
+	ctx := sdk.UnwrapSDKContext(c)
+	store := ctx.KVStore(k.storeKey)
+
+	// Get the domain from the store
+	res := store.Get(types.DomainKey)
+	if res == nil {
+		return 0
+	}
+
+	domain := binary.LittleEndian.Uint32(res)
+
+	return domain
 }
 
 func (k Keeper) VerifyMessage(c context.Context, messageBytes []byte) (string, error) {

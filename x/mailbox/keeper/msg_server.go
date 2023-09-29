@@ -102,10 +102,11 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 	if err != nil {
 		return nil, err
 	}
-	k.ImtCount++
+
+	k.Branches = append(k.Branches, id)
 
 	// Store that the leaf
-	store.Set(types.MailboxIMTKey(k.Tree.Count()-1), id)
+	store.Set(types.MailboxIMTKey(), id)
 
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{
