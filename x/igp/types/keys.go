@@ -1,12 +1,5 @@
 package types
 
-import (
-	fmt "fmt"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/address"
-)
-
 const (
 	// ModuleName for the hyperlane interchain-gas-paymaster
 	ModuleName = "hyperlane-igp"
@@ -24,12 +17,3 @@ var (
 	IgpKey            = []byte{0x4}
 	ClaimsKey         = []byte{0x5}
 )
-
-func GasOverheadKey(destination uint32) []byte {
-	return []byte(fmt.Sprintf("%d/%d", GasOverhead, destination))
-}
-
-func PayForGasKey(relayer sdk.AccAddress, messageId []byte) []byte {
-	b := append(GasPaidKey, address.MustLengthPrefix(relayer)...)
-	return append(b, messageId...)
-}

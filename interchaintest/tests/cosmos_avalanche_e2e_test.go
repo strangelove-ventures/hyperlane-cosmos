@@ -13,10 +13,11 @@ import (
 	"testing"
 
 	"github.com/oriser/regroup"
-	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	hyperlane "github.com/strangelove-ventures/interchaintest/v7/chain/hyperlane"
 	"go.uber.org/zap/zaptest"
+
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
 
 	"github.com/strangelove-ventures/interchaintest/v7/ibc"
 	"github.com/strangelove-ventures/interchaintest/v7/testreporter"
@@ -67,7 +68,7 @@ func TestAvalancheGetRpcUri(t *testing.T) {
 	nodeData := iNodeData.(map[string]interface{})
 	iID := nodeData["nodeID"]
 	fullID := iID.(string)
-	//fmt.Printf("%s", fullID)
+	// fmt.Printf("%s", fullID)
 	r := regroup.MustCompile("NodeID-(?P<ID>.*)")
 	match, err := r.Groups(fullID)
 	nodeID := match["ID"]
@@ -119,7 +120,7 @@ func TestAvalancheLocalNetwork(t *testing.T) {
 	// _, err := wallet.NewWalletFromURI(ctx, nodeURI, kc)
 	// require.NoError(t, err)
 
-	//pWallet := wallet.P()
+	// pWallet := wallet.P()
 
 	// owner := &secp256k1fx.OutputOwners{
 	// 	Threshold: 1,
@@ -174,7 +175,6 @@ func TestAvalancheLocalNetwork(t *testing.T) {
 
 	// utx := ethtypes.NewTransaction(senderNonce, toAddress, big.NewInt(amount.Amount), 21000, gasPrice, nil)
 	// signedTx, err := ethtypes.SignTx(utx, ethtypes.NewEIP155Signer(chainID), privateKey)
-
 }
 
 // GetDefaultChainURI returns the default chain URI for a given blockchainID

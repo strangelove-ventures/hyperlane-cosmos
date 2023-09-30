@@ -15,13 +15,14 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
-	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
 	icv7 "github.com/strangelove-ventures/interchaintest/v7"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	hyperlane "github.com/strangelove-ventures/interchaintest/v7/chain/hyperlane"
 	"go.uber.org/zap"
+
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
 
@@ -64,7 +65,7 @@ func TestHyperlaneAgentInit(t *testing.T) {
 
 	mailboxHex := "000000000000000000000000cc2a110c8df654a38749178a04402e88f65091d3"
 	prefixedMailboxHex := "0x" + mailboxHex
-	//originMailbox, err := hex.DecodeString(mailboxHex)
+	// originMailbox, err := hex.DecodeString(mailboxHex)
 	require.NoError(t, err)
 
 	_, err = preconfigureHyperlane(t, valSimd1, tmpDir1, "simd1", "http://simd1-rpc-url", "http://simd1-grpc-url", prefixedMailboxHex, 23456)
@@ -278,7 +279,7 @@ func TestHyperlaneCosmos(t *testing.T) {
 	message, proof := simd1IsmValidator.CreateMessage(dispatchSender, uint32(simdDomain), uint32(simd2Domain), bech32Recipient, string(b))
 	metadata := simd1IsmValidator.CreateRelayerLegacyMetadata(message, proof, originMailboxB)
 
-	//Append the signature from the validator to the metadata.
+	// Append the signature from the validator to the metadata.
 	metadata = append(metadata, decodedValidatorSignature...)
 
 	hyperlaneMsgDispatched, err := hexutil.Decode(hyperlaneMsg)
@@ -300,5 +301,4 @@ type ValidatorCheckpoint struct {
 }
 
 func dispatchMessage() {
-
 }

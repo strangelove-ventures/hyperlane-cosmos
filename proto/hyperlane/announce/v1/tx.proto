@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package hyperlane.announce.v1;
+
+import "gogoproto/gogo.proto";
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+
+option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types";
+
+// Msg defines the hyperlane announce Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // Announces a validator signature storage location
+  rpc Announcement(MsgAnnouncement) returns (MsgAnnouncementResponse);
+}
+
+// MsgAnnouncement Announces a validator signature storage location
+message MsgAnnouncement {
+  option (cosmos.msg.v1.signer) = "sender";
+  option (amino.name) = "hyperlane-cosmos/MsgAnnouncement";
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string sender = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+
+  // The validator (in eth address format) that is announcing its storage
+  // location
+  bytes validator = 2;
+
+  // location where signatures will be stored
+  string storage_location = 3;
+
+  // signed validator announcement
+  bytes signature = 4;
+}
+
+// MsgAnnouncementResponse defines the MsgAnnouncementResponse response type.
+message MsgAnnouncementResponse {}

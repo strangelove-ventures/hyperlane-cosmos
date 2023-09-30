@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package hyperlane.announce.v1;
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types";
+
+// Helper type for Hyperlane's getAnnouncedStorageLocations.
+message StorageMetadata {
+  option (gogoproto.goproto_getters) = false;
+  repeated string metadata = 1;
+}
