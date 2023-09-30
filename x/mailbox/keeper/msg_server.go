@@ -97,12 +97,6 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 	// Get the message ID
 	id := common.Id(message)
 
-	// Insert the message id into the tree
-	err := k.Tree.Insert(id)
-	if err != nil {
-		return nil, err
-	}
-
 	k.Branches = append(k.Branches, id)
 
 	// Store that the leaf

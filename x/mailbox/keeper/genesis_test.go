@@ -24,20 +24,8 @@ func (suite *KeeperTestSuite) TestGenesis() {
 		idMap[i] = res.MessageId
 	}
 
-	// Log before querying CurrentTreeMetadata
-	fmt.Println("Querying CurrentTreeMetadata...")
-
-	res, err := suite.queryClient.CurrentTreeMetadata(suite.ctx, &types.QueryCurrentTreeMetadataRequest{})
-	suite.Require().NoError(err)
-
-	// Log the received res.Count
-	fmt.Printf("Received res.Count: %d\n", res.Count)
-
 	// Log Keeper State
 	//fmt.Printf("Keeper State: %+v\n", suite.keeper)
-
-	// Asserting the count
-	suite.Require().Equal(uint32(100), res.Count)
 
 	// Exporting Genesis and logging the length of Branches
 	gs := suite.keeper.ExportGenesis(suite.ctx)
@@ -68,7 +56,7 @@ func (suite *KeeperTestSuite) TestGenesis() {
 	suite.SetupTest()
 
 	// Importing state
-	err = suite.keeper.InitGenesis(suite.ctx, gs)
+	err := suite.keeper.InitGenesis(suite.ctx, gs)
 	suite.Require().NoError(err)
 
 	// Logging and checking Branches and Delivered after Import
