@@ -47,13 +47,21 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 	message = append(message, version...)
 
 	//Nonce is the current branch length.
-	nonce := uint32(len(k.Tree.Branch))
+	nonce := uint32(0) //TODO: It should be this --> uint32(len(k.Tree.Branch))
 	nonceBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(nonceBytes, nonce)
 	message = append(message, nonceBytes...)
 
 	// Get this chain's domain
-	originDomain := k.GetDomain(ctx)
+	store := ctx.KVStore(k.storeKey)
+	b := store.Get(types.DomainKey)
+	domain := binary.LittleEndian.Uint32(b)
+
+	// Local Domain is set on NewKeeper
+	origin := domain
+	originBytes := make([]byte, 4)
+	binary.BigEndian.PutUint32(originBytes, origin)
+	message = append(message, originBytes...)
 
 	// Get the Sender address
 	// Since this is a cosmos chain, sender will be a bech32 address
@@ -90,13 +98,17 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 	// Get the message ID. (i.e: Keccak256 sha)
 	id := common.Id(message)
 
-	store := ctx.KVStore(k.storeKey)
 	store.Set(types.MailboxIMTKey(), id)
 
 	branch, err := k.Tree.InsertAndReturnBranches(id)
 
 	if err == nil {
 		k.Branch = branch
+	}
+
+	err = k.Tree.Insert(id)
+	if err != nil {
+		return nil, err
 	}
 
 	// Emit the events
@@ -107,7 +119,7 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 			sdk.NewAttribute(types.AttributeKeyHyperlaneMessage, hyperlaneMsg),
 			sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
 			sdk.NewAttribute(types.AttributeKeyNonce, strconv.FormatUint(uint64(nonce), 10)),
-			sdk.NewAttribute(types.AttributeKeyOrigin, strconv.FormatUint(uint64(originDomain), 10)),
+			sdk.NewAttribute(types.AttributeKeyOrigin, strconv.FormatUint(uint64(origin), 10)),
 			sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
 			sdk.NewAttribute(types.AttributeKeySender, hexutil.Encode(sender)),
 			sdk.NewAttribute(types.AttributeKeyVersion, strconv.FormatUint(0, 10)), // TODO(nix): How to determine version?
