@@ -26,7 +26,7 @@ func (suite *KeeperTestSuite) TestGenesis() {
 
 	// Exporting Genesis and logging the length of Branches
 	gs := suite.keeper.ExportGenesis(suite.ctx)
-	suite.Require().Equal(7, countPopulatedSlices(suite.keeper.Branch)) // 2^7 = 96 .. only 7 levels will be populated.
+	suite.Require().Equal(8, countPopulatedSlices(suite.keeper.Branch)) // 2^7 + 4 = 100  .. only 8 levels will be populated.
 
 	// Adding delivered message ids to the exported state
 	for i := 0; i < 100; i++ {
@@ -42,7 +42,7 @@ func (suite *KeeperTestSuite) TestGenesis() {
 	err := suite.keeper.InitGenesis(suite.ctx, gs)
 	suite.Require().NoError(err)
 
-	suite.Require().Equal(7, countPopulatedSlices(suite.keeper.Tree.Branch))
+	suite.Require().Equal(8, countPopulatedSlices(suite.keeper.Tree.Branch))
 	suite.Require().Equal(100, len(suite.keeper.Delivered))
 }
 
