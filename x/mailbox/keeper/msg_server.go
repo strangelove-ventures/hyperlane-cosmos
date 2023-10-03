@@ -106,11 +106,6 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 		k.Branch = branch
 	}
 
-	err = k.Tree.Insert(id)
-	if err != nil {
-		return nil, err
-	}
-
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(

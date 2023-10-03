@@ -10,8 +10,8 @@ import (
 )
 
 func (suite *KeeperTestSuite) TestGenesis() {
-	idMap := make([]string, 129)
-	for i := 0; i < 129; i++ {
+	idMap := make([]string, 128)
+	for i := 0; i < 128; i++ {
 		sender := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
 		recipientBech32 := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
 		recipientBytes := sdk.MustAccAddressFromBech32(recipientBech32).Bytes()
@@ -47,6 +47,7 @@ func (suite *KeeperTestSuite) TestGenesis() {
 }
 
 func countPopulatedSlices(arr [32][]byte) int {
+	fmt.Printf("%+v", arr)
 	count := 0
 	for _, slice := range arr {
 		if len(slice) > 0 {
