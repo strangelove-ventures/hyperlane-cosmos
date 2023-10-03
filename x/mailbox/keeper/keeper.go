@@ -33,7 +33,6 @@ type Keeper struct {
 	version     byte
 
 	Tree      *imt.Tree
-	Branches  [][]byte
 	Delivered map[string]bool
 }
 
@@ -51,7 +50,6 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwas
 		version:     0,
 		pcwKeeper:   cosmwasm.NewDefaultPermissionKeeper(cwKeeper),
 		Tree:        &imt.Tree{},
-		Branches:    [][]byte{},
 		Delivered:   map[string]bool{},
 	}
 }

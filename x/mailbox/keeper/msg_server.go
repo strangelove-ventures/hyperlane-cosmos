@@ -46,22 +46,14 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 	version := make([]byte, 1)
 	message = append(message, version...)
 
-	// Nonce is the tree count.
-	nonce := k.Tree.Count()
+	//Nonce is the current branch length.
+	nonce := uint32(len(k.Tree.Branch))
 	nonceBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(nonceBytes, nonce)
 	message = append(message, nonceBytes...)
 
 	// Get this chain's domain
-	store := ctx.KVStore(k.storeKey)
-	b := store.Get(types.DomainKey)
-	domain := binary.LittleEndian.Uint32(b)
-
-	// Local Domain is set on NewKeeper
-	origin := domain
-	originBytes := make([]byte, 4)
-	binary.BigEndian.PutUint32(originBytes, origin)
-	message = append(message, originBytes...)
+	originDomain := k.GetDomain(ctx)
 
 	// Get the Sender address
 	// Since this is a cosmos chain, sender will be a bech32 address
@@ -71,11 +63,13 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 		sender = append(padding, sender...)
 	}
 	message = append(message, sender...)
+	//fmt.Printf("Appended sender: %v\n", sender)
 
 	// Get the Destination Domain
 	destinationBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(destinationBytes, msg.DestinationDomain)
 	message = append(message, destinationBytes...)
+	//fmt.Printf("Appended destination domain: %v\n", msg.DestinationDomain)
 
 	// Get the Recipient address
 	// Since the recipient could be any destination change, the address must be in hex, non-bech32 format
@@ -85,22 +79,23 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 		recipient = append(padding, recipient...)
 	}
 	message = append(message, recipient...)
+	//fmt.Printf("Appended recipient: %v\n", recipient)
 
 	// Get the Message Body
 	messageBytes := hexutil.MustDecode(msg.MessageBody)
 	if len(messageBytes) > MAX_MESSAGE_BODY_BYTES {
+		fmt.Println("Error: Message body too long")
 		return nil, types.ErrMsgTooLong
 	}
 	message = append(message, messageBytes...)
 	hyperlaneMsg := hexutil.Encode(message)
+	// fmt.Printf("Appended message body: %v\n", messageBytes)
 
-	// Get the message ID
+	// Get the message ID. (i.e: Keccak256 sha)
 	id := common.Id(message)
+	//fmt.Printf("Generated message ID: %v\n", id)
 
-	k.Branches = append(k.Branches, id)
-
-	// Store that the leaf
-	store.Set(types.MailboxIMTKey(), id)
+	//TODO:COMPUTE AND STORE  THE BRANCHES in k.Tree.Branch
 
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -110,7 +105,7 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 			sdk.NewAttribute(types.AttributeKeyHyperlaneMessage, hyperlaneMsg),
 			sdk.NewAttribute(types.AttributeKeyMessage, msg.MessageBody),
 			sdk.NewAttribute(types.AttributeKeyNonce, strconv.FormatUint(uint64(nonce), 10)),
-			sdk.NewAttribute(types.AttributeKeyOrigin, strconv.FormatUint(uint64(origin), 10)),
+			sdk.NewAttribute(types.AttributeKeyOrigin, strconv.FormatUint(uint64(originDomain), 10)),
 			sdk.NewAttribute(types.AttributeKeyRecipientAddress, msg.RecipientAddress),
 			sdk.NewAttribute(types.AttributeKeySender, hexutil.Encode(sender)),
 			sdk.NewAttribute(types.AttributeKeyVersion, strconv.FormatUint(0, 10)), // TODO(nix): How to determine version?
@@ -124,6 +119,7 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 		),
 	})
+	fmt.Println("Emitted events")
 
 	return &types.MsgDispatchResponse{
 		MessageId: hexutil.Encode(id),

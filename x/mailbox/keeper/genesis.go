@@ -13,7 +13,8 @@ import (
 // state.
 func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
 	//Branches
-	k.Branches = append(k.Branches, gs.Tree.Branch...)
+
+	//k.Tree.Branch = append(k.Tree.Branch, gs.Tree.Branch...)
 	//Delivered Messages.
 	for _, msgDelivered := range gs.DeliveredMessages {
 		k.Delivered[msgDelivered.Id] = true
@@ -29,8 +30,8 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) types.GenesisState {
 	return types.GenesisState{
 		DeliveredMessages: ExportDeliveredMessages(ctx.KVStore(k.storeKey)),
 		Tree: types.Tree{
-			Branch: k.Branches,
-			Count:  k.Tree.Count(),
+			//Branch: k.Tree.Branch,
+			Count: k.Tree.Count(),
 		},
 		Domain: k.GetDomain(ctx),
 	}
