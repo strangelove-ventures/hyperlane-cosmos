@@ -99,11 +99,9 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 	id := common.Id(message)
 
 	store.Set(types.MailboxIMTKey(), id)
-
-	branch, _, err := k.Tree.InsertAndReturnBranches(id)
-
-	if err == nil {
-		k.Branch = branch
+	err := k.Tree.Insert(id)
+	if err != nil {
+		return nil, err
 	}
 
 	// Emit the events

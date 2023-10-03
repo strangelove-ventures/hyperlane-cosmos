@@ -18,15 +18,15 @@ type Tree struct {
 	count  uint32
 }
 
-// Insert inserts node and returns the branches
-func (t *Tree) InsertAndReturnBranches(node []byte) ([32][]byte, uint32, error) {
+// Insert inserts node
+func (t *Tree) Insert(node []byte) error {
 
 	if t.count >= MaxLeaves {
-		return [32][]byte{}, t.count, errors.New("merkle tree full")
+		return errors.New("merkle tree full")
 	}
 
 	if len(node) != 32 {
-		return [32][]byte{}, t.count, errors.New("must be 32-bytes")
+		return errors.New("must be 32-bytes")
 	}
 
 	t.count += 1
@@ -34,20 +34,16 @@ func (t *Tree) InsertAndReturnBranches(node []byte) ([32][]byte, uint32, error) 
 	for i := 0; i < TreeDepth; i++ {
 		if (size & 1) == 1 {
 			t.Branch[i] = node
-			return t.Branch, t.count, nil
+			return nil
 		}
 		temp := append(t.Branch[i][:], node...)
 		node = crypto.Keccak256(temp)
 		size /= 2
+
 	}
 
-	return [32][]byte{}, t.count, errors.New("unreachable")
+	return errors.New("unreachable")
 
-}
-
-func (t *Tree) Insert(node []byte) error {
-	_, _, errors := t.InsertAndReturnBranches(node)
-	return errors
 }
 
 // Count returns the number of inserts performed on the Tree
