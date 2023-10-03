@@ -47,7 +47,7 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 	message = append(message, version...)
 
 	//Nonce is the current branch length.
-	nonce := uint32(0) //TODO: It should be this --> uint32(len(k.Tree.Branch))
+	nonce := k.Tree.Count()
 	nonceBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(nonceBytes, nonce)
 	message = append(message, nonceBytes...)
@@ -100,7 +100,7 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 
 	store.Set(types.MailboxIMTKey(), id)
 
-	branch, err := k.Tree.InsertAndReturnBranches(id)
+	branch, _, err := k.Tree.InsertAndReturnBranches(id)
 
 	if err == nil {
 		k.Branch = branch

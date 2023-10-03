@@ -10,7 +10,7 @@ import (
 )
 
 func (suite *KeeperTestSuite) TestGenesis() {
-	idMap := make([]string, 128)
+	idMap := make([]string, 128) //Will populate 8 levels.
 	for i := 0; i < 128; i++ {
 		sender := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
 		recipientBech32 := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
@@ -26,10 +26,10 @@ func (suite *KeeperTestSuite) TestGenesis() {
 
 	// Exporting Genesis and logging the length of Branches
 	gs := suite.keeper.ExportGenesis(suite.ctx)
-	suite.Require().Equal(8, countPopulatedSlices(suite.keeper.Branch)) // 2^7 + 36 = 100  .. only 8 levels will be populated.
+	suite.Require().Equal(8, countPopulatedSlices(suite.keeper.Branch))
 
 	// Adding delivered message ids to the exported state
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 128; i++ {
 		gs.DeliveredMessages = append(gs.DeliveredMessages, &types.MessageDelivered{
 			Id: idMap[i],
 		})
@@ -43,11 +43,10 @@ func (suite *KeeperTestSuite) TestGenesis() {
 	suite.Require().NoError(err)
 
 	suite.Require().Equal(8, countPopulatedSlices(suite.keeper.Tree.Branch))
-	suite.Require().Equal(100, len(suite.keeper.Delivered))
+	suite.Require().Equal(128, len(suite.keeper.Delivered))
 }
 
 func countPopulatedSlices(arr [32][]byte) int {
-	fmt.Printf("%+v", arr)
 	count := 0
 	for _, slice := range arr {
 		if len(slice) > 0 {
