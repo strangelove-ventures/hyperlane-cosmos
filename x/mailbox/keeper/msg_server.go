@@ -63,13 +63,11 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 		sender = append(padding, sender...)
 	}
 	message = append(message, sender...)
-	//fmt.Printf("Appended sender: %v\n", sender)
 
 	// Get the Destination Domain
 	destinationBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(destinationBytes, msg.DestinationDomain)
 	message = append(message, destinationBytes...)
-	//fmt.Printf("Appended destination domain: %v\n", msg.DestinationDomain)
 
 	// Get the Recipient address
 	// Since the recipient could be any destination change, the address must be in hex, non-bech32 format
@@ -79,7 +77,6 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 		recipient = append(padding, recipient...)
 	}
 	message = append(message, recipient...)
-	//fmt.Printf("Appended recipient: %v\n", recipient)
 
 	// Get the Message Body
 	messageBytes := hexutil.MustDecode(msg.MessageBody)
@@ -89,24 +86,18 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 	}
 	message = append(message, messageBytes...)
 	hyperlaneMsg := hexutil.Encode(message)
-	// fmt.Printf("Appended message body: %v\n", messageBytes)
 
 	// Get the message ID. (i.e: Keccak256 sha)
 	id := common.Id(message)
-	//fmt.Printf("Generated message ID: %v\n", id)
 
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.MailboxIMTKey(), id)
 
 	branch, err := k.Tree.Insert(id)
-	fmt.Printf("Branch: %v\n", branch)
 
 	if err == nil {
 		k.Branch = branch
 	}
-
-	fmt.Printf("Branch: %v\n", k.Branch)
-	fmt.Printf("Branch----------------: %v\n", uint32(len(k.Branch)))
 
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{
@@ -130,7 +121,6 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 		),
 	})
-	fmt.Println("Emitted events")
 
 	return &types.MsgDispatchResponse{
 		MessageId: hexutil.Encode(id),

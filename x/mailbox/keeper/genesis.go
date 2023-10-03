@@ -32,7 +32,7 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) types.GenesisState {
 		DeliveredMessages: ExportDeliveredMessages(ctx.KVStore(k.storeKey)),
 		Tree: types.Tree{
 			Branch: k.Tree.Branch[:],
-			Count:  32, //TODO:Should we change this to reflect only levels populated ?
+			Count:  uint32(32), //TODO:Should we change this to reflect only levels populated ?
 		},
 		Domain: k.GetDomain(ctx),
 	}
