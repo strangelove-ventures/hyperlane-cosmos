@@ -95,7 +95,18 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 	id := common.Id(message)
 	//fmt.Printf("Generated message ID: %v\n", id)
 
-	//TODO:COMPUTE AND STORE  THE BRANCHES in k.Tree.Branch
+	store := ctx.KVStore(k.storeKey)
+	store.Set(types.MailboxIMTKey(), id)
+
+	branch, err := k.Tree.Insert(id)
+	fmt.Printf("Branch: %v\n", branch)
+
+	if err == nil {
+		k.Branch = branch
+	}
+
+	fmt.Printf("Branch: %v\n", k.Branch)
+	fmt.Printf("Branch----------------: %v\n", uint32(len(k.Branch)))
 
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{

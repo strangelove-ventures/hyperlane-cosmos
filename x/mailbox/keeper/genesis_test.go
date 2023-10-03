@@ -10,8 +10,8 @@ import (
 )
 
 func (suite *KeeperTestSuite) TestGenesis() {
-	idMap := make([]string, 100)
-	for i := 0; i < 100; i++ {
+	idMap := make([]string, 131071)
+	for i := 0; i < 131071; i++ {
 		sender := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
 		recipientBech32 := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
 		recipientBytes := sdk.MustAccAddressFromBech32(recipientBech32).Bytes()
@@ -24,9 +24,9 @@ func (suite *KeeperTestSuite) TestGenesis() {
 
 		res, err := suite.msgServer.Dispatch(suite.ctx, msg)
 
-		if i == 1 {
-			break
-		}
+		// if i == 33 {
+		// 	break
+		// }
 		suite.Require().NoError(err)
 		idMap[i] = res.MessageId
 		fmt.Println(idMap[i])

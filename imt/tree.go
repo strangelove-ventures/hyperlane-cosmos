@@ -19,13 +19,13 @@ type Tree struct {
 }
 
 // Insert inserts node into the Merkle Tree
-func (t *Tree) Insert(node []byte) error {
+func (t *Tree) Insert(node []byte) ([32][]byte, error) {
 	if t.count >= MaxLeaves {
-		return errors.New("merkle tree full")
+		return [32][]byte{}, errors.New("merkle tree full")
 	}
 
 	if len(node) != 32 {
-		return errors.New("must be 32-bytes")
+		return [32][]byte{}, errors.New("must be 32-bytes")
 	}
 
 	t.count += 1
@@ -33,14 +33,14 @@ func (t *Tree) Insert(node []byte) error {
 	for i := 0; i < TreeDepth; i++ {
 		if (size & 1) == 1 {
 			t.Branch[i] = node
-			return nil
+			return t.Branch, nil
 		}
 		temp := append(t.Branch[i][:], node...)
 		node = crypto.Keccak256(temp)
 		size /= 2
 	}
 
-	return errors.New("unreachable")
+	return [32][]byte{}, errors.New("unreachable")
 }
 
 // Count returns the number of inserts performed on the Tree

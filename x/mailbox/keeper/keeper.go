@@ -33,6 +33,7 @@ type Keeper struct {
 	version     byte
 
 	Tree      *imt.Tree
+	Branch    [32][]byte
 	Delivered map[string]bool
 }
 
