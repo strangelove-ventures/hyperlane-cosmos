@@ -10,8 +10,8 @@ import (
 )
 
 func (suite *KeeperTestSuite) TestGenesis() {
-	idMap := make([]string, 100)
-	for i := 0; i < 100; i++ {
+	idMap := make([]string, 129)
+	for i := 0; i < 129; i++ {
 		sender := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
 		recipientBech32 := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
 		recipientBytes := sdk.MustAccAddressFromBech32(recipientBech32).Bytes()
@@ -26,7 +26,7 @@ func (suite *KeeperTestSuite) TestGenesis() {
 
 	// Exporting Genesis and logging the length of Branches
 	gs := suite.keeper.ExportGenesis(suite.ctx)
-	suite.Require().Equal(8, countPopulatedSlices(suite.keeper.Branch)) // 2^7 + 4 = 100  .. only 8 levels will be populated.
+	suite.Require().Equal(8, countPopulatedSlices(suite.keeper.Branch)) // 2^7 + 36 = 100  .. only 8 levels will be populated.
 
 	// Adding delivered message ids to the exported state
 	for i := 0; i < 100; i++ {
