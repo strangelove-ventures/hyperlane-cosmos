@@ -18,8 +18,8 @@ type Tree struct {
 	count  uint32
 }
 
-// Insert inserts node into the Merkle Tree
-func (t *Tree) Insert(node []byte) ([32][]byte, error) {
+// Insert inserts node and returns the branches
+func (t *Tree) InsertAndReturnBranches(node []byte) ([32][]byte, error) {
 	if t.count >= MaxLeaves {
 		return [32][]byte{}, errors.New("merkle tree full")
 	}
@@ -41,6 +41,11 @@ func (t *Tree) Insert(node []byte) ([32][]byte, error) {
 	}
 
 	return [32][]byte{}, errors.New("unreachable")
+}
+
+func (t *Tree) Insert(node []byte) error {
+	_, errors := t.InsertAndReturnBranches(node)
+	return errors
 }
 
 // Count returns the number of inserts performed on the Tree

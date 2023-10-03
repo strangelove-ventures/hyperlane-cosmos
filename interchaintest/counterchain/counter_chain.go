@@ -88,7 +88,7 @@ func (c *CounterChain) CreateMessage(sender string, originDomain uint32, destDom
 	proof = c.Tree.GetProofForNextIndex() // Tree corresponds to origin chain metadata
 
 	// Insert the message id into the tree
-	_, err := c.Tree.Insert(id)
+	err := c.Tree.Insert(id)
 	require.NoError(c.T, err)
 
 	return message, proof

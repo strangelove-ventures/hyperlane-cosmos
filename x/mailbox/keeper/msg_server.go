@@ -93,7 +93,7 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.MailboxIMTKey(), id)
 
-	branch, err := k.Tree.Insert(id)
+	branch, err := k.Tree.InsertAndReturnBranches(id)
 
 	if err == nil {
 		k.Branch = branch
