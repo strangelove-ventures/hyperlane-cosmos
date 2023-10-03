@@ -14,7 +14,8 @@ import (
 func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
 	//Branches
 
-	//k.Tree.Branch = append(k.Tree.Branch, gs.Tree.Branch...)
+	copy(k.Tree.Branch[:], gs.Tree.Branch)
+
 	//Delivered Messages.
 	for _, msgDelivered := range gs.DeliveredMessages {
 		k.Delivered[msgDelivered.Id] = true
@@ -30,8 +31,8 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) types.GenesisState {
 	return types.GenesisState{
 		DeliveredMessages: ExportDeliveredMessages(ctx.KVStore(k.storeKey)),
 		Tree: types.Tree{
-			//Branch: k.Tree.Branch,
-			Count: k.Tree.Count(),
+			Branch: k.Tree.Branch[:],
+			Count:  32, //TODO:Should we change this to reflect only levels populated ?
 		},
 		Domain: k.GetDomain(ctx),
 	}
