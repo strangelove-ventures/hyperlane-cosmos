@@ -38,15 +38,15 @@ func TestFootGuns(t *testing.T) {
 	var i imt.Tree
 
 	emptySlice := []byte{}
-	err := i.Insert(emptySlice)
+	_, err := i.Insert(emptySlice)
 	require.Error(t, err, "nodes must be 32-bytes")
 
 	zeroes_31 := common.FromHex("0x00000000000000000000000000000000000000000000000000000000000000")
-	err = i.Insert(zeroes_31)
+	_, err = i.Insert(zeroes_31)
 	require.Error(t, err, "nodes must be 32-bytes")
 
 	zeroes_33 := common.FromHex("0x000000000000000000000000000000000000000000000000000000000000000000")
-	err = i.Insert(zeroes_33)
+	_, err = i.Insert(zeroes_33)
 	require.Error(t, err, "nodes must be 32-bytes")
 }
 
@@ -76,7 +76,7 @@ func TestVectors(t *testing.T) {
 				require.Equal(t, hash[:], expectedLeaf)
 
 				// Insert into the tree
-				err = i.Insert(hash)
+				_, err = i.Insert(hash)
 				require.NoError(t, err)
 
 			}
@@ -132,7 +132,7 @@ func TestIncrementalVectors(t *testing.T) {
 					require.Equal(t, hash[:], expectedLeaf)
 
 					// Insert into the tree
-					err = i.Insert(hash)
+					_, err = i.Insert(hash)
 					require.NoError(t, err)
 				}
 

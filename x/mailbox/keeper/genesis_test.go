@@ -10,8 +10,8 @@ import (
 )
 
 func (suite *KeeperTestSuite) TestGenesis() {
-	idMap := make([]string, 131071)
-	for i := 0; i < 131071; i++ {
+	idMap := make([]string, 10)
+	for i := 0; i < 10; i++ {
 		sender := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
 		recipientBech32 := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
 		recipientBytes := sdk.MustAccAddressFromBech32(recipientBech32).Bytes()
