@@ -51,7 +51,7 @@ func (t *Tree) Count() uint32 {
 	return t.count
 }
 
-// Count returns the number of inserts performed on the Tree
+// Set the count . (Used when restoring from genesis state)
 func (t *Tree) SetCount(count uint32) {
 	t.count = count
 }

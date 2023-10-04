@@ -46,7 +46,7 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 	version := make([]byte, 1)
 	message = append(message, version...)
 
-	//Nonce is the current branch length.
+	// Nonce is the tree count.
 	nonce := k.Tree.Count()
 	nonceBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(nonceBytes, nonce)
@@ -95,14 +95,17 @@ func (k *Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types
 	message = append(message, messageBytes...)
 	hyperlaneMsg := hexutil.Encode(message)
 
-	// Get the message ID. (i.e: Keccak256 sha)
+	// Get the message ID. (i.e: Keccak256 hash of the message)
 	id := common.Id(message)
 
-	store.Set(types.MailboxIMTKey(), id)
+	// Insert the message id into the tree
 	err := k.Tree.Insert(id)
 	if err != nil {
 		return nil, err
 	}
+
+	// Store that the current root
+	store.Set(types.MailboxIMTKey(), k.Tree.Root())
 
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{
