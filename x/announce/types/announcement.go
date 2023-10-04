@@ -14,7 +14,10 @@ import (
 // This is an ECDSA public key (secp256k1) in uncompressed format (65 bytes).
 // However, in Ethereum the leading byte is omitted, so 64 bytes total.
 // The Cosmos hyperlane module is compatible with the same format.
-const ETHEREUM_PUB_KEY_LEN = 64
+const (
+	ETHEREUM_PUB_KEY_LEN = 64
+	ETHEREUM_ADDR_LEN    = 20 // The ethereum address format is the last 20 bytes of the Keccak256 hashed public key
+)
 
 func encodePackedAnnouncement(origin uint32, originMailbox []byte) ([]byte, error) {
 	if len(originMailbox) != 32 {

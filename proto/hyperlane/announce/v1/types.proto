@@ -10,3 +10,20 @@ message StorageMetadata {
   option (gogoproto.goproto_getters) = false;
   repeated string metadata = 1;
 }
+
+// Helper type for Hyperlane's Announcement.
+message StoredAnnouncement {
+  option (gogoproto.goproto_getters) = false;
+
+  // location where signatures will be stored
+  string storage_location = 1;
+
+  // signed validator announcement
+  bytes signature = 2;
+}
+
+// Helper type for Hyperlane's Announcement.
+message StoredAnnouncements {
+  option (gogoproto.goproto_getters) = false;
+  repeated StoredAnnouncement announcement = 1;
+}

@@ -9,6 +9,8 @@
   
 - [hyperlane/announce/v1/types.proto](#hyperlane/announce/v1/types.proto)
     - [StorageMetadata](#hyperlane.announce.v1.StorageMetadata)
+    - [StoredAnnouncement](#hyperlane.announce.v1.StoredAnnouncement)
+    - [StoredAnnouncements](#hyperlane.announce.v1.StoredAnnouncements)
   
 - [hyperlane/announce/v1/query.proto](#hyperlane/announce/v1/query.proto)
     - [GetAnnouncedStorageLocationsRequest](#hyperlane.announce.v1.GetAnnouncedStorageLocationsRequest)
@@ -70,6 +72,37 @@ Helper type for Hyperlane's getAnnouncedStorageLocations.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | `metadata` | [string](#string) | repeated |  |
+
+
+
+
+
+
+<a name="hyperlane.announce.v1.StoredAnnouncement"></a>
+
+### StoredAnnouncement
+Helper type for Hyperlane's Announcement.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `storage_location` | [string](#string) |  | location where signatures will be stored |
+| `signature` | [bytes](#bytes) |  | signed validator announcement |
+
+
+
+
+
+
+<a name="hyperlane.announce.v1.StoredAnnouncements"></a>
+
+### StoredAnnouncements
+Helper type for Hyperlane's Announcement.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `announcement` | [StoredAnnouncement](#hyperlane.announce.v1.StoredAnnouncement) | repeated |  |
 
 
 

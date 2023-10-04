@@ -17,7 +17,10 @@ func GetQueryCmd() *cobra.Command {
 		RunE:                       client.ValidateCmd,
 	}
 
-	// queryCmd.AddCommand()
+	queryCmd.AddCommand(
+		getAnnouncedValidators(),
+		getAnnouncedStorageLocations(),
+	)
 	return queryCmd
 }
 
@@ -32,10 +35,7 @@ func NewTxCmd() *cobra.Command {
 	}
 
 	txCmd.AddCommand(
-	// msgPaymentCmd(),
-	// createIgpCmd(),
-	// createOracleCmd(),
-	// setGasPriceCmd(),
+		announceCmd(),
 	)
 
 	return txCmd

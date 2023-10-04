@@ -5,6 +5,7 @@ import (
 )
 
 var (
-	ErrPackAnnouncement = errorsmod.Register(ModuleName, 1, "failed packing announcement")
-	ErrGasPaid          = errorsmod.Register(ModuleName, 2, "message gas already paid")
+	ErrPackAnnouncement    = errorsmod.Register(ModuleName, 1, "failed packing announcement")
+	ErrMarshalAnnouncement = errorsmod.Register(ModuleName, 2, "failed marshalling announcement")
+	ErrInvalidValidator    = errorsmod.Register(ModuleName, 3, "invalid validator address")
 )

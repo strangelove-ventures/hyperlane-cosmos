@@ -16,11 +16,3 @@ var (
 	AnnouncedValidators       = []byte{0x00}
 	AnnouncedStorageLocations = []byte{0x1}
 )
-
-func AnnouncedValidatorsKey() []byte {
-	return AnnouncedValidators
-}
-
-func StorageLocationsKey(val string, messageId []byte) []byte {
-	return append(AnnouncedStorageLocations, []byte(val)...)
-}
