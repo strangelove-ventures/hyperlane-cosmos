@@ -26,7 +26,6 @@ func (suite *KeeperTestSuite) TestGenesis() {
 
 	// Exporting Genesis and logging the length of Branches
 	gs := suite.keeper.ExportGenesis(suite.ctx)
-	suite.Require().Equal(8, countPopulatedSlices(suite.keeper.Tree.Branch))
 
 	// Adding delivered message ids to the exported state
 	for i := 0; i < 128; i++ {
@@ -35,6 +34,10 @@ func (suite *KeeperTestSuite) TestGenesis() {
 		})
 	}
 
+	//Logging  the exported state
+	suite.Require().Equal(8, countGenesisStatePopulatedSlices((gs.Tree.Branch)))
+	suite.Require().Equal(128, len(gs.DeliveredMessages))
+
 	// Resetting and logging
 	suite.SetupTest()
 
@@ -42,11 +45,22 @@ func (suite *KeeperTestSuite) TestGenesis() {
 	err := suite.keeper.InitGenesis(suite.ctx, gs)
 	suite.Require().NoError(err)
 
-	suite.Require().Equal(8, countPopulatedSlices(suite.keeper.Tree.Branch))
+	// Logging the imported state
+	suite.Require().Equal(8, countKeeperPopulatedSlices(suite.keeper.Tree.Branch))
 	suite.Require().Equal(128, len(suite.keeper.Delivered))
 }
 
-func countPopulatedSlices(arr [32][]byte) int {
+func countKeeperPopulatedSlices(arr [32][]byte) int {
+	count := 0
+	for _, slice := range arr {
+		if len(slice) > 0 {
+			count++
+		}
+	}
+	return count
+}
+
+func countGenesisStatePopulatedSlices(arr [][]byte) int {
 	count := 0
 	for _, slice := range arr {
 		if len(slice) > 0 {
