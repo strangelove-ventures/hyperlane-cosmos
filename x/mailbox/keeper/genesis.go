@@ -13,9 +13,9 @@ import (
 // state.
 func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
 	//Branches
-
 	copy(k.Tree.Branch[:], gs.Tree.Branch)
 
+	//Count
 	k.Tree.SetCount(gs.Tree.Count)
 
 	//Delivered Messages.
