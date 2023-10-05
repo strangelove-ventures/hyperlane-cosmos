@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/hex"
-	"errors"
 	"fmt"
 
 	sdkerrors "cosmossdk.io/errors"
@@ -45,7 +44,7 @@ func getAddress(pubKey []byte) ([]byte, error) {
 	return hashedKey[len(hashedKey)-20:], nil
 }
 
-func getAnnouncementDigest(origin uint32, originMailbox []byte, storageLocation string) ([]byte, error) {
+func GetAnnouncementDigest(origin uint32, originMailbox []byte, storageLocation string) ([]byte, error) {
 	pack, err := encodePackedAnnouncement(origin, originMailbox)
 	if err != nil {
 		return nil, err
@@ -62,7 +61,7 @@ func toEthSignedMessageHash(packedHash []byte) []byte {
 	return hash([]byte(msg))
 }
 
-func verifyAnnouncementDigest(digest []byte, signature []byte, expectedSigner []byte) error {
+func VerifyAnnouncementDigest(digest []byte, signature []byte, expectedSigner []byte) error {
 	sigPublicKey, err := crypto.Ecrecover(digest, signature)
 	if err != nil {
 		return err
@@ -77,5 +76,5 @@ func verifyAnnouncementDigest(digest []byte, signature []byte, expectedSigner []
 		return nil
 	}
 
-	return errors.New("Signature does not match the declared validator")
+	return ErrBadDigest
 }

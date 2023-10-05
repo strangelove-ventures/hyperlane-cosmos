@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"encoding/binary"
+	"encoding/hex"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -17,6 +18,14 @@ import (
 	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 	ismkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
+)
+
+var (
+	_ ReadOnlyMailboxKeeper = (*Keeper)(nil)
+	// TODO: have Steve review. Why is this the address?
+	// Presuming it's the last 20 bytes of the Keccak256 of the public key for 'mailboxAddr' (sdk.AccAddress)
+	// then should we be deriving it instead of hardcoding it here.
+	mailboxAddress, _ = hex.DecodeString("000000000000000000000000cc2a110c8df654a38749178a04402e88f65091d3")
 )
 
 type Keeper struct {
@@ -34,6 +43,22 @@ type Keeper struct {
 
 	Tree      *imt.Tree
 	Delivered map[string]bool
+}
+
+type ReadOnlyMailboxKeeper interface {
+	GetMailboxAddress() []byte
+	GetDomain(context.Context) uint32
+}
+
+func (k Keeper) GetMailboxAddress() []byte {
+	return mailboxAddress
+}
+
+func (k Keeper) GetDomain(c context.Context) uint32 {
+	ctx := sdk.UnwrapSDKContext(c)
+	store := ctx.KVStore(k.storeKey)
+	b := store.Get(types.DomainKey)
+	return binary.LittleEndian.Uint32(b)
 }
 
 func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwasm.Keeper, ismKeeper *ismkeeper.Keeper) Keeper {

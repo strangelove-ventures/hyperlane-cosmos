@@ -24,18 +24,42 @@ func (k Keeper) Announcement(goCtx context.Context, msg *types.MsgAnnouncement) 
 		storedAnnouncements = &types.StoredAnnouncements{
 			Announcement: []*types.StoredAnnouncement{},
 		}
+	} else {
+		// Check for replays since there were existing announcements for this validator
+		for _, announcement := range storedAnnouncements.Announcement {
+			if announcement.StorageLocation == msg.StorageLocation {
+				return nil, types.ErrReplayAnnouncement
+			}
+		}
 	}
 
-	// TODO: verify properly before storing ...
+	origin := k.mailboxKeeper.GetDomain(ctx)
+	mailboxAddr := k.mailboxKeeper.GetMailboxAddress()
+
+	announcementDigest, err := types.GetAnnouncementDigest(origin, mailboxAddr, msg.StorageLocation)
+	if err != nil {
+		return nil, err
+	}
+	err = types.VerifyAnnouncementDigest(announcementDigest, msg.Signature, msg.Validator)
+	if err != nil {
+		return nil, err
+	}
 
 	storedAnnouncements.Announcement = append(storedAnnouncements.Announcement, &types.StoredAnnouncement{
 		StorageLocation: msg.StorageLocation,
 		Signature:       msg.Signature,
 	})
+
+	err = k.setAnnouncedValidators(ctx, msg.Validator)
+	if err != nil {
+		return nil, types.ErrMarshalAnnouncedValidators
+	}
 	err = k.setAnnouncements(ctx, msg.Validator, storedAnnouncements)
 	if err != nil {
-		return nil, types.ErrMarshalAnnouncement
+		return nil, err
 	}
+
+	// TODO: Emit Events!
 
 	return &types.MsgAnnouncementResponse{}, nil
 }

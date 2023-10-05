@@ -70,3 +70,13 @@ func (c *CounterChain) CreateRelayerLegacyMetadata(message []byte, proof [imt.Tr
 	metadata = append(metadata, c.ValSet.Threshold)
 	return metadata
 }
+
+func (c *CounterChain) Sign(digest []byte) []byte {
+	var signature []byte
+	for i := uint8(0); i < c.ValSet.Threshold; i++ {
+		sig, err := crypto.Sign(digest, c.ValSet.Vals[i].Priv)
+		require.NoError(c.T, err)
+		signature = append(signature, sig...)
+	}
+	return signature
+}

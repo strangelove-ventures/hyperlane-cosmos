@@ -14,6 +14,39 @@ func (k Keeper) getAnnouncementsStore(ctx sdk.Context) prefix.Store {
 	return prefix.NewStore(store, types.AnnouncedStorageLocations)
 }
 
+// getAnnouncedValidators unmarshal announced validators from storage
+func (k Keeper) getAnnouncedValidators(ctx sdk.Context) (*types.GetAnnouncedValidatorsResponse, error) {
+	store := ctx.KVStore(k.storeKey)
+	announcedValidatorBytes := store.Get(types.AnnouncedValidators)
+	announcedValidators := &types.GetAnnouncedValidatorsResponse{}
+
+	if announcedValidatorBytes == nil {
+		return nil, errors.New("No announced validators")
+	}
+
+	err := announcedValidators.Unmarshal(announcedValidatorBytes)
+	return announcedValidators, err
+}
+
+// setAnnouncedValidators store an announced validator
+func (k Keeper) setAnnouncedValidators(ctx sdk.Context, validator []byte) (err error) {
+	var announcedValidators *types.GetAnnouncedValidatorsResponse
+	announcedValidators, err = k.getAnnouncedValidators(ctx)
+	if err != nil {
+		announcedValidators = &types.GetAnnouncedValidatorsResponse{Validator: [][]byte{}}
+	}
+	announcedValidators.Validator = append(announcedValidators.Validator, validator)
+
+	announcedValidatorsBytes, err := announcedValidators.Marshal()
+	if err != nil {
+		return types.ErrMarshalAnnouncedValidators
+	}
+
+	store := ctx.KVStore(k.storeKey)
+	store.Set(types.AnnouncedValidators, announcedValidatorsBytes)
+	return nil
+}
+
 // getAnnouncements unmarshal announcements for the given validator from storage
 func (k Keeper) getAnnouncements(ctx sdk.Context, validator []byte) (*types.StoredAnnouncements, error) {
 	store := k.getAnnouncementsStore(ctx)
