@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"fmt"
+	"reflect"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -34,20 +35,22 @@ func (suite *KeeperTestSuite) TestGenesis() {
 		})
 	}
 
-	//Logging  the exported state
+	// Checking the exported state
 	suite.Require().Equal(8, countGenesisStatePopulatedSlices((gs.Tree.Branch)))
 	suite.Require().Equal(128, len(gs.DeliveredMessages))
 
-	// Resetting and logging
+	// Resetting suite
 	suite.SetupTest()
 
 	// Importing state
 	err := suite.keeper.InitGenesis(suite.ctx, gs)
 	suite.Require().NoError(err)
 
-	// Logging the imported state
+	//Comparing the two states to make sure they are the same
 	suite.Require().Equal(8, countKeeperPopulatedSlices(suite.keeper.Tree.Branch))
 	suite.Require().Equal(128, len(suite.keeper.Delivered))
+	isEqual := reflect.DeepEqual(gs.Tree.Branch, suite.keeper.Tree.Branch[:])
+	suite.Require().True(isEqual, "Imported state is not the same as exported state")
 }
 
 func countKeeperPopulatedSlices(arr [32][]byte) int {
