@@ -16,9 +16,14 @@ func (k Keeper) GetAnnouncedValidators(ctx context.Context, req *types.GetAnnoun
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
-	_ = sdk.UnwrapSDKContext(ctx)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
 
-	return &types.GetAnnouncedValidatorsResponse{}, nil
+	resp, err := k.getAnnouncedValidators(sdkCtx)
+	if err != nil {
+		return nil, types.ErrMarshalAnnouncedValidators
+	}
+
+	return resp, nil
 }
 
 // GetAnnouncedStorageLocations returns the list of storage locations for each requested validator
@@ -26,7 +31,22 @@ func (k Keeper) GetAnnouncedStorageLocations(ctx context.Context, req *types.Get
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
-	_ = sdk.UnwrapSDKContext(ctx)
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	resp := &types.GetAnnouncedStorageLocationsResponse{
+		Metadata: []*types.StorageMetadata{},
+	}
 
-	return &types.GetAnnouncedStorageLocationsResponse{}, nil
+	for _, val := range req.Validator {
+		md := &types.StorageMetadata{}
+		announcementResp, err := k.getAnnouncements(sdkCtx, val)
+		if err != nil {
+			return nil, err
+		}
+		for _, loc := range announcementResp.Announcement {
+			md.Metadata = append(md.Metadata, loc.StorageLocation)
+		}
+		resp.Metadata = append(resp.Metadata, md)
+	}
+
+	return resp, nil
 }

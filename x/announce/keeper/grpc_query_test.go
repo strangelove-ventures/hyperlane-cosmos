@@ -1,1 +1,23 @@
 package keeper_test
+
+import (
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
+)
+
+func (suite *KeeperTestSuite) TestQueryAnnouncements() {
+	suite.SetupTest(suite.T())
+	msg, _, err := suite.mockAnnounce()
+	suite.Require().NoError(err)
+	req := &types.GetAnnouncedValidatorsRequest{}
+	resp, err := suite.queryClient.GetAnnouncedValidators(suite.ctx, req)
+
+	suite.Require().NoError(err)
+	suite.Require().Equal(resp.Validator[0], msg.Validator)
+
+	storageLocReq := &types.GetAnnouncedStorageLocationsRequest{
+		Validator: resp.Validator,
+	}
+	storageLocResp, err := suite.queryClient.GetAnnouncedStorageLocations(suite.ctx, storageLocReq)
+	suite.Require().NoError(err)
+	suite.Require().Equal(storageLocResp.Metadata[0].Metadata[0], msg.StorageLocation)
+}
