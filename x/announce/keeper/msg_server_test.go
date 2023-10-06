@@ -16,12 +16,8 @@ func (suite *KeeperTestSuite) TestAnnouncement() {
 	validatorPrivateKey, err := crypto.HexToECDSA(valPrivKey)
 	suite.Require().NoError(err)
 	valAddr := crypto.PubkeyToAddress(validatorPrivateKey.PublicKey)
-
-	validator := counterchain.CreateEmperorValidator(suite.T(), uint32(suite.domain), counterchain.LEGACY_MULTISIG, valPrivKey)
+	var validator *counterchain.CounterChain
 	storageLocation := "file:///tmp//signatures-simd1"
-	digest, err := types.GetAnnouncementDigest(suite.domain, suite.mailboxKeeper.GetMailboxAddress(), storageLocation)
-	suite.Require().NoError(err)
-	valSignature := validator.Sign(digest)
 
 	testCases := []struct {
 		name     string
@@ -31,7 +27,12 @@ func (suite *KeeperTestSuite) TestAnnouncement() {
 		{
 			"success",
 			func() {
-				msg = &types.MsgAnnouncement{ // Case 1: IGP Creator is allowed to update the beneficiary
+				validator = counterchain.CreateEmperorValidator(suite.T(), suite.mailboxKeeper.GetDomain(suite.ctx), counterchain.LEGACY_MULTISIG, valPrivKey)
+				digest, err := types.GetAnnouncementDigest(suite.mailboxKeeper.GetDomain(suite.ctx), suite.mailboxKeeper.GetMailboxAddress(), storageLocation)
+				suite.Require().NoError(err)
+				valSignature := validator.Sign(digest)
+
+				msg = &types.MsgAnnouncement{ // Valid announcement with valid signature
 					Sender:          txSigner,
 					Validator:       valAddr.Bytes(),
 					StorageLocation: storageLocation,
@@ -47,7 +48,7 @@ func (suite *KeeperTestSuite) TestAnnouncement() {
 			suite.SetupTest(suite.T())
 			tc.malleate()
 
-			//_, err := suite.mockAnnounce()
+			resp, err := suite.msgServer.Announcement(suite.ctx, msg)
 			suite.Require().NoError(err)
 			events := suite.ctx.EventManager().Events()
 			valAddrHex := hex.EncodeToString(msg.Validator)
@@ -59,6 +60,10 @@ func (suite *KeeperTestSuite) TestAnnouncement() {
 					sdk.NewAttribute(types.AttributeStorageLocation, storageLocation),
 					sdk.NewAttribute(types.AttributeValidatorAddress, valAddrHex),
 				),
+				sdk.NewEvent(
+					sdk.EventTypeMessage,
+					sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
+				),
 			}
 
 			if tc.expPass {
@@ -67,9 +72,9 @@ func (suite *KeeperTestSuite) TestAnnouncement() {
 				}
 
 				suite.Require().NoError(err)
-				//suite.Require().NotNil(resp)
+				suite.Require().NotNil(resp)
 			} else {
-				//suite.Require().Nil(resp)
+				suite.Require().Nil(resp)
 				suite.Require().Error(err)
 			}
 		})

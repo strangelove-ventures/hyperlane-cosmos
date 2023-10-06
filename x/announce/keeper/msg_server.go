@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"encoding/hex"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -59,7 +60,17 @@ func (k Keeper) Announcement(goCtx context.Context, msg *types.MsgAnnouncement) 
 		return nil, err
 	}
 
-	// TODO: Emit Events!
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeAnnounce,
+			sdk.NewAttribute(types.AttributeStorageLocation, msg.StorageLocation),
+			sdk.NewAttribute(types.AttributeValidatorAddress, hex.EncodeToString(msg.Validator)),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
+		),
+	})
 
 	return &types.MsgAnnouncementResponse{}, nil
 }

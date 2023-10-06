@@ -21,7 +21,7 @@ func (m MsgAnnouncement) ValidateBasic() error {
 	}
 
 	if len(m.Validator) != ETHEREUM_ADDR_LEN {
-		return ErrInvalidValidator.Wrapf("Validator address is %d bytes, expected %d bytes", len(m.Validator), ETHEREUM_PUB_KEY_LEN)
+		return ErrInvalidValidator.Wrapf("Validator address is %d bytes, expected %d bytes", len(m.Validator), ETHEREUM_ADDR_LEN)
 	}
 
 	return nil

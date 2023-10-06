@@ -11,10 +11,9 @@ import (
 )
 
 // This is an ECDSA public key (secp256k1) in uncompressed format (65 bytes).
-// However, in Ethereum the leading byte is omitted, so 64 bytes total.
 // The Cosmos hyperlane module is compatible with the same format.
 const (
-	ETHEREUM_PUB_KEY_LEN = 64
+	ETHEREUM_PUB_KEY_LEN = 65
 	ETHEREUM_ADDR_LEN    = 20 // The ethereum address format is the last 20 bytes of the Keccak256 hashed public key
 )
 
@@ -38,7 +37,7 @@ func hash(packed []byte) []byte {
 
 func getAddress(pubKey []byte) ([]byte, error) {
 	if len(pubKey) != ETHEREUM_PUB_KEY_LEN {
-		return nil, fmt.Errorf("provided bytes %s is not a valid public key", hex.EncodeToString(pubKey))
+		return nil, fmt.Errorf("provided bytes %s is not a valid public key. Got %d bytes, expected %d bytes", hex.EncodeToString(pubKey), len(pubKey), ETHEREUM_PUB_KEY_LEN)
 	}
 	hashedKey := hash(pubKey)
 	return hashedKey[len(hashedKey)-20:], nil
@@ -67,12 +66,14 @@ func VerifyAnnouncementDigest(digest []byte, signature []byte, expectedSigner []
 		return err
 	}
 
-	addr, err := getAddress(sigPublicKey)
+	sigEcdsaPub, err := crypto.UnmarshalPubkey(sigPublicKey)
 	if err != nil {
 		return err
 	}
 
-	if bytes.Equal(expectedSigner, addr) {
+	recoveredAddr := crypto.PubkeyToAddress(*sigEcdsaPub)
+
+	if bytes.Equal(expectedSigner, recoveredAddr.Bytes()) {
 		return nil
 	}
 
