@@ -55,6 +55,6 @@ func (suite *KeeperTestSuite) SetupTest() {
 	queryClient := types.NewQueryClient(queryHelper)
 
 	suite.queryClient = queryClient
-	suite.msgServer = keeper.NewMsgServerImpl(&suite.keeper)
+	suite.msgServer = keeper.NewMsgServerImpl(suite.keeper)
 	suite.encCfg = encCfg
 }

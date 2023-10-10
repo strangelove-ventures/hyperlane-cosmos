@@ -61,7 +61,7 @@ func MsgDispatch(k *mailboxkeeper.Keeper, ctx sdk.Context, contractAddr sdk.AccA
 		return nil, wasmvmtypes.InvalidRequest{Err: "msgdispatch null msg"}
 	}
 
-	msgServer := mailboxkeeper.NewMsgServerImpl(k)
+	msgServer := mailboxkeeper.NewMsgServerImpl(*k)
 
 	msgMsgDispatch := mailboxtypes.NewMsgDispatch(msg.Sender, msg.DestinationDomain, msg.RecipientAddress, msg.MessageBody)
 

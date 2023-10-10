@@ -12,17 +12,17 @@ import (
 // InitGenesis initializes the hyperlane mailbox module's state from a provided genesis
 // state.
 func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
-	//Branches
+	// Branches
 	copy(k.Tree.Branch[:], gs.Tree.Branch)
 
-	//Count
+	// Count
 	k.Tree.SetCount(gs.Tree.Count)
 
-	//Delivered Messages.
+	// Delivered Messages.
 	for _, msgDelivered := range gs.DeliveredMessages {
 		k.Delivered[msgDelivered.Id] = true
 	}
-	//Domain
+	// Domain
 	k.SetDomain(ctx, gs.Domain)
 	return nil
 }

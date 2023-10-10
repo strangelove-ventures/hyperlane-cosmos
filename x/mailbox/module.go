@@ -46,7 +46,7 @@ func (AppModuleBasic) RegisterInterfaces(registry codectypes.InterfaceRegistry) 
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(&types.GenesisState{
 		Tree: types.Tree{
-			Count:  0,
+			Count:  uint32(0),
 			Branch: [][]byte{},
 		},
 		DeliveredMessages: []*types.MessageDelivered{},
@@ -92,7 +92,7 @@ func NewAppModule(k keeper.Keeper) AppModule {
 
 // RegisterServices registers module services.
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-	types.RegisterMsgServer(cfg.MsgServer(), &am.keeper)
+	types.RegisterMsgServer(cfg.MsgServer(), am.keeper)
 	types.RegisterQueryServer(cfg.QueryServer(), am.keeper)
 }
 
