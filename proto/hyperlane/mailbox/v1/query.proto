@@ -22,6 +22,12 @@ service Query {
   rpc CurrentTree(QueryCurrentTreeRequest) returns (QueryCurrentTreeResponse) {
     option (google.api.http).get = "/hyperlane/mailbox/v1/tree";
   }
+
+  // Check if message was delivered
+  rpc MsgDelivered(QueryMsgDeliveredRequest)
+      returns (QueryMsgDeliveredResponse) {
+    option (google.api.http).get = "/hyperlane/mailbox/v1/delivered";
+  }
 }
 
 // QueryCurrentTreeMetadataRequest is the request type for the Query/Tree
@@ -50,3 +56,10 @@ message QueryDomainRequest {}
 
 // QueryDomainResponse is the response type for the Query/Domain RPC method.
 message QueryDomainResponse { uint32 domain = 1; }
+
+// QueryMsgDeliveredRequest is the request type to check if message was
+// delivered
+message QueryMsgDeliveredRequest { bytes message_id = 1; }
+
+// QueryMsgDeliveredResponse is the response type if message was delivered
+message QueryMsgDeliveredResponse { bool delivered = 1; }

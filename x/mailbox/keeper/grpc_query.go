@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
@@ -31,11 +32,6 @@ func (k Keeper) CurrentTree(c context.Context, req *types.QueryCurrentTreeReques
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	/*branches := [][]byte{}
-	for _, branch := range k.Tree.GetProofForNextIndex() {
-		branches = append(branches, branch[:])
-	}*/
-
 	return &types.QueryCurrentTreeResponse{
 		Branches: k.Tree.Branch[:],
 		Count:    k.Tree.Count(),
@@ -55,5 +51,25 @@ func (k Keeper) Domain(c context.Context, req *types.QueryDomainRequest) (*types
 
 	return &types.QueryDomainResponse{
 		Domain: domain,
+	}, nil
+}
+
+// MsgDelivered implements the Query/MsgDelivered gRPC method
+func (k Keeper) MsgDelivered(c context.Context, req *types.QueryMsgDeliveredRequest) (*types.QueryMsgDeliveredResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	delivered := false
+	msgId := hexutil.Encode(req.MessageId)
+
+	ctx := sdk.UnwrapSDKContext(c)
+	store := ctx.KVStore(k.storeKey)
+	if store.Has(types.MailboxDeliveredKey(msgId)) {
+		delivered = true
+	}
+
+	return &types.QueryMsgDeliveredResponse{
+		Delivered: delivered,
 	}, nil
 }
