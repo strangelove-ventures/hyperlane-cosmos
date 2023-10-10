@@ -89,7 +89,6 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	// Get the Message Body
 	messageBytes := hexutil.MustDecode(msg.MessageBody)
 	if len(messageBytes) > MAX_MESSAGE_BODY_BYTES {
-		fmt.Println("Error: Message body too long")
 		return nil, types.ErrMsgTooLong
 	}
 	message = append(message, messageBytes...)
