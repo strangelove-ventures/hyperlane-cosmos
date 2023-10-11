@@ -30,8 +30,12 @@ func announceCmd() *cobra.Command {
 			storageLocation := args[1]
 			sigHex := args[2]
 
-			_, valHex, _ = strings.Cut(valHex, "0x") // remove any 0x prefixes so we can properly decode
-			_, sigHex, _ = strings.Cut(sigHex, "0x") // remove any 0x prefixes so we can properly decode
+			if strings.Contains(valHex, "0x") {
+				_, valHex, _ = strings.Cut(valHex, "0x") // remove any 0x prefixes so we can properly decode
+			}
+			if strings.Contains(sigHex, "0x") {
+				_, sigHex, _ = strings.Cut(sigHex, "0x") // remove any 0x prefixes so we can properly decode
+			}
 
 			address, err := hex.DecodeString(valHex)
 			if err != nil {

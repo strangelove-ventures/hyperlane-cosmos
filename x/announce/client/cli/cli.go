@@ -7,7 +7,7 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 )
 
-// GetQueryCmd returns the query commands for Hyperlane IGP module commands
+// GetQueryCmd returns the query commands for Hyperlane announce module commands
 func GetQueryCmd() *cobra.Command {
 	queryCmd := &cobra.Command{
 		Use:                        types.ModuleName,
@@ -24,7 +24,7 @@ func GetQueryCmd() *cobra.Command {
 	return queryCmd
 }
 
-// NewTxCmd returns a CLI command handler for all Hyperlane IGP module transaction commands.
+// NewTxCmd returns a CLI command handler for all Hyperlane announce module transaction commands.
 func NewTxCmd() *cobra.Command {
 	txCmd := &cobra.Command{
 		Use:                        types.ModuleName,

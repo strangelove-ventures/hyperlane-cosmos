@@ -38,16 +38,12 @@ func preconfigureHyperlane(t *testing.T, node *hyperlane.HyperlaneChainConfig, t
 	return valJson, nil
 }
 
-// "cosmosKey": {
-// "cosmosModules": {
-// "bech32_address": "%s"
-// "base_denom": "stake",
 func generateHyperlaneValidatorConfig(bech32, privKey, chainID, chainName, rpcUrl, grpcUrl string, originMailboxHex string, domain uint32) string {
 	rawJson := `{
 		"chains": {
 		  "%s": {
 			"connection": { "rpc_url": "%s", "grpc_url": "%s", "chain_id": "%s" },
-			"signer": { "type":"cosmosKey", "key": "%s", "prefix": "cosmos", "base_denom": "stake"},
+			"signer": { "type":"cosmosKey", "key": "%s", "prefix": "cosmos", "baseDenom": "stake"},
 			"name": "%s",
 			"domain": %d,
 			"addresses": {

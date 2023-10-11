@@ -6,7 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
 )
 
-// RegisterInterfaces registers the hyperlane igp implementations and interfaces.
+// RegisterInterfaces registers the hyperlane announce implementations and interfaces.
 func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 	registry.RegisterImplementations(
 		(*sdk.Msg)(nil),

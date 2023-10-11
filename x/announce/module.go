@@ -29,12 +29,12 @@ var (
 // a no-op.
 type AppModuleBasic struct{}
 
-// Name returns the hyperlane IGP module name.
+// Name returns the hyperlane announce module name.
 func (AppModuleBasic) Name() string {
 	return types.ModuleName
 }
 
-// RegisterLegacyAminoCodec performs a no-op. Hyperlane IGP does not support amino.
+// RegisterLegacyAminoCodec performs a no-op. Hyperlane announce does not support amino.
 func (AppModuleBasic) RegisterLegacyAminoCodec(*codec.LegacyAmino) {}
 
 // RegisterInterfaces registers module concrete types into protobuf Any.

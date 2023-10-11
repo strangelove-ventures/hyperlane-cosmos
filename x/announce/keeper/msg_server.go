@@ -11,7 +11,7 @@ import (
 
 var _ types.MsgServer = (*Keeper)(nil)
 
-// NewMsgServerImpl return an implementation of the igp MsgServer interface for the provided keeper
+// NewMsgServerImpl return an implementation of the announce MsgServer interface for the provided keeper
 func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 	return keeper
 }
