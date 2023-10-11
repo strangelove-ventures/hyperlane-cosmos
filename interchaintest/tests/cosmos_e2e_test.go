@@ -503,5 +503,7 @@ func TestAnnounce(t *testing.T) {
 	// (2) Now use the validator 'announce' module to check if the validator announcement succeeded.
 	announcedValidators := helpers.QueryAnnouncedValidators(t, ctx, simd1)
 	announcedVals := string(announcedValidators)
+	valExpected := string(valAddr.Bytes())
+	require.Contains(t, announcedVals, valExpected)
 	fmt.Printf(announcedVals)
 }
