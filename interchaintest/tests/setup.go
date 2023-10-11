@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	announcetypes "github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 
 	igptypes "github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
 
@@ -46,6 +47,7 @@ func hyperlaneEncoding() *testutil.TestEncodingConfig {
 	message_id_multisig.RegisterInterfaces(cfg.InterfaceRegistry)
 	legacy_multisig.RegisterInterfaces(cfg.InterfaceRegistry)
 	igptypes.RegisterInterfaces(cfg.InterfaceRegistry)
+	announcetypes.RegisterInterfaces(cfg.InterfaceRegistry)
 
 	return &cfg
 }

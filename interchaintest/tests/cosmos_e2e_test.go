@@ -501,6 +501,7 @@ func TestAnnounce(t *testing.T) {
 	require.Equal(t, evtValAddr, valAddrHex)
 
 	// (2) Now use the validator 'announce' module to check if the validator announcement succeeded.
-	// announcedValidators := helpers.QueryAnnouncedValidators(t, ctx, simd1)
-	// fmt.Printf(string(announcedValidators))
+	announcedValidators := helpers.QueryAnnouncedValidators(t, ctx, simd1)
+	announcedVals := string(announcedValidators)
+	fmt.Printf(announcedVals)
 }
