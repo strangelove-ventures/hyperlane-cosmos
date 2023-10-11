@@ -20,7 +20,7 @@ func getAnnouncedStorageLocations() *cobra.Command {
 		Use:     "getAnnouncedStorageLocations <validator_address_hex_csv>",
 		Short:   "getAnnouncedStorageLocations",
 		Long:    "getAnnouncedStorageLocations - get announced storage locations given a comma separated list of hex validator addresses",
-		Example: fmt.Sprintf("%s query %s tree", version.AppName, types.ModuleName),
+		Example: fmt.Sprintf("%s query %s getAnnouncedStorageLocations 0xAAAAAAAAAAAA", version.AppName, types.ModuleName),
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
@@ -60,7 +60,7 @@ func getAnnouncedValidators() *cobra.Command {
 		Use:     "getAnnouncedValidators",
 		Short:   "getAnnouncedValidators",
 		Long:    "getAnnouncedValidators - get a list of all announced validators",
-		Example: fmt.Sprintf("%s query %s tree", version.AppName, types.ModuleName),
+		Example: fmt.Sprintf("%s query %s getAnnouncedValidators", version.AppName, types.ModuleName),
 		Args:    cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)

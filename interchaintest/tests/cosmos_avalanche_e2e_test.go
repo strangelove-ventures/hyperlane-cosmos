@@ -250,7 +250,7 @@ func TestHyperlaneAvalancheCosmosDispatch(t *testing.T) {
 	prefixedMailboxHex := "0x" + mailboxHex
 	require.NoError(t, err)
 
-	_, err = preconfigureHyperlane(t, valSimd1, tmpDir1, "simd1", chains[0].GetHostRPCAddress(), chains[0].GetHostGRPCAddress(), prefixedMailboxHex, domain)
+	_, err = preconfigureHyperlane(t, valSimd1, tmpDir1, "bech32address", "privKey", "simd1", "simd1", chains[0].GetHostRPCAddress(), chains[0].GetHostGRPCAddress(), prefixedMailboxHex, domain)
 	require.NoError(t, err)
 
 	logger := NewLogger(t)

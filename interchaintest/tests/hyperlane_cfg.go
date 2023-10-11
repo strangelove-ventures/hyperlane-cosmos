@@ -15,13 +15,13 @@ import (
 // chainName e.g. simd1 or simd2
 // rpcUrl is the node RPC endpoint for e.g. simd1
 // hyperlaneDomain is the chain's hyperlane domain, as configured in the chain app state or genesis
-func preconfigureHyperlane(t *testing.T, node *hyperlane.HyperlaneChainConfig, tmpDir string, chainName string, chainRpcUrl string, chainGrpcUrl string, originMailbox string, hyperlaneDomain uint32) (valJson string, err error) {
+func preconfigureHyperlane(t *testing.T, node *hyperlane.HyperlaneChainConfig, tmpDir string, bech32 string, privKey string, chainID string, chainName string, chainRpcUrl string, chainGrpcUrl string, originMailbox string, hyperlaneDomain uint32) (valJson string, err error) {
 	hyperlaneConfigPath := filepath.Join(tmpDir, chainName+".json")
 	fmt.Printf("Chain: %s, RPC Uri: %s, GRPC Uri: %s\n", chainName, chainRpcUrl, chainGrpcUrl)
 
 	// Write the hyperlane CONFIG_FILES to disk where the bind mount will expect it.
 	// See also https://docs.hyperlane.xyz/docs/operators/agent-configuration#config-files-with-docker.
-	valJson = generateHyperlaneValidatorConfig(chainName, chainRpcUrl, chainGrpcUrl, originMailbox, hyperlaneDomain)
+	valJson = generateHyperlaneValidatorConfig(bech32, privKey, chainID, chainName, chainRpcUrl, chainGrpcUrl, originMailbox, hyperlaneDomain)
 	err = os.WriteFile(hyperlaneConfigPath, []byte(valJson), 777)
 	if err != nil {
 		return "", err
@@ -38,11 +38,16 @@ func preconfigureHyperlane(t *testing.T, node *hyperlane.HyperlaneChainConfig, t
 	return valJson, nil
 }
 
-func generateHyperlaneValidatorConfig(chainName, rpcUrl, grpcUrl string, originMailboxHex string, domain uint32) string {
+// "cosmosKey": {
+// "cosmosModules": {
+// "bech32_address": "%s"
+// "base_denom": "stake",
+func generateHyperlaneValidatorConfig(bech32, privKey, chainID, chainName, rpcUrl, grpcUrl string, originMailboxHex string, domain uint32) string {
 	rawJson := `{
 		"chains": {
 		  "%s": {
-			"connection": { "rpc_url": "%s", "grpc_url": "%s" },
+			"connection": { "rpc_url": "%s", "grpc_url": "%s", "chain_id": "%s" },
+			"signer": { "type":"cosmosKey", "key": "%s", "prefix": "cosmos", "base_denom": "stake"},
 			"name": "%s",
 			"domain": %d,
 			"addresses": {
@@ -55,7 +60,7 @@ func generateHyperlaneValidatorConfig(chainName, rpcUrl, grpcUrl string, originM
 		  }
 		}
 	  }`
-	return fmt.Sprintf(rawJson, chainName, rpcUrl, grpcUrl, chainName, domain, originMailboxHex)
+	return fmt.Sprintf(rawJson, chainName, rpcUrl, grpcUrl, chainID, privKey, chainName, domain, originMailboxHex)
 }
 
 func getMailbox(valJson string, chain string) (mailbox string, err error) {

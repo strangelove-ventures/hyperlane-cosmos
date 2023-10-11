@@ -129,6 +129,10 @@ import (
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
 	// Hyperlane dependencies
+	announce "github.com/strangelove-ventures/hyperlane-cosmos/x/announce"
+	announcekeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/announce/keeper"
+	announcetypes "github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
+
 	igp "github.com/strangelove-ventures/hyperlane-cosmos/x/igp"
 	igpkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/igp/keeper"
 	igptypes "github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
@@ -239,6 +243,7 @@ var (
 		mailbox.AppModuleBasic{},
 		ism.AppModuleBasic{},
 		igp.AppModuleBasic{},
+		announce.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -303,6 +308,7 @@ type SimApp struct {
 	MailboxKeeper       mailboxkeeper.Keeper
 	IsmKeeper           ismkeeper.Keeper
 	IgpKeeper           igpkeeper.Keeper
+	AnnounceKeeper      announcekeeper.Keeper
 
 	ScopedIBCKeeper           capabilitykeeper.ScopedKeeper
 	ScopedICAHostKeeper       capabilitykeeper.ScopedKeeper
@@ -354,7 +360,7 @@ func NewSimApp(
 		ibcexported.StoreKey, ibctransfertypes.StoreKey, ibcfeetypes.StoreKey,
 		wasm.StoreKey, icahosttypes.StoreKey,
 		icacontrollertypes.StoreKey, mailboxtypes.StoreKey, ismtypes.StoreKey,
-		igptypes.StoreKey,
+		igptypes.StoreKey, announcetypes.StoreKey,
 	)
 
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -631,10 +637,10 @@ func NewSimApp(
 
 	// TODO: How are the domains registered selected.. using 12345 as a placeholder
 	// domain := uint32(12345)
-
 	app.IgpKeeper = igpkeeper.NewKeeper(appCodec, keys[igptypes.StoreKey], app.BankKeeper.(bankkeeper.SendKeeper), app.StakingKeeper, "")
 	app.IsmKeeper = ismkeeper.NewKeeper(appCodec, keys[ismtypes.StoreKey], authtypes.NewModuleAddress(govtypes.ModuleName).String())
 	app.MailboxKeeper = mailboxkeeper.NewKeeper(appCodec, keys[mailboxtypes.StoreKey], &app.WasmKeeper, &app.IsmKeeper)
+	app.AnnounceKeeper = announcekeeper.NewKeeper(appCodec, keys[announcetypes.StoreKey], app.MailboxKeeper)
 	// app.MailboxKeeper.SetDomain(domain)
 
 	// The gov proposal types can be individually enabled
@@ -718,6 +724,7 @@ func NewSimApp(
 		mailbox.NewAppModule(app.MailboxKeeper),
 		ism.NewAppModule(app.IsmKeeper),
 		igp.NewAppModule(app.IgpKeeper),
+		announce.NewAppModule(app.AnnounceKeeper),
 		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
 	)
 
@@ -741,6 +748,7 @@ func NewSimApp(
 		mailboxtypes.ModuleName,
 		ismtypes.ModuleName,
 		igptypes.ModuleName,
+		announcetypes.ModuleName,
 	)
 
 	app.ModuleManager.SetOrderEndBlockers(
@@ -759,6 +767,7 @@ func NewSimApp(
 		mailboxtypes.ModuleName,
 		ismtypes.ModuleName,
 		igptypes.ModuleName,
+		announcetypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -785,6 +794,7 @@ func NewSimApp(
 		mailboxtypes.ModuleName,
 		ismtypes.ModuleName,
 		igptypes.ModuleName,
+		announcetypes.ModuleName,
 	}
 	app.ModuleManager.SetOrderInitGenesis(genesisModuleOrder...)
 	app.ModuleManager.SetOrderExportGenesis(genesisModuleOrder...)

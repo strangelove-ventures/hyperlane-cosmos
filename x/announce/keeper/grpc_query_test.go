@@ -6,7 +6,9 @@ import (
 
 func (suite *KeeperTestSuite) TestQueryAnnouncements() {
 	suite.SetupTest(suite.T())
-	msg, _, err := suite.mockAnnounce()
+	valPrivKey := "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61" // Testing only, do NOT use
+	mailbox := suite.mailboxKeeper.GetMailboxAddress()
+	msg, _, err := suite.mockAnnounce(valPrivKey, mailbox)
 	suite.Require().NoError(err)
 	req := &types.GetAnnouncedValidatorsRequest{}
 	resp, err := suite.queryClient.GetAnnouncedValidators(suite.ctx, req)

@@ -14,9 +14,9 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 
-	"github.com/strangelove-ventures/hyperlane-cosmos/x/igp/client/cli"
-	"github.com/strangelove-ventures/hyperlane-cosmos/x/igp/keeper"
-	"github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/client/cli"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/keeper"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 )
 
 var (
