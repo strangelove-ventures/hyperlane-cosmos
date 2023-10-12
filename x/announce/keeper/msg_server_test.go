@@ -6,6 +6,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/crypto"
+
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 )

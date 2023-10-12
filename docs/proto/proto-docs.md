@@ -4,43 +4,87 @@
 
 ## Table of Contents
 
-- [hyperlane/announce/v1/genesis.proto](#hyperlane/announce/v1/genesis.proto)
-    - [GenesisState](#hyperlane.announce.v1.GenesisState)
+- [hyperlane/ism/v1/ism.proto](#hyperlane/ism/v1/ism.proto)
+    - [Ism](#hyperlane.ism.v1.Ism)
   
-- [hyperlane/announce/v1/types.proto](#hyperlane/announce/v1/types.proto)
-    - [StorageMetadata](#hyperlane.announce.v1.StorageMetadata)
-    - [StoredAnnouncement](#hyperlane.announce.v1.StoredAnnouncement)
-    - [StoredAnnouncements](#hyperlane.announce.v1.StoredAnnouncements)
+- [hyperlane/ism/v1/genesis.proto](#hyperlane/ism/v1/genesis.proto)
+    - [GenesisState](#hyperlane.ism.v1.GenesisState)
   
-- [hyperlane/announce/v1/query.proto](#hyperlane/announce/v1/query.proto)
-    - [GetAnnouncedStorageLocationsRequest](#hyperlane.announce.v1.GetAnnouncedStorageLocationsRequest)
-    - [GetAnnouncedStorageLocationsResponse](#hyperlane.announce.v1.GetAnnouncedStorageLocationsResponse)
-    - [GetAnnouncedValidatorsRequest](#hyperlane.announce.v1.GetAnnouncedValidatorsRequest)
-    - [GetAnnouncedValidatorsResponse](#hyperlane.announce.v1.GetAnnouncedValidatorsResponse)
+- [hyperlane/ism/v1/legacy_multisig.proto](#hyperlane/ism/v1/legacy_multisig.proto)
+    - [LegacyMultiSig](#hyperlane.ism.v1.LegacyMultiSig)
   
-    - [Query](#hyperlane.announce.v1.Query)
+- [hyperlane/ism/v1/merkle_root_multisig.proto](#hyperlane/ism/v1/merkle_root_multisig.proto)
+    - [MerkleRootMultiSig](#hyperlane.ism.v1.MerkleRootMultiSig)
   
-- [hyperlane/announce/v1/tx.proto](#hyperlane/announce/v1/tx.proto)
-    - [MsgAnnouncement](#hyperlane.announce.v1.MsgAnnouncement)
-    - [MsgAnnouncementResponse](#hyperlane.announce.v1.MsgAnnouncementResponse)
+- [hyperlane/ism/v1/message_id_multisig.proto](#hyperlane/ism/v1/message_id_multisig.proto)
+    - [MessageIdMultiSig](#hyperlane.ism.v1.MessageIdMultiSig)
   
-    - [Msg](#hyperlane.announce.v1.Msg)
+- [hyperlane/ism/v1/query.proto](#hyperlane/ism/v1/query.proto)
+    - [QueryAllDefaultIsmsRequest](#hyperlane.ism.v1.QueryAllDefaultIsmsRequest)
+    - [QueryAllDefaultIsmsResponse](#hyperlane.ism.v1.QueryAllDefaultIsmsResponse)
+    - [QueryOriginsDefaultIsmRequest](#hyperlane.ism.v1.QueryOriginsDefaultIsmRequest)
+    - [QueryOriginsDefaultIsmResponse](#hyperlane.ism.v1.QueryOriginsDefaultIsmResponse)
+  
+    - [Query](#hyperlane.ism.v1.Query)
+  
+- [hyperlane/ism/v1/tx.proto](#hyperlane/ism/v1/tx.proto)
+    - [MsgSetDefaultIsm](#hyperlane.ism.v1.MsgSetDefaultIsm)
+    - [MsgSetDefaultIsmResponse](#hyperlane.ism.v1.MsgSetDefaultIsmResponse)
+  
+    - [Msg](#hyperlane.ism.v1.Msg)
   
 - [Scalar Value Types](#scalar-value-types)
 
 
 
-<a name="hyperlane/announce/v1/genesis.proto"></a>
+<a name="hyperlane/ism/v1/ism.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/announce/v1/genesis.proto
+## hyperlane/ism/v1/ism.proto
 
 
 
-<a name="hyperlane.announce.v1.GenesisState"></a>
+<a name="hyperlane.ism.v1.Ism"></a>
+
+### Ism
+Hyperlane's default ISM
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `origin` | [uint32](#uint32) |  |  |
+| `abstract_ism` | [google.protobuf.Any](#google.protobuf.Any) |  |  |
+
+
+
+
+
+ <!-- end messages -->
+
+ <!-- end enums -->
+
+ <!-- end HasExtensions -->
+
+ <!-- end services -->
+
+
+
+<a name="hyperlane/ism/v1/genesis.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## hyperlane/ism/v1/genesis.proto
+
+
+
+<a name="hyperlane.ism.v1.GenesisState"></a>
 
 ### GenesisState
-Hyperlane Announce's keeper genesis state
+Hyperlane ISM's keeper genesis state
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `default_ism` | [Ism](#hyperlane.ism.v1.Ism) | repeated | Genesis default ISM |
 
 
 
@@ -56,53 +100,23 @@ Hyperlane Announce's keeper genesis state
 
 
 
-<a name="hyperlane/announce/v1/types.proto"></a>
+<a name="hyperlane/ism/v1/legacy_multisig.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/announce/v1/types.proto
+## hyperlane/ism/v1/legacy_multisig.proto
 
 
 
-<a name="hyperlane.announce.v1.StorageMetadata"></a>
+<a name="hyperlane.ism.v1.LegacyMultiSig"></a>
 
-### StorageMetadata
-Helper type for Hyperlane's getAnnouncedStorageLocations.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `metadata` | [string](#string) | repeated |  |
-
-
-
-
-
-
-<a name="hyperlane.announce.v1.StoredAnnouncement"></a>
-
-### StoredAnnouncement
-Helper type for Hyperlane's Announcement.
+### LegacyMultiSig
+LegacyMultiSig ISM for a specific origin
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `storage_location` | [string](#string) |  | location where signatures will be stored |
-| `signature` | [bytes](#bytes) |  | signed validator announcement |
-
-
-
-
-
-
-<a name="hyperlane.announce.v1.StoredAnnouncements"></a>
-
-### StoredAnnouncements
-Helper type for Hyperlane's Announcement.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `announcement` | [StoredAnnouncement](#hyperlane.announce.v1.StoredAnnouncement) | repeated |  |
+| `validator_pub_keys` | [string](#string) | repeated | Validator pub keys |
+| `threshold` | [uint32](#uint32) |  | number of validators required |
 
 
 
@@ -118,66 +132,128 @@ Helper type for Hyperlane's Announcement.
 
 
 
-<a name="hyperlane/announce/v1/query.proto"></a>
+<a name="hyperlane/ism/v1/merkle_root_multisig.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/announce/v1/query.proto
+## hyperlane/ism/v1/merkle_root_multisig.proto
 
 
 
-<a name="hyperlane.announce.v1.GetAnnouncedStorageLocationsRequest"></a>
+<a name="hyperlane.ism.v1.MerkleRootMultiSig"></a>
 
-### GetAnnouncedStorageLocationsRequest
-GetAnnouncedStorageLocationsRequest is the request type for the
-GetAnnouncedStorageLocations RPC method.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `validator` | [bytes](#bytes) | repeated | list of validators where each validator is in eth address format (20 bytes) |
-
-
-
-
-
-
-<a name="hyperlane.announce.v1.GetAnnouncedStorageLocationsResponse"></a>
-
-### GetAnnouncedStorageLocationsResponse
-GetAnnouncedStorageLocationsResponse is the response type for the
-GetAnnouncedStorageLocations RPC method.
+### MerkleRootMultiSig
+MerkleRootMultiSig ISM for a specific origin
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `metadata` | [StorageMetadata](#hyperlane.announce.v1.StorageMetadata) | repeated |  |
+| `validator_pub_keys` | [string](#string) | repeated | Validator pub keys |
+| `threshold` | [uint32](#uint32) |  | number of validators required |
 
 
 
 
 
+ <!-- end messages -->
 
-<a name="hyperlane.announce.v1.GetAnnouncedValidatorsRequest"></a>
+ <!-- end enums -->
 
-### GetAnnouncedValidatorsRequest
-GetAnnouncedValidatorsRequest is the request type for the
-GetAnnouncedValidators RPC method.
+ <!-- end HasExtensions -->
 
-
-
+ <!-- end services -->
 
 
 
-<a name="hyperlane.announce.v1.GetAnnouncedValidatorsResponse"></a>
+<a name="hyperlane/ism/v1/message_id_multisig.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
 
-### GetAnnouncedValidatorsResponse
-GetAnnouncedValidatorsResponse is the response type for the
-GetAnnouncedValidators RPC method.
+## hyperlane/ism/v1/message_id_multisig.proto
+
+
+
+<a name="hyperlane.ism.v1.MessageIdMultiSig"></a>
+
+### MessageIdMultiSig
+MessageIdMultiSig ISM for a specific origin
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `validator` | [bytes](#bytes) | repeated | list of validators where each validator is in eth address format (20 bytes) |
+| `validator_pub_keys` | [string](#string) | repeated | Validator pub keys |
+| `threshold` | [uint32](#uint32) |  | number of validators required |
+
+
+
+
+
+ <!-- end messages -->
+
+ <!-- end enums -->
+
+ <!-- end HasExtensions -->
+
+ <!-- end services -->
+
+
+
+<a name="hyperlane/ism/v1/query.proto"></a>
+<p align="right"><a href="#top">Top</a></p>
+
+## hyperlane/ism/v1/query.proto
+
+
+
+<a name="hyperlane.ism.v1.QueryAllDefaultIsmsRequest"></a>
+
+### QueryAllDefaultIsmsRequest
+QueryAllDefaultIsmRequest is the request type for the AllDefaultIsms RPC
+method.
+
+
+
+
+
+
+<a name="hyperlane.ism.v1.QueryAllDefaultIsmsResponse"></a>
+
+### QueryAllDefaultIsmsResponse
+QueryAllDefaultIsmResponse is the response type for the AllDefaultIsms RPC
+method.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `default_isms` | [Ism](#hyperlane.ism.v1.Ism) | repeated |  |
+
+
+
+
+
+
+<a name="hyperlane.ism.v1.QueryOriginsDefaultIsmRequest"></a>
+
+### QueryOriginsDefaultIsmRequest
+QueryDefaultIsmRequest is the request type for the DefaultIsm RPC method.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `origin` | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="hyperlane.ism.v1.QueryOriginsDefaultIsmResponse"></a>
+
+### QueryOriginsDefaultIsmResponse
+QueryDefaultIsmResponse is the response type for the DefaultIsm RPC method.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `default_ism` | [google.protobuf.Any](#google.protobuf.Any) |  |  |
 
 
 
@@ -190,49 +266,47 @@ GetAnnouncedValidators RPC method.
  <!-- end HasExtensions -->
 
 
-<a name="hyperlane.announce.v1.Query"></a>
+<a name="hyperlane.ism.v1.Query"></a>
 
 ### Query
-Query service for hyperlane announce module
+Query service for hyperlane ISM module
 
 | Method Name | Request Type | Response Type | Description | HTTP Verb | Endpoint |
 | ----------- | ------------ | ------------- | ------------| ------- | -------- |
-| `GetAnnouncedStorageLocations` | [GetAnnouncedStorageLocationsRequest](#hyperlane.announce.v1.GetAnnouncedStorageLocationsRequest) | [GetAnnouncedStorageLocationsResponse](#hyperlane.announce.v1.GetAnnouncedStorageLocationsResponse) | Gets the announced storage locations (where signatures are stored) for the requested validators | GET|/hyperlane/announce/v1/get_announced_storage_locations|
-| `GetAnnouncedValidators` | [GetAnnouncedValidatorsRequest](#hyperlane.announce.v1.GetAnnouncedValidatorsRequest) | [GetAnnouncedValidatorsResponse](#hyperlane.announce.v1.GetAnnouncedValidatorsResponse) | Gets a list of validators that have made announcements | GET|/hyperlane/announce/v1/get_announced_validators|
+| `OriginsDefaultIsm` | [QueryOriginsDefaultIsmRequest](#hyperlane.ism.v1.QueryOriginsDefaultIsmRequest) | [QueryOriginsDefaultIsmResponse](#hyperlane.ism.v1.QueryOriginsDefaultIsmResponse) | Get current default multisig ISM for an origin | GET|/hyperlane/ism/v1/origins_default_ism|
+| `AllDefaultIsms` | [QueryAllDefaultIsmsRequest](#hyperlane.ism.v1.QueryAllDefaultIsmsRequest) | [QueryAllDefaultIsmsResponse](#hyperlane.ism.v1.QueryAllDefaultIsmsResponse) | Get all current default multisig ISMs | GET|/hyperlane/ism/v1/all_default_isms|
 
  <!-- end services -->
 
 
 
-<a name="hyperlane/announce/v1/tx.proto"></a>
+<a name="hyperlane/ism/v1/tx.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/announce/v1/tx.proto
+## hyperlane/ism/v1/tx.proto
 
 
 
-<a name="hyperlane.announce.v1.MsgAnnouncement"></a>
+<a name="hyperlane.ism.v1.MsgSetDefaultIsm"></a>
 
-### MsgAnnouncement
-MsgAnnouncement Announces a validator signature storage location
+### MsgSetDefaultIsm
+MsgSetDefaultIsm defines the request type for the SetDefaultIsm rpc.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `sender` | [string](#string) |  |  |
-| `validator` | [bytes](#bytes) |  | The validator (in eth address format) that is announcing its storage location |
-| `storage_location` | [string](#string) |  | location where signatures will be stored |
-| `signature` | [bytes](#bytes) |  | signed validator announcement |
+| `signer` | [string](#string) |  |  |
+| `isms` | [Ism](#hyperlane.ism.v1.Ism) | repeated |  |
 
 
 
 
 
 
-<a name="hyperlane.announce.v1.MsgAnnouncementResponse"></a>
+<a name="hyperlane.ism.v1.MsgSetDefaultIsmResponse"></a>
 
-### MsgAnnouncementResponse
-MsgAnnouncementResponse defines the MsgAnnouncementResponse response type.
+### MsgSetDefaultIsmResponse
+MsgSetDefaultIsmResponse defines the Msg/SetDefaultIsm response type
 
 
 
@@ -245,14 +319,14 @@ MsgAnnouncementResponse defines the MsgAnnouncementResponse response type.
  <!-- end HasExtensions -->
 
 
-<a name="hyperlane.announce.v1.Msg"></a>
+<a name="hyperlane.ism.v1.Msg"></a>
 
 ### Msg
-Msg defines the hyperlane announce Msg service.
+Msg defines the hyperlane ISM Msg service.
 
 | Method Name | Request Type | Response Type | Description | HTTP Verb | Endpoint |
 | ----------- | ------------ | ------------- | ------------| ------- | -------- |
-| `Announcement` | [MsgAnnouncement](#hyperlane.announce.v1.MsgAnnouncement) | [MsgAnnouncementResponse](#hyperlane.announce.v1.MsgAnnouncementResponse) | Announces a validator signature storage location | |
+| `SetDefaultIsm` | [MsgSetDefaultIsm](#hyperlane.ism.v1.MsgSetDefaultIsm) | [MsgSetDefaultIsmResponse](#hyperlane.ism.v1.MsgSetDefaultIsmResponse) | SetDefaultIsm defines a rpc handler method for MsgSetDefaultIsm. | |
 
  <!-- end services -->
 

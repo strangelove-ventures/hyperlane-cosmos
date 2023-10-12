@@ -29,11 +29,11 @@ func (k Keeper) getAnnouncedValidators(ctx sdk.Context) (*types.GetAnnouncedVali
 }
 
 // setAnnouncedValidators store an announced validator
-func (k Keeper) setAnnouncedValidators(ctx sdk.Context, validator []byte) (err error) {
+func (k Keeper) setAnnouncedValidators(ctx sdk.Context, validator string) (err error) {
 	var announcedValidators *types.GetAnnouncedValidatorsResponse
 	announcedValidators, err = k.getAnnouncedValidators(ctx)
 	if err != nil {
-		announcedValidators = &types.GetAnnouncedValidatorsResponse{Validator: [][]byte{}}
+		announcedValidators = &types.GetAnnouncedValidatorsResponse{Validator: []string{}}
 	}
 	announcedValidators.Validator = append(announcedValidators.Validator, validator)
 

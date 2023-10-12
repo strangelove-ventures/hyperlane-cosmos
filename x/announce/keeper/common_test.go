@@ -4,8 +4,9 @@ import (
 	"encoding/hex"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	testutil "github.com/strangelove-ventures/hyperlane-cosmos/x/announce/testutil"
 	"go.uber.org/mock/gomock"
+
+	testutil "github.com/strangelove-ventures/hyperlane-cosmos/x/announce/testutil"
 )
 
 // init mocks of expected keepers that the announce module depends on

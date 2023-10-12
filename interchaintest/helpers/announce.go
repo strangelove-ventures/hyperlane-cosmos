@@ -4,13 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
+
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 )
 
 // simd tx hyperlane-announce announce <hex-validator-address> <storageLocation> <hex-validator-signature>
@@ -104,5 +107,22 @@ func VerifyAnnounceEvents(c *cosmos.CosmosChain, txHash string) (storageLocation
 		return "", "", errors.New("validator addr not found in TX event attrs")
 	}
 
+	return
+}
+
+func ParseEnvVar(envVar, key string) (value string) {
+	//HYP_BASE_CHECKPOINTSYNCER_PATH=${val_dir}/signatures-simd1
+	pattern := fmt.Sprintf(`(?m)^%s=(?P<val>.*)$`, key)
+	r, _ := regexp.Compile(pattern)
+
+	matches := r.FindStringSubmatch(envVar)
+	if matches == nil {
+		return
+	}
+	index := r.SubexpIndex("val")
+	if index != -1 {
+		value = matches[index]
+		value = strings.Replace(value, "\"", "", -1)
+	}
 	return
 }

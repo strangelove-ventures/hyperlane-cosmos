@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 )
 
@@ -14,10 +15,17 @@ func (suite *KeeperTestSuite) TestQueryAnnouncements() {
 	resp, err := suite.queryClient.GetAnnouncedValidators(suite.ctx, req)
 
 	suite.Require().NoError(err)
-	suite.Require().Equal(resp.Validator[0], msg.Validator)
+	suite.Require().Equal(resp.Validator[0], hexutil.Encode(msg.Validator))
+
+	vals := [][]byte{}
+	for _, val := range resp.Validator {
+		valHex, err := hexutil.Decode(val)
+		suite.Require().NoError(err)
+		vals = append(vals, valHex)
+	}
 
 	storageLocReq := &types.GetAnnouncedStorageLocationsRequest{
-		Validator: resp.Validator,
+		Validator: vals,
 	}
 	storageLocResp, err := suite.queryClient.GetAnnouncedStorageLocations(suite.ctx, storageLocReq)
 	suite.Require().NoError(err)

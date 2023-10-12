@@ -7,6 +7,7 @@ import (
 	tmtime "github.com/cometbft/cometbft/types/time"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/testutil"
+
 	announcetestutil "github.com/strangelove-ventures/hyperlane-cosmos/x/announce/testutil"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"

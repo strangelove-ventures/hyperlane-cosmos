@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+
 	announcetypes "github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 
 	igptypes "github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"

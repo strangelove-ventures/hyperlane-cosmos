@@ -28,7 +28,8 @@ service Query {
 // GetAnnouncedStorageLocationsRequest is the request type for the
 // GetAnnouncedStorageLocations RPC method.
 message GetAnnouncedStorageLocationsRequest {
-  // list of validators where each validator is in eth address format (20 bytes)
+  // list of validators where each validator is in hex-encoded eth address
+  // format (20 bytes)
   repeated bytes validator = 1;
 }
 
@@ -45,6 +46,7 @@ message GetAnnouncedValidatorsRequest {}
 // GetAnnouncedValidatorsResponse is the response type for the
 // GetAnnouncedValidators RPC method.
 message GetAnnouncedValidatorsResponse {
-  // list of validators where each validator is in eth address format (20 bytes)
-  repeated bytes validator = 1;
+  // list of validators where each validator is in hex-encoded eth address
+  // format (20 bytes)
+  repeated string validator = 1;
 }

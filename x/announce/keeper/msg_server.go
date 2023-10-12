@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 )
@@ -51,7 +52,8 @@ func (k Keeper) Announcement(goCtx context.Context, msg *types.MsgAnnouncement) 
 		Signature:       msg.Signature,
 	})
 
-	err = k.setAnnouncedValidators(ctx, msg.Validator)
+	valHex := hexutil.Encode(msg.Validator)
+	err = k.setAnnouncedValidators(ctx, valHex)
 	if err != nil {
 		return nil, types.ErrMarshalAnnouncedValidators
 	}

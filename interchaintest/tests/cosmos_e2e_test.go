@@ -26,7 +26,6 @@ import (
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
-	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
 
@@ -411,7 +410,8 @@ func TestAnnounce(t *testing.T) {
 	simd2Domain, err := strconv.ParseUint(simd2DomainStr, 10, 64)
 	require.NoError(t, err)
 	fmt.Printf("simd mailbox domain: %d, simd2 mailbox domain: %d\n", simdDomain, simd2Domain)
-	announceWallet, err := icv7.GetAndFundTestUserWithMnemonic(ctx, "valannounce", mnemonic, int64(10_000_000_000), simd1)
+	_, err = icv7.GetAndFundTestUserWithMnemonic(ctx, "valannounce", mnemonic, int64(10_000_000_000), simd1)
+	//announceWallet, err := icv7.GetAndFundTestUserWithMnemonic(ctx, "valannounce", mnemonic, int64(10_000_000_000), simd1)
 	require.NoError(t, err)
 
 	userSimd := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd1)[0]
@@ -469,7 +469,7 @@ func TestAnnounce(t *testing.T) {
 
 	valJson, err = preconfigureHyperlane(t, valSimd2, tmpDir2, bech32Addr, mnemonicPrivKey, chains[1].Config().ChainID, chains[1].Config().Name, chains[1].GetRPCAddress(), "http://"+chains[1].GetGRPCAddress(), prefixedMailboxHex, 34567)
 	require.NoError(t, err)
-	//simd1ValidatorSignaturesDir := filepath.Join(tmpDir1, "signatures-"+chains[0].Config().Name) //${val_dir}/signatures-${chainName}
+	// simd1ValidatorSignaturesDir := filepath.Join(tmpDir1, "signatures-"+chains[0].Config().Name) //${val_dir}/signatures-${chainName}
 
 	// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build .".
 	// Also make sure that the tags in hyperlane.yaml match the local docker image repo and version.
@@ -477,33 +477,66 @@ func TestAnnounce(t *testing.T) {
 	err = hyperlaneNetwork.Build(ctx, logger, eRep, opts, *valSimd1, *valSimd2)
 	require.NoError(t, err)
 
-	// Give the hyperlane validators time to start up and start watching the mailbox for the chain
+	// Give the hyperlane validators time to start up and start watching the announcements for the chain
 	time.Sleep(10 * time.Second)
 
 	validatorPrivateKey, err := crypto.HexToECDSA(valPrivKey)
 	require.NoError(t, err)
 	valAddr := crypto.PubkeyToAddress(validatorPrivateKey.PublicKey)
-	valAddrHex := hex.EncodeToString(valAddr.Bytes())
-	storageLocation := "file:///tmp//signatures-simd1"
+	//valAddrHex := hex.EncodeToString(valAddr.Bytes())
+	//storageLocation := "file:///tmp//signatures-simd1"
 
-	digest, err := types.GetAnnouncementDigest(uint32(simdDomain), simd1Mailbox, storageLocation)
-	require.NoError(t, err)
-	valSignature := simd1IsmValidator.Sign(digest)
-	valSigHex := hex.EncodeToString(valSignature)
+	//digest, err := types.GetAnnouncementDigest(uint32(simdDomain), simd1Mailbox, storageLocation)
+	//require.NoError(t, err)
+	//valSignature := simd1IsmValidator.Sign(digest)
+	//valSigHex := hex.EncodeToString(valSignature)
 
 	// Announcement sends the announcement to the chain
-	processStdout := helpers.CallAnnounceMsg(t, ctx, simd1, announceWallet.KeyName(), valAddrHex, storageLocation, valSigHex)
-	announcementTxHash := helpers.ParseTxHash(string(processStdout))
-	fmt.Printf(announcementTxHash)
-	evtStorageLocation, evtValAddr, err := helpers.VerifyAnnounceEvents(simd1, announcementTxHash)
+	// processStdout := helpers.CallAnnounceMsg(t, ctx, simd1, announceWallet.KeyName(), valAddrHex, storageLocation, valSigHex)
+	// announcementTxHash := helpers.ParseTxHash(string(processStdout))
+	// fmt.Printf(announcementTxHash)
+	// evtStorageLocation, evtValAddr, err := helpers.VerifyAnnounceEvents(simd1, announcementTxHash)
+	// require.NoError(t, err)
+	// require.Equal(t, evtStorageLocation, storageLocation)
+	// require.Equal(t, evtValAddr, valAddrHex)
+
+	valExpected := hexutil.Encode(valAddr.Bytes())
+	val1Env, err := valSimd1.ReadEnvFile()
 	require.NoError(t, err)
-	require.Equal(t, evtStorageLocation, storageLocation)
-	require.Equal(t, evtValAddr, valAddrHex)
+	expectedStorageLocation := envVarValByKey(val1Env, "HYP_BASE_CHECKPOINTSYNCER_PATH")
+	require.NotEmpty(t, expectedStorageLocation)
 
 	// (2) Now use the validator 'announce' module to check if the validator announcement succeeded.
-	announcedValidators := helpers.QueryAnnouncedValidators(t, ctx, simd1)
-	announcedVals := string(announcedValidators)
-	valExpected := string(valAddr.Bytes())
-	require.Contains(t, announcedVals, valExpected)
-	fmt.Printf(announcedVals)
+	err = Await(func() (bool, error) {
+		announcedValidators := helpers.QueryAnnouncedValidators(t, ctx, simd1)
+		announcedVals := string(announcedValidators)
+		hasVal := strings.Contains(announcedVals, valExpected)
+		return hasVal, nil
+	}, 1*time.Minute, 5*time.Second)
+	require.NoError(t, err)
+
+	// (3) Now get the announced storage location and ensure it matches the expected one
+	err = Await(func() (bool, error) {
+		storageLocations := helpers.QueryAnnouncedStorageLocations(t, ctx, simd1, valExpected)
+		locations := string(storageLocations)
+		hasLoc := strings.Contains(locations, expectedStorageLocation)
+		return hasLoc, nil
+	}, 1*time.Minute, 5*time.Second)
+	require.NoError(t, err)
+}
+
+func envVarValByKey(envVars []string, key string) string {
+	for _, v := range envVars {
+		res := helpers.ParseEnvVar(v, key)
+		if res != "" {
+			return res
+		}
+	}
+	return ""
+}
+
+func TestEnvRegex(t *testing.T) {
+	str := "HYP_BASE_CHECKPOINTSYNCER_PATH=/tmp/signatures-simd1"
+	v := helpers.ParseEnvVar(str, "HYP_BASE_CHECKPOINTSYNCER_PATH")
+	require.NotEmpty(t, v)
 }
