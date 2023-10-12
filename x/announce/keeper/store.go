@@ -54,7 +54,7 @@ func (k Keeper) getAnnouncements(ctx sdk.Context, validator []byte) (*types.Stor
 	announcements := &types.StoredAnnouncements{}
 
 	if announceBytes == nil {
-		return nil, errors.New("No announcements stored for validator")
+		return announcements, nil
 	}
 
 	err := announcements.Unmarshal(announceBytes)

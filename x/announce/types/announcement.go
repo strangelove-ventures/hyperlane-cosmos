@@ -61,6 +61,10 @@ func toEthSignedMessageHash(packedHash []byte) []byte {
 }
 
 func VerifyAnnouncementDigest(digest []byte, signature []byte, expectedSigner []byte) error {
+	if signature[64] >= 4 {
+		signature[64] = signature[64] - 27
+	}
+
 	sigPublicKey, err := crypto.Ecrecover(digest, signature)
 	if err != nil {
 		return err

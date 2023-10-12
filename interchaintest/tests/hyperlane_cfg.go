@@ -43,7 +43,7 @@ func generateHyperlaneValidatorConfig(bech32, privKey, chainID, chainName, rpcUr
 		"chains": {
 		  "%s": {
 			"connection": { "rpc_url": "%s", "grpc_url": "%s", "chain_id": "%s" },
-			"signer": { "type":"cosmosKey", "key": "%s", "prefix": "cosmos", "baseDenom": "stake"},
+			"signer": { "type":"cosmosKey", "key": "%s", "prefix": "cosmos", "base_denom": "stake"},
 			"name": "%s",
 			"domain": %d,
 			"addresses": {
