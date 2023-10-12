@@ -6,12 +6,10 @@ require (
 	github.com/CosmWasm/wasmd v0.40.0-rc.1.0.20230424144037-55647a1fd1f9
 	github.com/cosmos/cosmos-sdk v0.47.3
 	//github.com/docker/docker v24.0.5+incompatible
-	github.com/ethereum/go-ethereum v1.11.6
+	github.com/ethereum/go-ethereum v1.12.1
 	github.com/icza/dyno v0.0.0-20220812133438-f0b6f8a18845
 	//github.com/moby/moby v24.0.5+incompatible
 	github.com/strangelove-ventures/heighliner v0.0.0-00010101000000-000000000000
-	github.com/strangelove-ventures/hyperlane-cosmos v0.0.0-00010101000000-000000000000
-	github.com/strangelove-ventures/interchaintest/v7 v7.0.0-20230605195517-c0989e954796
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.25.0
 	google.golang.org/grpc v1.57.0
@@ -21,6 +19,8 @@ require (
 	cosmossdk.io/math v1.0.1
 	github.com/avast/retry-go/v4 v4.3.4
 	github.com/cometbft/cometbft v0.37.1
+	github.com/strangelove-ventures/hyperlane-cosmos v0.0.0-00010101000000-000000000000
+	github.com/strangelove-ventures/interchaintest/v7 v7.0.0-00010101000000-000000000000
 )
 
 require (
@@ -142,7 +142,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/hdevalence/ed25519consensus v0.1.0 // indirect
-	github.com/holiman/uint256 v1.2.2-0.20230321075855-87b91420868c // indirect
+	github.com/holiman/uint256 v1.2.3 // indirect
 	github.com/huandu/skiplist v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/improbable-eng/grpc-web v0.15.0 // indirect
@@ -245,11 +245,11 @@ require (
 	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.7.0 // indirect
-	golang.org/x/sync v0.2.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/sync v0.3.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
 	golang.org/x/term v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
-	golang.org/x/time v0.1.0 // indirect
+	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.9.3 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/api v0.114.0 // indirect
