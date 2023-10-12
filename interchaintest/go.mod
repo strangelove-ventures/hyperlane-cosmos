@@ -10,8 +10,6 @@ require (
 	github.com/icza/dyno v0.0.0-20220812133438-f0b6f8a18845
 	//github.com/moby/moby v24.0.5+incompatible
 	github.com/strangelove-ventures/heighliner v0.0.0-00010101000000-000000000000
-	github.com/strangelove-ventures/hyperlane-cosmos v0.0.0-00010101000000-000000000000
-	github.com/strangelove-ventures/interchaintest/v7 v7.0.0-20230605195517-c0989e954796
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.25.0
 	google.golang.org/grpc v1.57.0
@@ -20,7 +18,9 @@ require (
 require (
 	cosmossdk.io/math v1.0.1
 	github.com/avast/retry-go/v4 v4.3.4
-	github.com/cometbft/cometbft v0.37.1
+	github.com/cometbft/cometbft v0.37.2
+	github.com/strangelove-ventures/hyperlane-cosmos v0.0.0-00010101000000-000000000000
+	github.com/strangelove-ventures/interchaintest/v7 v7.0.0-00010101000000-000000000000
 )
 
 require (
