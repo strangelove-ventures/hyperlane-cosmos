@@ -82,6 +82,26 @@ func VerifyDispatchEvents(c *cosmos.CosmosChain, txHash string) (destDomain, rec
 	return
 }
 
+func HasEvent(ctx context.Context, c *cosmos.CosmosChain, eventName string, attrKey string, attrVal string, height uint64) (bool, error) {
+	txs, err := c.FindTxs(ctx, height)
+	if err != nil {
+		return false, err
+	}
+	for _, tx := range txs {
+		for _, evt := range tx.Events {
+			if evt.Type == eventName {
+				for _, attr := range evt.Attributes {
+					if attr.Key == attrKey && attr.Value == attrVal {
+						return true, nil
+					}
+				}
+			}
+		}
+	}
+
+	return false, nil
+}
+
 func VerifyProcessEvents(c *cosmos.CosmosChain, txHash string) (msgId string, err error) {
 	// Look up the events for the TX by hash
 	events, err := GetEvents(c, txHash)

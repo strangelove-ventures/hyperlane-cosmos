@@ -54,6 +54,10 @@ func CreateEmperorValidator(t *testing.T, domain uint32, ismType string, privKey
 	}
 }
 
+func (c *CounterChain) GetMessageId(message []byte) []byte {
+	return common.Id(message)
+}
+
 func (c *CounterChain) CreateMessage(sender string, originDomain uint32, destDomain uint32, recipient string, msg string) (message []byte, proof [imt.TreeDepth][32]byte) {
 	version := make([]byte, 1)
 	message = append(message, version...)
