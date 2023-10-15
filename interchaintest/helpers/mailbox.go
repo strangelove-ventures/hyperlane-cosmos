@@ -161,6 +161,27 @@ func QueryCurrentTreeMetadata(
 	return stdout
 }
 
+// simd query hyperlane-mailbox delivered
+func QueryMsgDelivered(
+	t *testing.T,
+	ctx context.Context,
+	chain *cosmos.CosmosChain,
+	msgId string,
+) bool {
+	cmd := []string{
+		"simd", "query", "hyperlane-mailbox", "delivered", msgId,
+		"--node", chain.GetRPCAddress(),
+		"--home", chain.HomeDir(),
+		"--chain-id", chain.Config().ChainID,
+	}
+	stdout, _, err := chain.Exec(ctx, cmd, nil)
+	require.NoError(t, err)
+
+	fmt.Println("MsgDelivered stdout: ", string(stdout))
+
+	return strings.Contains(string(stdout), "true")
+}
+
 // simd query hyperlane-mailbox tree
 func QueryCurrentTree(
 	t *testing.T,
