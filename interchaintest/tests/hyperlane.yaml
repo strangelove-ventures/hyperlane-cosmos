@@ -2,11 +2,10 @@ hyperlane-relayer:
   name: hyperlane-simd1-simd2 # hyperlane relayers can relay on multiple chains
   type: relayer
   bin: ./relayer # For heighliner built images, this should be /bin/validator
-  env-path: hyperlane-relayer-args.txt # path to the docker args file
+  env-path: hyperlane-rly.txt # path to the docker args file
   cmd-flags:
     - --db ${rly_dir}/db.txt
-    - --allowLocalCheckpointSyncers
-  bind-mounts: ${rly_dir}/db.txt:${rly_dir}/db.txt,${rly_dir}/rly.json:/config/rly.json ##${val-sig-binds}
+  bind-mounts: ${rly_dir}/db.txt:${rly_dir}/db.txt,${rly_dir}/rly.json:/config/rly.json,${val-sig-binds}
   images:
     - repository: hyperlane-monorepo
       uid-gid: 1025:1025

@@ -25,7 +25,6 @@ import (
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
-	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
 
@@ -224,7 +223,7 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 
 	// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build .".
 	// Also make sure that the tags in hyperlane.yaml match the local docker image repo and version.
-	hyperlaneNetwork := hyperlane.NewHyperlaneNetwork(false, true)
+	hyperlaneNetwork := hyperlane.NewHyperlaneNetwork(true, true)
 	err = hyperlaneNetwork.Build(ctx, logger, eRep, opts, *valSimd1, *valSimd2, *rly)
 	require.NoError(t, err)
 
@@ -242,9 +241,6 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 			MessageBody:     dispatchedMsg,
 		},
 	}
-
-	// The height where the hyperlane message is processed will be after this height
-	simd2CurrentHeight, err := simd2.Height(ctx)
 
 	// Dispatch the hyperlane message to simd1
 	dipatchMsg, err := json.Marshal(dispatchMsgStruct)
@@ -287,19 +283,11 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 	require.NoError(t, err)
 	message, _ := simd1IsmValidator.CreateMessage(dispatchSender, uint32(simdDomain), uint32(simd2Domain), bech32Recipient, string(b))
 	messageId := simd1IsmValidator.GetMessageId(message)
-	require.Equal(t, dispatchedMsgId, messageId)
+	require.Equal(t, dispatchedMsgId, hexutil.Encode(messageId))
 
-	checked := map[uint64]struct{}{}
 	err = Await(func() (bool, error) {
-		// find the next block height that we haven't searched yet
-		newHeight := simd2CurrentHeight
-		for _, ok := checked[newHeight]; ok; {
-			newHeight = newHeight + 1
-		}
-		checked[newHeight] = struct{}{}
-		// check if the given block has a TX with our Processed message
-		return helpers.HasEvent(ctx, simd2, types.EventTypeProcessId, types.AttributeKeyID, string(messageId), newHeight)
-	}, 1*time.Minute, 5*time.Second)
+		return helpers.QueryMsgDelivered(t, ctx, simd2, dispatchedMsgId), nil
+	}, 10*time.Minute, 5*time.Second)
 	require.NoError(t, err)
 }
 
