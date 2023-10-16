@@ -20,9 +20,7 @@ type Tree struct {
 
 func InitializeTree(branch [][]byte, count uint32) *Tree {
 	tree := Tree{}
-	for i := 0; i < len(branch); i++ {
-		tree.Branch[i] = branch[i]
-	}
+	copy(tree.Branch[:], branch)
 	tree.SetCount(count)
 	return &tree
 }
