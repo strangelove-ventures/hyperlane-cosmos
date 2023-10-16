@@ -21,9 +21,11 @@ func (k Keeper) CurrentTreeMetadata(c context.Context, req *types.QueryCurrentTr
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
+	tree := k.GetImtTree(c)
+
 	return &types.QueryCurrentTreeMetadataResponse{
-		Root:  k.Tree.Root(),
-		Count: k.Tree.Count(),
+		Root:  tree.Root(),
+		Count: tree.Count(),
 	}, nil
 }
 
@@ -32,9 +34,11 @@ func (k Keeper) CurrentTree(c context.Context, req *types.QueryCurrentTreeReques
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
+	tree := k.GetImtTree(c)
+
 	return &types.QueryCurrentTreeResponse{
-		Branches: k.Tree.Branch[:],
-		Count:    k.Tree.Count(),
+		Branches: tree.Branch[:],
+		Count:    tree.Count(),
 	}, nil
 }
 

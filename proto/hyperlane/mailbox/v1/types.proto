@@ -11,16 +11,7 @@ message Tree {
   // Count of items inserted to tree
   uint32 count = 1;
   // Each item inserted
-  repeated TreeEntry tree_entries = 2;
-}
-
-// Hyperlane's tree entry
-message TreeEntry {
-  option (gogoproto.goproto_getters) = false;
-  // index
-  uint32 index = 1;
-  // message
-  bytes message = 2;
+  repeated bytes branch = 2;
 }
 
 // Mailbox delivered message

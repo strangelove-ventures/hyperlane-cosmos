@@ -31,7 +31,7 @@ type Tree struct {
 	// Count of items inserted to tree
 	Count uint32 `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
 	// Each item inserted
-	TreeEntries []*TreeEntry `protobuf:"bytes,2,rep,name=tree_entries,json=treeEntries,proto3" json:"tree_entries,omitempty"`
+	Branch [][]byte `protobuf:"bytes,2,rep,name=branch,proto3" json:"branch,omitempty"`
 }
 
 func (m *Tree) Reset()         { *m = Tree{} }
@@ -72,52 +72,6 @@ func (m *Tree) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Tree proto.InternalMessageInfo
 
-// Hyperlane's tree entry
-type TreeEntry struct {
-	// index
-	Index uint32 `protobuf:"varint,1,opt,name=index,proto3" json:"index,omitempty"`
-	// message
-	Message []byte `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-}
-
-func (m *TreeEntry) Reset()         { *m = TreeEntry{} }
-func (m *TreeEntry) String() string { return proto.CompactTextString(m) }
-func (*TreeEntry) ProtoMessage()    {}
-func (*TreeEntry) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1893fbd4f98e6eb3, []int{1}
-}
-
-func (m *TreeEntry) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-
-func (m *TreeEntry) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_TreeEntry.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-
-func (m *TreeEntry) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TreeEntry.Merge(m, src)
-}
-
-func (m *TreeEntry) XXX_Size() int {
-	return m.Size()
-}
-
-func (m *TreeEntry) XXX_DiscardUnknown() {
-	xxx_messageInfo_TreeEntry.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_TreeEntry proto.InternalMessageInfo
-
 // Mailbox delivered message
 type MessageDelivered struct {
 	// Message id (hash)
@@ -128,7 +82,7 @@ func (m *MessageDelivered) Reset()         { *m = MessageDelivered{} }
 func (m *MessageDelivered) String() string { return proto.CompactTextString(m) }
 func (*MessageDelivered) ProtoMessage()    {}
 func (*MessageDelivered) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1893fbd4f98e6eb3, []int{2}
+	return fileDescriptor_1893fbd4f98e6eb3, []int{1}
 }
 
 func (m *MessageDelivered) XXX_Unmarshal(b []byte) error {
@@ -164,33 +118,29 @@ var xxx_messageInfo_MessageDelivered proto.InternalMessageInfo
 
 func init() {
 	proto.RegisterType((*Tree)(nil), "hyperlane.mailbox.v1.Tree")
-	proto.RegisterType((*TreeEntry)(nil), "hyperlane.mailbox.v1.TreeEntry")
 	proto.RegisterType((*MessageDelivered)(nil), "hyperlane.mailbox.v1.MessageDelivered")
 }
 
 func init() { proto.RegisterFile("hyperlane/mailbox/v1/types.proto", fileDescriptor_1893fbd4f98e6eb3) }
 
 var fileDescriptor_1893fbd4f98e6eb3 = []byte{
-	// 300 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x90, 0xbf, 0x4e, 0xeb, 0x30,
-	0x18, 0xc5, 0xe3, 0xdc, 0x5e, 0x50, 0xdd, 0x82, 0x50, 0xd4, 0x21, 0x62, 0x70, 0xa3, 0x4e, 0x59,
-	0x6a, 0xab, 0xb0, 0x31, 0x41, 0x05, 0x23, 0x4b, 0xc4, 0xd4, 0x05, 0xa5, 0xcd, 0x47, 0x6a, 0x29,
-	0xb1, 0x2b, 0xdb, 0x89, 0x92, 0x37, 0x60, 0xe4, 0x11, 0x78, 0x1c, 0xc6, 0x8e, 0x8c, 0x28, 0x79,
-	0x11, 0x94, 0x3f, 0xcd, 0xc4, 0x76, 0x8e, 0xfd, 0xd3, 0x39, 0xfa, 0x0e, 0xf6, 0xf6, 0xe5, 0x01,
-	0x54, 0x12, 0x0a, 0x60, 0x69, 0xc8, 0x93, 0xad, 0x2c, 0x58, 0xbe, 0x62, 0xa6, 0x3c, 0x80, 0xa6,
-	0x07, 0x25, 0x8d, 0x74, 0x66, 0x03, 0x41, 0x7b, 0x82, 0xe6, 0xab, 0xeb, 0x59, 0x2c, 0x63, 0xd9,
-	0x02, 0xac, 0x51, 0x1d, 0xbb, 0x78, 0xc3, 0xa3, 0x17, 0x05, 0xe0, 0xcc, 0xf0, 0xff, 0x9d, 0xcc,
-	0x84, 0x71, 0x91, 0x87, 0xfc, 0x8b, 0xa0, 0x33, 0xce, 0x1a, 0x4f, 0x8d, 0x02, 0x78, 0x05, 0x61,
-	0x14, 0x07, 0xed, 0xda, 0xde, 0x3f, 0x7f, 0x72, 0x33, 0xa7, 0x7f, 0x15, 0xd0, 0x26, 0xe7, 0x49,
-	0x18, 0x55, 0x06, 0x13, 0xd3, 0x4b, 0x0e, 0xfa, 0x6e, 0xf4, 0xfe, 0x39, 0xb7, 0x16, 0x0f, 0x78,
-	0x3c, 0xfc, 0x37, 0x65, 0x5c, 0x44, 0x50, 0x9c, 0xca, 0x5a, 0xe3, 0xb8, 0xf8, 0x3c, 0x05, 0xad,
-	0xc3, 0x18, 0x5c, 0xdb, 0x43, 0xfe, 0x34, 0x38, 0xd9, 0x3e, 0xc2, 0xc7, 0x57, 0xcf, 0xdd, 0xc3,
-	0x23, 0x24, 0x3c, 0x07, 0x05, 0x91, 0x73, 0x89, 0x6d, 0x1e, 0xb5, 0x31, 0xe3, 0xc0, 0xe6, 0x51,
-	0x47, 0xae, 0x37, 0x5f, 0x15, 0x41, 0xc7, 0x8a, 0xa0, 0x9f, 0x8a, 0xa0, 0x8f, 0x9a, 0x58, 0xc7,
-	0x9a, 0x58, 0xdf, 0x35, 0xb1, 0x36, 0xf7, 0x31, 0x37, 0xfb, 0x6c, 0x4b, 0x77, 0x32, 0x65, 0xda,
-	0xa8, 0x50, 0xc4, 0x90, 0xc8, 0x1c, 0x96, 0x39, 0x08, 0x93, 0x29, 0xd0, 0x6c, 0xb8, 0x6c, 0xb9,
-	0x93, 0x3a, 0x95, 0x9a, 0x15, 0xc3, 0xca, 0xed, 0xc4, 0xdb, 0xb3, 0x76, 0xb7, 0xdb, 0xdf, 0x00,
-	0x00, 0x00, 0xff, 0xff, 0x19, 0x1c, 0x09, 0x9f, 0x87, 0x01, 0x00, 0x00,
+	// 249 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x3c, 0xcf, 0x31, 0x4b, 0xc3, 0x40,
+	0x18, 0xc6, 0xf1, 0x24, 0xd6, 0x82, 0x87, 0x8a, 0x84, 0x20, 0xc5, 0xe1, 0x0c, 0x9d, 0xb2, 0x34,
+	0x47, 0x71, 0xeb, 0x24, 0xe2, 0xea, 0x12, 0x9c, 0xba, 0x5d, 0x92, 0x97, 0xcb, 0x41, 0x72, 0x6f,
+	0xb8, 0xbb, 0x1c, 0xed, 0x37, 0x70, 0xf4, 0x23, 0xf8, 0x71, 0x1c, 0x3b, 0x3a, 0x4a, 0xf2, 0x45,
+	0xc4, 0xa4, 0x64, 0x7b, 0x1f, 0xf8, 0xf1, 0xc2, 0x9f, 0xc4, 0xd5, 0xb1, 0x05, 0x5d, 0x73, 0x05,
+	0xac, 0xe1, 0xb2, 0xce, 0xf1, 0xc0, 0xdc, 0x96, 0xd9, 0x63, 0x0b, 0x26, 0x6d, 0x35, 0x5a, 0x0c,
+	0xa3, 0x59, 0xa4, 0x67, 0x91, 0xba, 0xed, 0x43, 0x24, 0x50, 0xe0, 0x08, 0xd8, 0xff, 0x35, 0xd9,
+	0xf5, 0x8e, 0x2c, 0xde, 0x35, 0x40, 0x18, 0x91, 0xcb, 0x02, 0x3b, 0x65, 0x57, 0x7e, 0xec, 0x27,
+	0x37, 0xd9, 0x34, 0xc2, 0x7b, 0xb2, 0xcc, 0x35, 0x57, 0x45, 0xb5, 0x0a, 0xe2, 0x8b, 0xe4, 0x3a,
+	0x3b, 0xaf, 0xdd, 0xe2, 0xe3, 0xeb, 0xd1, 0x5b, 0x27, 0xe4, 0xee, 0x0d, 0x8c, 0xe1, 0x02, 0x5e,
+	0xa1, 0x96, 0x0e, 0x34, 0x94, 0xe1, 0x2d, 0x09, 0x64, 0x39, 0x3e, 0xb9, 0xca, 0x02, 0x59, 0x4e,
+	0xf2, 0x65, 0xff, 0xdd, 0x53, 0xff, 0xd4, 0x53, 0xff, 0xb7, 0xa7, 0xfe, 0xe7, 0x40, 0xbd, 0xd3,
+	0x40, 0xbd, 0x9f, 0x81, 0x7a, 0xfb, 0x67, 0x21, 0x6d, 0xd5, 0xe5, 0x69, 0x81, 0x0d, 0x33, 0x56,
+	0x73, 0x25, 0xa0, 0x46, 0x07, 0x1b, 0x07, 0xca, 0x76, 0x1a, 0x0c, 0x9b, 0x5b, 0x36, 0x05, 0x9a,
+	0x06, 0x0d, 0x3b, 0xcc, 0xd9, 0x63, 0x73, 0xbe, 0x1c, 0x43, 0x9e, 0xfe, 0x02, 0x00, 0x00, 0xff,
+	0xff, 0xcb, 0x0d, 0xa1, 0xe9, 0x18, 0x01, 0x00, 0x00,
 }
 
 func (m *Tree) Marshal() (dAtA []byte, err error) {
@@ -213,57 +163,17 @@ func (m *Tree) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.TreeEntries) > 0 {
-		for iNdEx := len(m.TreeEntries) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.TreeEntries[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintTypes(dAtA, i, uint64(size))
-			}
+	if len(m.Branch) > 0 {
+		for iNdEx := len(m.Branch) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Branch[iNdEx])
+			copy(dAtA[i:], m.Branch[iNdEx])
+			i = encodeVarintTypes(dAtA, i, uint64(len(m.Branch[iNdEx])))
 			i--
 			dAtA[i] = 0x12
 		}
 	}
 	if m.Count != 0 {
 		i = encodeVarintTypes(dAtA, i, uint64(m.Count))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *TreeEntry) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *TreeEntry) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *TreeEntry) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Message) > 0 {
-		i -= len(m.Message)
-		copy(dAtA[i:], m.Message)
-		i = encodeVarintTypes(dAtA, i, uint64(len(m.Message)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if m.Index != 0 {
-		i = encodeVarintTypes(dAtA, i, uint64(m.Index))
 		i--
 		dAtA[i] = 0x8
 	}
@@ -321,27 +231,11 @@ func (m *Tree) Size() (n int) {
 	if m.Count != 0 {
 		n += 1 + sovTypes(uint64(m.Count))
 	}
-	if len(m.TreeEntries) > 0 {
-		for _, e := range m.TreeEntries {
-			l = e.Size()
+	if len(m.Branch) > 0 {
+		for _, b := range m.Branch {
+			l = len(b)
 			n += 1 + l + sovTypes(uint64(l))
 		}
-	}
-	return n
-}
-
-func (m *TreeEntry) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Index != 0 {
-		n += 1 + sovTypes(uint64(m.Index))
-	}
-	l = len(m.Message)
-	if l > 0 {
-		n += 1 + l + sovTypes(uint64(l))
 	}
 	return n
 }
@@ -417,111 +311,7 @@ func (m *Tree) Unmarshal(dAtA []byte) error {
 			}
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TreeEntries", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.TreeEntries = append(m.TreeEntries, &TreeEntry{})
-			if err := m.TreeEntries[len(m.TreeEntries)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTypes(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-
-func (m *TreeEntry) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTypes
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: TreeEntry: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: TreeEntry: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Index", wireType)
-			}
-			m.Index = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Index |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Message", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Branch", wireType)
 			}
 			var byteLen int
 			for shift := uint(0); ; shift += 7 {
@@ -548,10 +338,8 @@ func (m *TreeEntry) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Message = append(m.Message[:0], dAtA[iNdEx:postIndex]...)
-			if m.Message == nil {
-				m.Message = []byte{}
-			}
+			m.Branch = append(m.Branch, make([]byte, postIndex-iNdEx))
+			copy(m.Branch[len(m.Branch)-1], dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
