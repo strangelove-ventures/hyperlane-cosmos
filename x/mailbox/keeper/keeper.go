@@ -53,13 +53,6 @@ func (k Keeper) GetMailboxAddress() []byte {
 	return mailboxAddress
 }
 
-func (k Keeper) GetDomain(c context.Context) uint32 {
-	ctx := sdk.UnwrapSDKContext(c)
-	store := ctx.KVStore(k.storeKey)
-	b := store.Get(types.DomainKey)
-	return binary.LittleEndian.Uint32(b)
-}
-
 func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwasm.Keeper, ismKeeper *ismkeeper.Keeper) Keeper {
 	// governance authority
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
@@ -85,7 +78,7 @@ func (k *Keeper) SetDomain(c context.Context, domain uint32) {
 	store.Set(types.DomainKey, res)
 }
 
-func (k *Keeper) GetDomain(c context.Context) uint32 {
+func (k Keeper) GetDomain(c context.Context) uint32 {
 	ctx := sdk.UnwrapSDKContext(c)
 	store := ctx.KVStore(k.storeKey)
 

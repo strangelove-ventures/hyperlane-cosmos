@@ -3,7 +3,6 @@ package types
 import (
 	"bytes"
 	"encoding/binary"
-	"encoding/hex"
 	"fmt"
 
 	sdkerrors "cosmossdk.io/errors"
@@ -35,13 +34,14 @@ func hash(packed []byte) []byte {
 	return crypto.Keccak256(packed)
 }
 
-func getAddress(pubKey []byte) ([]byte, error) {
+// Is this needed?
+/*func getAddress(pubKey []byte) ([]byte, error) {
 	if len(pubKey) != ETHEREUM_PUB_KEY_LEN {
 		return nil, fmt.Errorf("provided bytes %s is not a valid public key. Got %d bytes, expected %d bytes", hex.EncodeToString(pubKey), len(pubKey), ETHEREUM_PUB_KEY_LEN)
 	}
 	hashedKey := hash(pubKey)
 	return hashedKey[len(hashedKey)-20:], nil
-}
+}*/
 
 func GetAnnouncementDigest(origin uint32, originMailbox []byte, storageLocation string) ([]byte, error) {
 	pack, err := encodePackedAnnouncement(origin, originMailbox)
