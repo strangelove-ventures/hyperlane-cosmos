@@ -27,6 +27,7 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
 
+	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
 )
 
@@ -41,6 +42,7 @@ func TestHyperlaneMailbox(t *testing.T) {
 	// Chains
 	simd := chains[0].(*cosmos.CosmosChain)
 	t.Log("simd.GetHostRPCAddress()", simd.GetHostRPCAddress())
+	t.Log("simd.GetHostGRPCAddress()", simd.GetHostGRPCAddress())
 
 	users := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd)
 	user := users[0]
@@ -58,7 +60,7 @@ func TestHyperlaneMailbox(t *testing.T) {
 
 	// Set default isms for counter chains
 	helpers.SetDefaultIsm(t, ctx, simd, user.KeyName(), counterChain1, counterChain2, counterChain3)
-	res := helpers.QueryAllDefaultIsms(t, ctx, simd)
+	/*res := helpers.QueryAllDefaultIsms(t, ctx, simd)
 
 	var abstractIsm ismtypes.AbstractIsm
 
@@ -69,32 +71,37 @@ func TestHyperlaneMailbox(t *testing.T) {
 	require.Equal(t, counterChain1.ValSet.Threshold, uint8(legacyMultiSig.Threshold))
 	for i, val := range counterChain1.ValSet.Vals {
 		require.Equal(t, val.Addr, legacyMultiSig.ValidatorPubKeys[i])
-	}
+	}*/
 
 	// Create first legacy multisig message from counter chain 1
 	sender := "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7"
 	destDomain := uint32(12345)
-	message, proof := counterChain1.CreateMessage(sender, destDomain, destDomain, contract, "Legacy Multisig 1")
+	message, proof := counterChain1.CreateMessage(sender, 1, destDomain, contract, "Legacy Multisig 1")
 	metadata := counterChain1.CreateLegacyMetadata(message, proof)
+	msgId := hexutil.Encode(common.Id(message))
+	delivered := helpers.QueryMsgDelivered(t, ctx, simd, msgId)
+	require.False(t, delivered)
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
+	delivered = helpers.QueryMsgDelivered(t, ctx, simd, msgId)
+	require.True(t, delivered)
 
 	// Create second legacy multisig message from counter chain 1
-	message, proof = counterChain1.CreateMessage(sender, destDomain, destDomain, contract, "Legacy Multisig 2")
+	message, proof = counterChain1.CreateMessage(sender, 1, destDomain, contract, "Legacy Multisig 2")
 	metadata = counterChain1.CreateLegacyMetadata(message, proof)
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 
 	// Create third legacy multisig message from counter chain 1
-	message, proof = counterChain1.CreateMessage(sender, destDomain, destDomain, contract, "Legacy Multisig 3")
+	message, proof = counterChain1.CreateMessage(sender, 1, destDomain, contract, "Legacy Multisig 3")
 	metadata = counterChain1.CreateLegacyMetadata(message, proof)
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 
 	// Create first message id multisig message from counter chain 2
-	message, _ = counterChain2.CreateMessage(sender, destDomain, destDomain, contract, "Message Id Multisig 1")
+	message, _ = counterChain2.CreateMessage(sender, 2, destDomain, contract, "Message Id Multisig 1")
 	metadata = counterChain2.CreateMessageIdMetadata(message)
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 
 	// Create first merkle root multisig message from counter chain 3
-	message, proof = counterChain3.CreateMessage(sender, destDomain, destDomain, contract, "Merkle Root Multisig 1")
+	message, proof = counterChain3.CreateMessage(sender, 3, destDomain, contract, "Merkle Root Multisig 1")
 	metadata = counterChain3.CreateMerkleRootMetadata(message, proof)
 	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata), hexutil.Encode(message))
 

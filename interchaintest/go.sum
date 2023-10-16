@@ -231,6 +231,8 @@ github.com/FactomProject/btcutilecc v0.0.0-20130527213604-d3a63a5752ec/go.mod h1
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
 github.com/KyleMoser/heighliner v0.0.0-20230829230844-9070cc213a11 h1:Y0ICPGur2xzOi2qsgNPsQmuzvrmRJWLjxhX6aoIPm7g=
 github.com/KyleMoser/heighliner v0.0.0-20230829230844-9070cc213a11/go.mod h1:rPfwN8szPw5mBrSwpZ1Z0Cbj+66SpLyP/OC8bUSg6so=
+github.com/KyleMoser/interchaintest/v7 v7.0.0-20230921024409-54452b7c77f7 h1:1SvdJTzkchYqkSQNWNFOMqspp/WQWuQMgX5xCoyR5lM=
+github.com/KyleMoser/interchaintest/v7 v7.0.0-20230921024409-54452b7c77f7/go.mod h1:PaJRHGMb9vsS37F6XvMujiw6cVwjMCv1qBEawrJ3F/4=
 github.com/Microsoft/go-winio v0.5.2/go.mod h1:WpS1mjBmmwHBEWmogvA2mj8546UReBk4v8QkMxJ6pZY=
 github.com/Microsoft/go-winio v0.6.0 h1:slsWYD/zyx7lCXoZVlvQrj0hPTM1HI4+v1sIda2yDvg=
 github.com/Microsoft/go-winio v0.6.0/go.mod h1:cTAf44im0RAYeL23bpB+fzCyDH2MJiz2BO69KH/soAE=
@@ -1114,8 +1116,6 @@ github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An
 github.com/spf13/viper v1.3.2/go.mod h1:ZiWeW+zYFKm7srdB9IoDzzZXaJaI5eL9QjNiN/DMA2s=
 github.com/spf13/viper v1.15.0 h1:js3yy885G8xwJa6iOISGFwd+qlUo5AvyXb7CiihdtiU=
 github.com/spf13/viper v1.15.0/go.mod h1:fFcTBJxvhhzSJiZy8n+PeW6t8l+KeT/uTARa0jHOQLA=
-github.com/strangelove-ventures/interchaintest/v7 v7.0.0-20230605195517-c0989e954796 h1:7By+ValegLEMRNrRzfnA1aDuLuwDWeRkh+PYebWqVyI=
-github.com/strangelove-ventures/interchaintest/v7 v7.0.0-20230605195517-c0989e954796/go.mod h1:PaJRHGMb9vsS37F6XvMujiw6cVwjMCv1qBEawrJ3F/4=
 github.com/streadway/amqp v0.0.0-20190404075320-75d898a42a94/go.mod h1:AZpEONHx3DKn8O/DFsRAY58/XVQiIPMTMB1SddzLXVw=
 github.com/streadway/amqp v0.0.0-20190827072141-edfb9018d271/go.mod h1:AZpEONHx3DKn8O/DFsRAY58/XVQiIPMTMB1SddzLXVw=
 github.com/streadway/handy v0.0.0-20190108123426-d5acb3125c2a/go.mod h1:qNTQ5P5JnDBl6z3cMAg/SywNDC5ABu5ApDIw6lUbRmI=

@@ -148,7 +148,6 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 
 	// Verify message signatures
 	verified, err := k.ismKeeper.Verify(metadataBytes, messageBytes)
-
 	if err != nil {
 		return nil, err
 	}

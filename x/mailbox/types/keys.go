@@ -12,9 +12,7 @@ const (
 	KeyMailboxDelivered = "delivered"
 )
 
-var (
-	DomainKey = []byte{0x1}
-)
+var DomainKey = []byte{0x1}
 
 func MailboxIMTKey() []byte {
 	return []byte(KeyMailboxIMT)
