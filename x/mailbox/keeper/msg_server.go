@@ -37,6 +37,7 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 
 // Dispatch defines a rpc handler method for MsgDispatch
 func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.MsgDispatchResponse, error) {
+	tree := k.GetImtTree(goCtx)
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// TODO: NewMessage
@@ -47,7 +48,7 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	message = append(message, version...)
 
 	// Nonce is the tree count.
-	nonce := k.Tree.Count()
+	nonce := tree.Count()
 	nonceBytes := make([]byte, 4)
 	binary.BigEndian.PutUint32(nonceBytes, nonce)
 	message = append(message, nonceBytes...)
@@ -94,16 +95,17 @@ func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.
 	message = append(message, messageBytes...)
 	hyperlaneMsg := hexutil.Encode(message)
 
-	// Get the message ID
+	// Get the message ID. (i.e: Keccak256 hash of the message)
 	id := common.Id(message)
 
 	// Insert the message id into the tree
-	err := k.Tree.Insert(id)
+	err := tree.Insert(id)
 	if err != nil {
 		return nil, err
 	}
-	// Store that the leaf
-	store.Set(types.MailboxIMTKey(k.Tree.Count()-1), id)
+
+	// Store that the current root
+	k.StoreImtTree(goCtx, tree)
 
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{

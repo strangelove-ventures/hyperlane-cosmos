@@ -18,6 +18,13 @@ type Tree struct {
 	count  uint32
 }
 
+func InitializeTree(branch [][]byte, count uint32) *Tree {
+	tree := Tree{}
+	copy(tree.Branch[:], branch)
+	tree.SetCount(count)
+	return &tree
+}
+
 // Insert inserts node into the Merkle Tree
 func (t *Tree) Insert(node []byte) error {
 	if t.count >= MaxLeaves {
@@ -46,6 +53,11 @@ func (t *Tree) Insert(node []byte) error {
 // Count returns the number of inserts performed on the Tree
 func (t *Tree) Count() uint32 {
 	return t.count
+}
+
+// Set the count . (Used when restoring from genesis state)
+func (t *Tree) SetCount(count uint32) {
+	t.count = count
 }
 
 // Print dumps the tree (for debugging)

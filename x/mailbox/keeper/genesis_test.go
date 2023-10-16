@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"fmt"
+	"reflect"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -10,8 +11,8 @@ import (
 )
 
 func (suite *KeeperTestSuite) TestGenesis() {
-	idMap := make([]string, 100)
-	for i := 0; i < 100; i++ {
+	idMap := make([]string, 128) // Will populate 8 levels.
+	for i := 0; i < 128; i++ {
 		sender := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
 		recipientBech32 := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
 		recipientBytes := sdk.MustAccAddressFromBech32(recipientBech32).Bytes()
@@ -23,43 +24,52 @@ func (suite *KeeperTestSuite) TestGenesis() {
 		suite.Require().NoError(err)
 		idMap[i] = res.MessageId
 	}
-	// TODO: add ProcessMsg tests
 
-	res, err := suite.queryClient.CurrentTreeMetadata(suite.ctx, &types.QueryCurrentTreeMetadataRequest{})
-	suite.Require().NoError(err)
-	suite.Require().Equal(uint32(100), res.Count)
-
-	// Verify tree exported correctly
+	// Exporting Genesis and logging the length of Branches
 	gs := suite.keeper.ExportGenesis(suite.ctx)
-	suite.Require().Equal(uint32(100), gs.Tree.Count)
-	count := 0
-	for i := 0; i < 100; i++ {
-		for j := 0; j < 100; j++ {
-			if gs.Tree.TreeEntries[j].Index == uint32(i) {
-				if hexutil.Encode(gs.Tree.TreeEntries[j].Message) == idMap[i] {
-					count++
-					break
-				}
-			}
-		}
-	}
-	suite.Require().Equal(100, count)
 
-	// Add some delivered message ids to the exported state
-	for i := 0; i < 100; i++ {
+	// Adding delivered message ids to the exported state
+	for i := 0; i < 128; i++ {
 		gs.DeliveredMessages = append(gs.DeliveredMessages, &types.MessageDelivered{
 			Id: idMap[i],
 		})
 	}
 
-	// Reset
+	// Checking the exported state
+	suite.Require().Equal(8, countGenesisStatePopulatedSlices((gs.Tree.Branch)))
+	suite.Require().Equal(128, len(gs.DeliveredMessages))
+
+	// Resetting suite
 	suite.SetupTest()
 
-	// Import state
-	err = suite.keeper.InitGenesis(suite.ctx, gs)
+	// Importing state
+	err := suite.keeper.InitGenesis(suite.ctx, gs)
 	suite.Require().NoError(err)
 
-	// Check Tree and Delivered
-	suite.Require().Equal(uint32(100), suite.keeper.Tree.Count())
-	suite.Require().Equal(100, len(suite.keeper.Delivered))
+	// Comparing the two states to make sure they are the same
+	tree := suite.keeper.GetImtTree(suite.ctx)
+	suite.Require().Equal(8, countKeeperPopulatedSlices(tree.Branch))
+	suite.Require().Equal(128, len(suite.keeper.Delivered))
+	isEqual := reflect.DeepEqual(gs.Tree.Branch, tree.Branch[:])
+	suite.Require().True(isEqual, "Imported state is not the same as exported state")
+}
+
+func countKeeperPopulatedSlices(arr [32][]byte) int {
+	count := 0
+	for _, slice := range arr {
+		if len(slice) > 0 {
+			count++
+		}
+	}
+	return count
+}
+
+func countGenesisStatePopulatedSlices(arr [][]byte) int {
+	count := 0
+	for _, slice := range arr {
+		if len(slice) > 0 {
+			count++
+		}
+	}
+	return count
 }
