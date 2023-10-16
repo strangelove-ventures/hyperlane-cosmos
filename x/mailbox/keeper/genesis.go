@@ -12,11 +12,7 @@ import (
 // InitGenesis initializes the hyperlane mailbox module's state from a provided genesis
 // state.
 func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
-	// Branches
-	copy(k.Tree.Branch[:], gs.Tree.Branch)
-
-	// Count
-	k.Tree.SetCount(gs.Tree.Count)
+	k.StoreTree(ctx, gs.Tree)
 
 	// Delivered Messages.
 	for _, msgDelivered := range gs.DeliveredMessages {
@@ -29,14 +25,12 @@ func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
 
 // ExportGenesis returns the hyperlane mailbox module's exported genesis.
 func (k Keeper) ExportGenesis(ctx sdk.Context) types.GenesisState {
+	tree := k.GetTree(ctx)
 
 	return types.GenesisState{
 		DeliveredMessages: ExportDeliveredMessages(ctx.KVStore(k.storeKey)),
-		Tree: types.Tree{
-			Branch: k.Tree.Branch[:],
-			Count:  k.Tree.Count(),
-		},
-		Domain: k.GetDomain(ctx),
+		Tree:              tree,
+		Domain:            k.GetDomain(ctx),
 	}
 }
 

@@ -11,7 +11,7 @@ import (
 )
 
 func (suite *KeeperTestSuite) TestGenesis() {
-	idMap := make([]string, 128) //Will populate 8 levels.
+	idMap := make([]string, 128) // Will populate 8 levels.
 	for i := 0; i < 128; i++ {
 		sender := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
 		recipientBech32 := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
@@ -46,10 +46,11 @@ func (suite *KeeperTestSuite) TestGenesis() {
 	err := suite.keeper.InitGenesis(suite.ctx, gs)
 	suite.Require().NoError(err)
 
-	//Comparing the two states to make sure they are the same
-	suite.Require().Equal(8, countKeeperPopulatedSlices(suite.keeper.Tree.Branch))
+	// Comparing the two states to make sure they are the same
+	tree := suite.keeper.GetImtTree(suite.ctx)
+	suite.Require().Equal(8, countKeeperPopulatedSlices(tree.Branch))
 	suite.Require().Equal(128, len(suite.keeper.Delivered))
-	isEqual := reflect.DeepEqual(gs.Tree.Branch, suite.keeper.Tree.Branch[:])
+	isEqual := reflect.DeepEqual(gs.Tree.Branch, tree.Branch[:])
 	suite.Require().True(isEqual, "Imported state is not the same as exported state")
 }
 

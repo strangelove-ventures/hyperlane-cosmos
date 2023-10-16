@@ -32,7 +32,6 @@ type Keeper struct {
 	mailboxAddr sdk.AccAddress
 	version     byte
 
-	Tree      *imt.Tree
 	Delivered map[string]bool
 }
 
@@ -49,7 +48,6 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwas
 		mailboxAddr: authtypes.NewModuleAddress(types.ModuleName),
 		version:     0,
 		pcwKeeper:   cosmwasm.NewDefaultPermissionKeeper(cwKeeper),
-		Tree:        &imt.Tree{},
 		Delivered:   map[string]bool{},
 	}
 }
@@ -75,6 +73,42 @@ func (k *Keeper) GetDomain(c context.Context) uint32 {
 	domain := binary.LittleEndian.Uint32(res)
 
 	return domain
+}
+
+// Stores the proto type tree
+func (k *Keeper) StoreTree(c context.Context, tree types.Tree) {
+	ctx := sdk.UnwrapSDKContext(c)
+	store := ctx.KVStore(k.storeKey)
+
+	treeBz := k.cdc.MustMarshal(&tree)
+	store.Set(types.MailboxIMTKey(), treeBz)
+}
+
+// Stores the IMT type tree
+func (k *Keeper) StoreImtTree(c context.Context, tree *imt.Tree) {
+	protoTree := types.Tree{
+		Branch: tree.Branch[:],
+		Count:  tree.Count(),
+	}
+	k.StoreTree(c, protoTree)
+}
+
+// Gets the proto type tree
+func (k *Keeper) GetTree(c context.Context) types.Tree {
+	ctx := sdk.UnwrapSDKContext(c)
+	store := ctx.KVStore(k.storeKey)
+
+	treeBz := store.Get(types.MailboxIMTKey())
+	var tree types.Tree
+	k.cdc.MustUnmarshal(treeBz, &tree)
+
+	return tree
+}
+
+// Gets the IMT type tree
+func (k *Keeper) GetImtTree(c context.Context) *imt.Tree {
+	protoTree := k.GetTree(c)
+	return imt.InitializeTree(protoTree.Branch, protoTree.Count)
 }
 
 func (k Keeper) VerifyMessage(c context.Context, messageBytes []byte) (string, error) {
