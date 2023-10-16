@@ -112,6 +112,7 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 		Client:           client,
 		NetworkID:        network,
 		SkipPathCreation: true,
+		BlockDatabaseFile: interchaintest.DefaultBlockDatabaseFilepath(),
 	}
 
 	err := ic.Build(ctx, eRep, opts)

@@ -106,8 +106,7 @@ func (k Keeper) VerifyMessage(c context.Context, messageBytes []byte) (string, e
 	id := hexutil.Encode(idBytes)
 
 	// Verify message has not been delivered yet
-	val, ok := k.Delivered[id]
-	if ok && val {
+	if store.Has(types.MailboxDeliveredKey(id)) {
 		return "", types.ErrMsgDelivered
 	}
 
