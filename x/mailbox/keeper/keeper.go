@@ -3,7 +3,6 @@ package keeper
 import (
 	"context"
 	"encoding/binary"
-	"encoding/hex"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -22,10 +21,6 @@ import (
 
 var (
 	_ ReadOnlyMailboxKeeper = (*Keeper)(nil)
-	// TODO: have Steve review. Why is this the address?
-	// Presuming it's the last 20 bytes of the Keccak256 of the public key for 'mailboxAddr' (sdk.AccAddress)
-	// then should we be deriving it instead of hardcoding it here.
-	mailboxAddress, _ = hex.DecodeString("000000000000000000000000cc2a110c8df654a38749178a04402e88f65091d3")
 )
 
 type Keeper struct {
@@ -47,8 +42,14 @@ type ReadOnlyMailboxKeeper interface {
 	GetDomain(context.Context) uint32
 }
 
+// Get 32 byte mailbox address, pad if necessary
 func (k Keeper) GetMailboxAddress() []byte {
-	return mailboxAddress
+	mailboxAddr := k.mailboxAddr
+	for len(mailboxAddr) < 32 {
+		padding := make([]byte, 1)
+		mailboxAddr = append(padding, mailboxAddr...)
+	}
+	return mailboxAddr
 }
 
 func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwasm.Keeper, ismKeeper *ismkeeper.Keeper) Keeper {
