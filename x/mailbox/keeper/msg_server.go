@@ -194,7 +194,6 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 	// Store that the message was delivered
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.MailboxDeliveredKey(id), []byte{1})
-	k.Delivered[id] = true
 
 	// Emit the events
 	ctx.EventManager().EmitEvents(sdk.Events{

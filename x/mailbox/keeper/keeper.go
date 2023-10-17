@@ -3,7 +3,6 @@ package keeper
 import (
 	"context"
 	"encoding/binary"
-	"encoding/hex"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -36,8 +35,6 @@ type Keeper struct {
 	authority   string
 	mailboxAddr sdk.AccAddress
 	version     byte
-
-	Delivered map[string]bool
 }
 
 type ReadOnlyMailboxKeeper interface {
@@ -45,16 +42,14 @@ type ReadOnlyMailboxKeeper interface {
 	GetDomain(context.Context) uint32
 }
 
+// Get 32 byte mailbox address, pad if necessary
 func (k Keeper) GetMailboxAddress() []byte {
-	mailboxAddr := hex.EncodeToString(k.mailboxAddr.Bytes())
-	padding := 64 - len(mailboxAddr)
-
-	for i := 0; i < padding; i++ {
-		mailboxAddr = "0" + mailboxAddr
+	mailboxAddr := k.mailboxAddr
+	for len(mailboxAddr) < 32 {
+		padding := make([]byte, 1)
+		mailboxAddr = append(padding, mailboxAddr...)
 	}
-
-	mailboxAddrBytes, _ := hex.DecodeString(mailboxAddr)
-	return mailboxAddrBytes
+	return mailboxAddr
 }
 
 func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwasm.Keeper, ismKeeper *ismkeeper.Keeper) Keeper {
@@ -70,7 +65,6 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwas
 		mailboxAddr: authtypes.NewModuleAddress(types.ModuleName),
 		version:     0,
 		pcwKeeper:   cosmwasm.NewDefaultPermissionKeeper(cwKeeper),
-		Delivered:   map[string]bool{},
 	}
 }
 

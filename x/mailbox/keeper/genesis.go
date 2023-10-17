@@ -14,9 +14,10 @@ import (
 func (k *Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
 	k.StoreTree(ctx, gs.Tree)
 
+	store := ctx.KVStore(k.storeKey)
 	// Delivered Messages.
 	for _, msgDelivered := range gs.DeliveredMessages {
-		k.Delivered[msgDelivered.Id] = true
+		store.Set(types.MailboxDeliveredKey(msgDelivered.Id), []byte{1})
 	}
 	// Domain
 	k.SetDomain(ctx, gs.Domain)
