@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -30,28 +28,27 @@ import (
 
 // Test the announce module 'announce' TX
 func TestAnnounce(t *testing.T) {
-	tmpDir1 := t.TempDir()
-	tmpDir2 := t.TempDir()
-	buildsEnabled := false
-	_, filename, _, _ := runtime.Caller(0)
-	path := filepath.Dir(filename)
-	tarFilePath := filepath.Join(path, "../../")
-	goModPath := filepath.Join(path, "../../go.mod")
-	hyperlaneConfigPath := filepath.Join(path, "hyperlane.yaml")
 	logger := NewLogger(t)
 
-	// TODO: better caching mechanism to prevent rebuilding the same image
-	if buildsEnabled {
-		// Builds the hyperlane image from the current project (e.g. locally).
-		// The directory at 'tarFilePath' will be tarballed and used for the docker context.
-		// The args 'buildDir' and 'dockerfilePath' are relative to 'tarFilePath' (the context).
-		// Build arguments are derived from 'goModPath' so it must be a full path (not relative).
-		docker.BuildHeighlinerHyperlaneImage(docker.HyperlaneImageName, tarFilePath, ".", goModPath, "local.Dockerfile")
-	}
+	// Mailbox address - will be used in the hyperlane validator config
+	mailboxHex, expectedMailbox := helpers.GetMailboxAddress()
+	prefixedMailboxHex := "0x" + mailboxHex
 
-	if t.Failed() {
-		logger.Fatal("Test marked failed")
-	}
+	// Directories where files related to this test will be stored
+	val1TmpDir := t.TempDir()
+	val2TmpDir := t.TempDir()
+
+	// Get the hyperlane agent raw configs (before variable replacements)
+	valSimd1, valSimd2, _ := readHyperlaneConfig(t, COSMOS_E2E_CONFIG, logger)
+
+	// Get the validator key for the agents. We also need this key to configure the chain ISM.
+	valSimd1PrivKey, err := getHyperlaneBaseValidatorKey(valSimd1)
+	require.NoError(t, err)
+	valSimd2PrivKey, err := getHyperlaneBaseValidatorKey(valSimd2)
+	require.NoError(t, err)
+
+	// Build the chain docker image from the local repo
+	optionalBuildChainImage()
 
 	DockerImage := ibc.DockerImage{
 		Repository: docker.HyperlaneImageName,
@@ -86,7 +83,7 @@ func TestAnnounce(t *testing.T) {
 		SkipPathCreation: true,
 	}
 
-	err := ic.Build(ctx, eRep, opts)
+	err = ic.Build(ctx, eRep, opts)
 	require.NoError(t, err)
 
 	t.Cleanup(func() {
@@ -121,9 +118,9 @@ func TestAnnounce(t *testing.T) {
 
 	// Create counter chain 1 with val set signing legacy multisig
 	// The private key used here MUST be the one from the validator config file. TODO: cleanup this test to read it from the file.
-	simd1IsmValidator := counterchain.CreateEmperorValidator(t, uint32(simdDomain), counterchain.LEGACY_MULTISIG, valPrivKey)
+	simd1IsmValidator := counterchain.CreateEmperorValidator(t, uint32(simdDomain), counterchain.LEGACY_MULTISIG, valSimd1PrivKey)
 	// Create counter chain 2 with val set signing legacy multisig
-	simd2IsmValidator := counterchain.CreateEmperorValidator(t, uint32(simd2Domain), counterchain.LEGACY_MULTISIG, valPrivKey)
+	simd2IsmValidator := counterchain.CreateEmperorValidator(t, uint32(simd2Domain), counterchain.LEGACY_MULTISIG, valSimd2PrivKey)
 
 	// Set default isms for counter chains for SIMD
 	helpers.SetDefaultIsm(t, ctx, simd1, userSimd.KeyName(), simd2IsmValidator)
@@ -134,23 +131,11 @@ func TestAnnounce(t *testing.T) {
 	recipientDispatch := hexutil.Encode([]byte(recipientAccAddr))
 	fmt.Printf("Recipient dispatch addr hex: %s", recipientDispatch)
 
-	hyperlaneCfg, err := hyperlane.ReadHyperlaneConfig(hyperlaneConfigPath, logger)
-	require.NoError(t, err)
-	valSimd1, ok := hyperlaneCfg["hyperlane-validator-simd1"]
-	require.True(t, ok)
-	valSimd2, ok := hyperlaneCfg["hyperlane-validator-simd2"]
-	require.True(t, ok)
-
-	mailboxHex := "000000000000000000000000cc2a110c8df654a38749178a04402e88f65091d3"
-	prefixedMailboxHex := "0x" + mailboxHex
-	logger.Info("Preconfiguring Hyperlane (getting configs)")
-
-	valJson, err := preconfigureHyperlaneValidator(t, valSimd1, tmpDir1, mnemonicPrivKey, chains[0].Config().ChainID, chains[0].Config().Name, chains[0].GetRPCAddress(), "http://"+chains[0].GetGRPCAddress(), prefixedMailboxHex, 23456)
+	valJson, err := preconfigureHyperlaneValidator(t, valSimd1, val1TmpDir, mnemonicPrivKey, chains[0].Config().ChainID, chains[0].Config().Name, chains[0].GetRPCAddress(), "http://"+chains[0].GetGRPCAddress(), prefixedMailboxHex, 23456)
 	require.NoError(t, err)
 
 	simd1MailboxHex, err := getMailbox(valJson, chains[0].Config().Name)
 	require.NoError(t, err)
-	expectedMailbox, _ := hex.DecodeString("000000000000000000000000cc2a110c8df654a38749178a04402e88f65091d3")
 	_, simd1MailboxUnprefixed, found := strings.Cut(simd1MailboxHex, "0x")
 	require.True(t, found)
 	simd1Mailbox, err := hex.DecodeString(simd1MailboxUnprefixed)
@@ -158,10 +143,10 @@ func TestAnnounce(t *testing.T) {
 	originMailboxB := []byte(simd1Mailbox)
 	require.Equal(t, expectedMailbox, originMailboxB)
 
-	valJson, err = preconfigureHyperlaneValidator(t, valSimd2, tmpDir2, mnemonicPrivKey, chains[1].Config().ChainID, chains[1].Config().Name, chains[1].GetRPCAddress(), "http://"+chains[1].GetGRPCAddress(), prefixedMailboxHex, 34567)
+	valJson, err = preconfigureHyperlaneValidator(t, valSimd2, val2TmpDir, mnemonicPrivKey, chains[1].Config().ChainID, chains[1].Config().Name, chains[1].GetRPCAddress(), "http://"+chains[1].GetGRPCAddress(), prefixedMailboxHex, 34567)
 	require.NoError(t, err)
 
-	validatorPrivateKey, err := crypto.HexToECDSA(valPrivKey)
+	validatorPrivateKey, err := crypto.HexToECDSA(valSimd1PrivKey)
 	require.NoError(t, err)
 	valAddr := crypto.PubkeyToAddress(validatorPrivateKey.PublicKey)
 	valAddrHex := hex.EncodeToString(valAddr.Bytes())
@@ -212,27 +197,24 @@ func TestAnnounce(t *testing.T) {
 
 // Test the hyperlane announce module with the monorepo (rust) validator agent making the announcement
 func TestHyperlaneAnnounceWithValidator(t *testing.T) {
-	tmpDir1 := t.TempDir()
-	buildsEnabled := false
-	_, filename, _, _ := runtime.Caller(0)
-	path := filepath.Dir(filename)
-	tarFilePath := filepath.Join(path, "../../")
-	goModPath := filepath.Join(path, "../../go.mod")
-	hyperlaneConfigPath := filepath.Join(path, "hyperlane.yaml")
 	logger := NewLogger(t)
 
-	// TODO: better caching mechanism to prevent rebuilding the same image
-	if buildsEnabled {
-		// Builds the hyperlane image from the current project (e.g. locally).
-		// The directory at 'tarFilePath' will be tarballed and used for the docker context.
-		// The args 'buildDir' and 'dockerfilePath' are relative to 'tarFilePath' (the context).
-		// Build arguments are derived from 'goModPath' so it must be a full path (not relative).
-		docker.BuildHeighlinerHyperlaneImage(docker.HyperlaneImageName, tarFilePath, ".", goModPath, "local.Dockerfile")
-	}
+	// Mailbox address - will be used in the hyperlane validator config
+	mailboxHex, expectedMailbox := helpers.GetMailboxAddress()
+	prefixedMailboxHex := "0x" + mailboxHex
 
-	if t.Failed() {
-		logger.Fatal("Test marked failed")
-	}
+	// Directories where files related to this test will be stored
+	tmpDir := t.TempDir()
+
+	// Get the hyperlane agent raw configs (before variable replacements)
+	valSimd1, _, _ := readHyperlaneConfig(t, COSMOS_E2E_CONFIG, logger)
+
+	// Get the validator key for the agents. We also need this key to configure the chain ISM.
+	valSimd1PrivKey, err := getHyperlaneBaseValidatorKey(valSimd1)
+	require.NoError(t, err)
+
+	// Build the chain docker image from the local repo
+	optionalBuildChainImage()
 
 	DockerImage := ibc.DockerImage{
 		Repository: docker.HyperlaneImageName,
@@ -265,7 +247,7 @@ func TestHyperlaneAnnounceWithValidator(t *testing.T) {
 		SkipPathCreation: true,
 	}
 
-	err := ic.Build(ctx, eRep, opts)
+	err = ic.Build(ctx, eRep, opts)
 	require.NoError(t, err)
 
 	t.Cleanup(func() {
@@ -292,26 +274,16 @@ func TestHyperlaneAnnounceWithValidator(t *testing.T) {
 
 	// Create counter chain with val set signing legacy multisig
 	// The private key used here MUST be the one from the validator config file. TODO: cleanup this test to read it from the file.
-	simd2IsmValidator := counterchain.CreateEmperorValidator(t, uint32(34567), counterchain.LEGACY_MULTISIG, valPrivKey)
+	simd2IsmValidator := counterchain.CreateEmperorValidator(t, uint32(34567), counterchain.LEGACY_MULTISIG, valSimd1PrivKey)
 
 	// Set default isms for counter chains for SIMD
 	helpers.SetDefaultIsm(t, ctx, simd1, userSimd.KeyName(), simd2IsmValidator)
 
-	hyperlaneCfg, err := hyperlane.ReadHyperlaneConfig(hyperlaneConfigPath, logger)
-	require.NoError(t, err)
-	valSimd1, ok := hyperlaneCfg["hyperlane-validator-simd1"]
-	require.True(t, ok)
-
-	mailboxHex := "000000000000000000000000cc2a110c8df654a38749178a04402e88f65091d3"
-	prefixedMailboxHex := "0x" + mailboxHex
-	logger.Info("Preconfiguring Hyperlane (getting configs)")
-
-	valJson, err := preconfigureHyperlaneValidator(t, valSimd1, tmpDir1, mnemonicPrivKey, chains[0].Config().ChainID, chains[0].Config().Name, chains[0].GetRPCAddress(), "http://"+chains[0].GetGRPCAddress(), prefixedMailboxHex, 23456)
+	valJson, err := preconfigureHyperlaneValidator(t, valSimd1, tmpDir, mnemonicPrivKey, chains[0].Config().ChainID, chains[0].Config().Name, chains[0].GetRPCAddress(), "http://"+chains[0].GetGRPCAddress(), prefixedMailboxHex, 23456)
 	require.NoError(t, err)
 
 	simd1MailboxHex, err := getMailbox(valJson, chains[0].Config().Name)
 	require.NoError(t, err)
-	expectedMailbox, _ := hex.DecodeString("000000000000000000000000cc2a110c8df654a38749178a04402e88f65091d3")
 	_, simd1MailboxUnprefixed, found := strings.Cut(simd1MailboxHex, "0x")
 	require.True(t, found)
 	simd1Mailbox, err := hex.DecodeString(simd1MailboxUnprefixed)
@@ -328,7 +300,7 @@ func TestHyperlaneAnnounceWithValidator(t *testing.T) {
 	// Give the hyperlane validator time to start up and start watching the announcements for the chain
 	time.Sleep(10 * time.Second)
 
-	validatorPrivateKey, err := crypto.HexToECDSA(valPrivKey)
+	validatorPrivateKey, err := crypto.HexToECDSA(valSimd1PrivKey)
 	require.NoError(t, err)
 	valAddr := crypto.PubkeyToAddress(validatorPrivateKey.PublicKey)
 

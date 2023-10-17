@@ -22,10 +22,6 @@ import (
 
 var (
 	_ ReadOnlyMailboxKeeper = (*Keeper)(nil)
-	// TODO: have Steve review. Why is this the address?
-	// Presuming it's the last 20 bytes of the Keccak256 of the public key for 'mailboxAddr' (sdk.AccAddress)
-	// then should we be deriving it instead of hardcoding it here.
-	mailboxAddress, _ = hex.DecodeString("000000000000000000000000cc2a110c8df654a38749178a04402e88f65091d3")
 )
 
 type Keeper struct {
@@ -50,7 +46,15 @@ type ReadOnlyMailboxKeeper interface {
 }
 
 func (k Keeper) GetMailboxAddress() []byte {
-	return mailboxAddress
+	mailboxAddr := hex.EncodeToString(k.mailboxAddr.Bytes())
+	padding := 64 - len(mailboxAddr)
+
+	for i := 0; i < padding; i++ {
+		mailboxAddr = "0" + mailboxAddr
+	}
+
+	mailboxAddrBytes, _ := hex.DecodeString(mailboxAddr)
+	return mailboxAddrBytes
 }
 
 func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwasm.Keeper, ismKeeper *ismkeeper.Keeper) Keeper {
