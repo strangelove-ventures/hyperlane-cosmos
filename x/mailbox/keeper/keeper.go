@@ -40,8 +40,6 @@ type Keeper struct {
 	authority   string
 	mailboxAddr sdk.AccAddress
 	version     byte
-
-	Delivered map[string]bool
 }
 
 type ReadOnlyMailboxKeeper interface {
@@ -66,7 +64,6 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwas
 		mailboxAddr: authtypes.NewModuleAddress(types.ModuleName),
 		version:     0,
 		pcwKeeper:   cosmwasm.NewDefaultPermissionKeeper(cwKeeper),
-		Delivered:   map[string]bool{},
 	}
 }
 
