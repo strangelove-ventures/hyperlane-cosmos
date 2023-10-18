@@ -19,9 +19,7 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
 
-var (
-	_ ReadOnlyMailboxKeeper = (*Keeper)(nil)
-)
+var _ ReadOnlyMailboxKeeper = (*Keeper)(nil)
 
 type Keeper struct {
 	// implements gRPC QueryServer interface

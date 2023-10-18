@@ -17,13 +17,18 @@ message StoredAnnouncement {
 
   // location where signatures will be stored
   string storage_location = 1;
-
-  // signed validator announcement
-  bytes signature = 2;
 }
 
 // Helper type for Hyperlane's Announcement.
 message StoredAnnouncements {
   option (gogoproto.goproto_getters) = false;
   repeated StoredAnnouncement announcement = 1;
+}
+
+// Genesis helper type for Hyperlane's Announcement.
+message GenesisAnnouncement {
+  option (gogoproto.goproto_getters) = false;
+  StoredAnnouncement announcement = 1;
+  // The validator (in eth address format) that announced
+  bytes validator = 2;
 }

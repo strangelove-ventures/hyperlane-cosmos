@@ -1,10 +1,9 @@
 package keeper
 
 import (
-	"errors"
-
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 )
@@ -15,36 +14,21 @@ func (k Keeper) getAnnouncementsStore(ctx sdk.Context) prefix.Store {
 }
 
 // getAnnouncedValidators unmarshal announced validators from storage
-func (k Keeper) getAnnouncedValidators(ctx sdk.Context) (*types.GetAnnouncedValidatorsResponse, error) {
+func (k Keeper) getAnnouncedValidators(ctx sdk.Context) *types.GetAnnouncedValidatorsResponse {
 	store := ctx.KVStore(k.storeKey)
-	announcedValidatorBytes := store.Get(types.AnnouncedValidators)
-	announcedValidators := &types.GetAnnouncedValidatorsResponse{}
+	iterator := sdk.KVStorePrefixIterator(store, types.AnnouncedStorageLocations)
+	defer iterator.Close()
+	validators := []string{}
 
-	if announcedValidatorBytes == nil {
-		return nil, errors.New("No announced validators")
+	for ; iterator.Valid(); iterator.Next() {
+		validator := iterator.Key()
+		validators = append(validators, hexutil.Encode(validator))
 	}
 
-	err := announcedValidators.Unmarshal(announcedValidatorBytes)
-	return announcedValidators, err
-}
-
-// setAnnouncedValidators store an announced validator
-func (k Keeper) setAnnouncedValidators(ctx sdk.Context, validator string) (err error) {
-	var announcedValidators *types.GetAnnouncedValidatorsResponse
-	announcedValidators, err = k.getAnnouncedValidators(ctx)
-	if err != nil {
-		announcedValidators = &types.GetAnnouncedValidatorsResponse{Validator: []string{}}
+	announcedValidators := &types.GetAnnouncedValidatorsResponse{
+		Validator: validators,
 	}
-	announcedValidators.Validator = append(announcedValidators.Validator, validator)
-
-	announcedValidatorsBytes, err := announcedValidators.Marshal()
-	if err != nil {
-		return types.ErrMarshalAnnouncedValidators
-	}
-
-	store := ctx.KVStore(k.storeKey)
-	store.Set(types.AnnouncedValidators, announcedValidatorsBytes)
-	return nil
+	return announcedValidators
 }
 
 // getAnnouncements unmarshal announcements for the given validator from storage

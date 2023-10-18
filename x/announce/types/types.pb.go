@@ -73,8 +73,6 @@ var xxx_messageInfo_StorageMetadata proto.InternalMessageInfo
 type StoredAnnouncement struct {
 	// location where signatures will be stored
 	StorageLocation string `protobuf:"bytes,1,opt,name=storage_location,json=storageLocation,proto3" json:"storage_location,omitempty"`
-	// signed validator announcement
-	Signature []byte `protobuf:"bytes,2,opt,name=signature,proto3" json:"signature,omitempty"`
 }
 
 func (m *StoredAnnouncement) Reset()         { *m = StoredAnnouncement{} }
@@ -158,35 +156,83 @@ func (m *StoredAnnouncements) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_StoredAnnouncements proto.InternalMessageInfo
 
+// Genesis helper type for Hyperlane's Announcement.
+type GenesisAnnouncement struct {
+	Announcement *StoredAnnouncement `protobuf:"bytes,1,opt,name=announcement,proto3" json:"announcement,omitempty"`
+	// The validator (in eth address format) that announced
+	Validator []byte `protobuf:"bytes,2,opt,name=validator,proto3" json:"validator,omitempty"`
+}
+
+func (m *GenesisAnnouncement) Reset()         { *m = GenesisAnnouncement{} }
+func (m *GenesisAnnouncement) String() string { return proto.CompactTextString(m) }
+func (*GenesisAnnouncement) ProtoMessage()    {}
+func (*GenesisAnnouncement) Descriptor() ([]byte, []int) {
+	return fileDescriptor_26474efeff56f239, []int{3}
+}
+
+func (m *GenesisAnnouncement) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+
+func (m *GenesisAnnouncement) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_GenesisAnnouncement.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+
+func (m *GenesisAnnouncement) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GenesisAnnouncement.Merge(m, src)
+}
+
+func (m *GenesisAnnouncement) XXX_Size() int {
+	return m.Size()
+}
+
+func (m *GenesisAnnouncement) XXX_DiscardUnknown() {
+	xxx_messageInfo_GenesisAnnouncement.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GenesisAnnouncement proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*StorageMetadata)(nil), "hyperlane.announce.v1.StorageMetadata")
 	proto.RegisterType((*StoredAnnouncement)(nil), "hyperlane.announce.v1.StoredAnnouncement")
 	proto.RegisterType((*StoredAnnouncements)(nil), "hyperlane.announce.v1.StoredAnnouncements")
+	proto.RegisterType((*GenesisAnnouncement)(nil), "hyperlane.announce.v1.GenesisAnnouncement")
 }
 
 func init() { proto.RegisterFile("hyperlane/announce/v1/types.proto", fileDescriptor_26474efeff56f239) }
 
 var fileDescriptor_26474efeff56f239 = []byte{
-	// 300 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x91, 0xbf, 0x4e, 0x02, 0x41,
-	0x10, 0xc6, 0x6f, 0xd5, 0x18, 0x59, 0x49, 0x30, 0xab, 0x26, 0x84, 0x98, 0x15, 0xa9, 0xa0, 0x60,
-	0x37, 0x48, 0x67, 0x87, 0xb5, 0x34, 0x67, 0xa7, 0x85, 0x59, 0x8e, 0xc9, 0x82, 0xe1, 0x76, 0xc8,
-	0xed, 0x72, 0x91, 0x37, 0xb0, 0xf4, 0x11, 0x7c, 0x1c, 0x4b, 0x4a, 0x4b, 0x73, 0xf7, 0x22, 0xe6,
-	0xfe, 0x78, 0x68, 0xb0, 0x9b, 0xfd, 0xf2, 0xcd, 0xf7, 0x9b, 0x9d, 0xa1, 0x57, 0xb3, 0xf5, 0x12,
-	0xa2, 0x85, 0x32, 0x20, 0x95, 0x31, 0xb8, 0x32, 0x01, 0xc8, 0x78, 0x20, 0xdd, 0x7a, 0x09, 0x56,
-	0x2c, 0x23, 0x74, 0xc8, 0xce, 0x2b, 0x8b, 0xf8, 0xb1, 0x88, 0x78, 0xd0, 0x3a, 0xd3, 0xa8, 0x31,
-	0x77, 0xc8, 0xac, 0x2a, 0xcc, 0x9d, 0x21, 0x6d, 0xdc, 0x3b, 0x8c, 0x94, 0x86, 0x31, 0x38, 0x35,
-	0x55, 0x4e, 0xb1, 0x16, 0x3d, 0x0a, 0xcb, 0xba, 0x49, 0xda, 0xfb, 0xdd, 0x9a, 0x5f, 0xbd, 0x6f,
-	0x0e, 0x5e, 0xdf, 0x2f, 0xbd, 0x4e, 0x40, 0x59, 0xd6, 0x04, 0xd3, 0x51, 0x99, 0x1f, 0x82, 0x71,
-	0xac, 0x47, 0x4f, 0x6c, 0x11, 0xf5, 0xb4, 0xc0, 0x40, 0xb9, 0x39, 0x9a, 0x26, 0x69, 0x93, 0x6e,
-	0xcd, 0x6f, 0x94, 0xfa, 0x5d, 0x29, 0xb3, 0x0b, 0x5a, 0xb3, 0x73, 0x6d, 0x94, 0x5b, 0x45, 0xd0,
-	0xdc, 0x6b, 0x93, 0x6e, 0xdd, 0xdf, 0x0a, 0x25, 0xe4, 0x99, 0x9e, 0xee, 0x42, 0x2c, 0x1b, 0xd3,
-	0xba, 0xfa, 0x25, 0xe4, 0x13, 0x1e, 0x5f, 0xf7, 0xc4, 0xbf, 0x9f, 0x16, 0xbb, 0x09, 0xfe, 0x9f,
-	0xf6, 0x82, 0x75, 0xfb, 0xf8, 0x91, 0x70, 0xb2, 0x49, 0x38, 0xf9, 0x4a, 0x38, 0x79, 0x4b, 0xb9,
-	0xb7, 0x49, 0xb9, 0xf7, 0x99, 0x72, 0xef, 0x61, 0xa4, 0xe7, 0x6e, 0xb6, 0x9a, 0x88, 0x00, 0x43,
-	0x69, 0x5d, 0xa4, 0x8c, 0x86, 0x05, 0xc6, 0xd0, 0x8f, 0xc1, 0x64, 0xb3, 0x5a, 0x59, 0x71, 0xfb,
-	0x01, 0xda, 0x10, 0xad, 0x7c, 0xd9, 0x1e, 0x26, 0xbf, 0xca, 0xe4, 0x30, 0xdf, 0xf4, 0xf0, 0x3b,
-	0x00, 0x00, 0xff, 0xff, 0x13, 0x67, 0xf8, 0x26, 0xbb, 0x01, 0x00, 0x00,
+	// 322 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x92, 0xb1, 0x4e, 0x02, 0x41,
+	0x10, 0x86, 0x6f, 0xd5, 0x18, 0x59, 0x49, 0x30, 0x87, 0x26, 0x84, 0x98, 0x15, 0xa9, 0xa0, 0x60,
+	0x37, 0x48, 0x67, 0x87, 0x89, 0xb1, 0x91, 0xe6, 0xec, 0xb4, 0x30, 0xcb, 0x31, 0x39, 0xce, 0xdc,
+	0xed, 0x90, 0xdd, 0xe5, 0x22, 0x6f, 0x40, 0xe9, 0x23, 0xf8, 0x38, 0x96, 0x94, 0x96, 0x06, 0x5e,
+	0xc4, 0x70, 0xac, 0x20, 0xc1, 0xce, 0x6e, 0xee, 0xcf, 0x3f, 0xdf, 0xff, 0x5f, 0x76, 0xe8, 0xe5,
+	0x70, 0x32, 0x02, 0x9d, 0x48, 0x05, 0x42, 0x2a, 0x85, 0x63, 0x15, 0x82, 0xc8, 0xda, 0xc2, 0x4e,
+	0x46, 0x60, 0xf8, 0x48, 0xa3, 0x45, 0xff, 0x6c, 0x6d, 0xe1, 0x3f, 0x16, 0x9e, 0xb5, 0xab, 0xa7,
+	0x11, 0x46, 0x98, 0x3b, 0xc4, 0x72, 0x5a, 0x99, 0xeb, 0x1d, 0x5a, 0x7a, 0xb0, 0xa8, 0x65, 0x04,
+	0x3d, 0xb0, 0x72, 0x20, 0xad, 0xf4, 0xab, 0xf4, 0x28, 0x75, 0x73, 0x85, 0xd4, 0xf6, 0x1b, 0x85,
+	0x60, 0xfd, 0x7d, 0x7d, 0x30, 0x7d, 0xbf, 0xf0, 0xea, 0xb7, 0xd4, 0x5f, 0x2e, 0xc1, 0xa0, 0xeb,
+	0xf8, 0x29, 0x28, 0xeb, 0x37, 0xe9, 0x89, 0x59, 0xa1, 0x9e, 0x13, 0x0c, 0xa5, 0x8d, 0x51, 0x55,
+	0x48, 0x8d, 0x34, 0x0a, 0x41, 0xc9, 0xe9, 0xf7, 0x4e, 0x76, 0x98, 0x17, 0x5a, 0xde, 0xc5, 0x18,
+	0xbf, 0x47, 0x8b, 0xf2, 0x97, 0x90, 0x77, 0x38, 0xbe, 0x6a, 0xf2, 0x3f, 0x7f, 0x8b, 0xef, 0x12,
+	0x82, 0xad, 0x75, 0x97, 0x35, 0x25, 0xb4, 0x7c, 0x07, 0x0a, 0x4c, 0x6c, 0xb6, 0x4a, 0xef, 0x86,
+	0x91, 0x7f, 0x84, 0xf9, 0xe7, 0xb4, 0x90, 0xc9, 0x24, 0x1e, 0x48, 0x8b, 0xba, 0xb2, 0x57, 0x23,
+	0x8d, 0x62, 0xb0, 0x11, 0x56, 0x55, 0x6e, 0x9e, 0x3e, 0xe6, 0x8c, 0xcc, 0xe6, 0x8c, 0x7c, 0xcd,
+	0x19, 0x79, 0x5b, 0x30, 0x6f, 0xb6, 0x60, 0xde, 0xe7, 0x82, 0x79, 0x8f, 0xdd, 0x28, 0xb6, 0xc3,
+	0x71, 0x9f, 0x87, 0x98, 0x0a, 0x63, 0xb5, 0x54, 0x11, 0x24, 0x98, 0x41, 0x2b, 0x03, 0x65, 0xc7,
+	0x1a, 0x8c, 0x58, 0xb7, 0x6a, 0x85, 0x68, 0x52, 0x34, 0xe2, 0x75, 0x73, 0x05, 0xf9, 0x09, 0xf4,
+	0x0f, 0xf3, 0x67, 0xed, 0x7c, 0x07, 0x00, 0x00, 0xff, 0xff, 0x5e, 0xd6, 0xdd, 0x09, 0x28, 0x02,
+	0x00, 0x00,
 }
 
 func (m *StorageMetadata) Marshal() (dAtA []byte, err error) {
@@ -241,13 +287,6 @@ func (m *StoredAnnouncement) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.Signature) > 0 {
-		i -= len(m.Signature)
-		copy(dAtA[i:], m.Signature)
-		i = encodeVarintTypes(dAtA, i, uint64(len(m.Signature)))
-		i--
-		dAtA[i] = 0x12
-	}
 	if len(m.StorageLocation) > 0 {
 		i -= len(m.StorageLocation)
 		copy(dAtA[i:], m.StorageLocation)
@@ -295,6 +334,48 @@ func (m *StoredAnnouncements) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *GenesisAnnouncement) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *GenesisAnnouncement) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *GenesisAnnouncement) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Validator) > 0 {
+		i -= len(m.Validator)
+		copy(dAtA[i:], m.Validator)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Validator)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if m.Announcement != nil {
+		{
+			size, err := m.Announcement.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTypes(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTypes(v)
 	base := offset
@@ -332,10 +413,6 @@ func (m *StoredAnnouncement) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTypes(uint64(l))
 	}
-	l = len(m.Signature)
-	if l > 0 {
-		n += 1 + l + sovTypes(uint64(l))
-	}
 	return n
 }
 
@@ -350,6 +427,23 @@ func (m *StoredAnnouncements) Size() (n int) {
 			l = e.Size()
 			n += 1 + l + sovTypes(uint64(l))
 		}
+	}
+	return n
+}
+
+func (m *GenesisAnnouncement) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Announcement != nil {
+		l = m.Announcement.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.Validator)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
 	}
 	return n
 }
@@ -506,40 +600,6 @@ func (m *StoredAnnouncement) Unmarshal(dAtA []byte) error {
 			}
 			m.StorageLocation = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Signature", wireType)
-			}
-			var byteLen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTypes
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				byteLen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if byteLen < 0 {
-				return ErrInvalidLengthTypes
-			}
-			postIndex := iNdEx + byteLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTypes
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Signature = append(m.Signature[:0], dAtA[iNdEx:postIndex]...)
-			if m.Signature == nil {
-				m.Signature = []byte{}
-			}
-			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTypes(dAtA[iNdEx:])
@@ -623,6 +683,127 @@ func (m *StoredAnnouncements) Unmarshal(dAtA []byte) error {
 			m.Announcement = append(m.Announcement, &StoredAnnouncement{})
 			if err := m.Announcement[len(m.Announcement)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+
+func (m *GenesisAnnouncement) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: GenesisAnnouncement: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: GenesisAnnouncement: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Announcement", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Announcement == nil {
+				m.Announcement = &StoredAnnouncement{}
+			}
+			if err := m.Announcement.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Validator", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Validator = append(m.Validator[:0], dAtA[iNdEx:postIndex]...)
+			if m.Validator == nil {
+				m.Validator = []byte{}
 			}
 			iNdEx = postIndex
 		default:

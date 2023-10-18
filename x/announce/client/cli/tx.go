@@ -18,7 +18,7 @@ func announceCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "announce <hex-validator-address> <storageLocation> <hex-validator-signature>",
 		Short:   "announce - Announces a validator signature location",
-		Example: fmt.Sprintf("%s tx %s announce 0xFFFFFFFFFFFFFFFFFFFF", version.AppName, types.ModuleName),
+		Example: fmt.Sprintf("%s tx %s announce 0xFFFFFFFFFFFFFFFFFFFF file:///hyperlane/val-signatures 0x...", version.AppName, types.ModuleName),
 		Args:    cobra.ExactArgs(3),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)

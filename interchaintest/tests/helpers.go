@@ -17,12 +17,13 @@ import (
 	"time"
 
 	"github.com/go-cmd/cmd"
-	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
-	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/hyperlane"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
 )
 
 const (

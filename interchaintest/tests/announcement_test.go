@@ -12,10 +12,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
-	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
-	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
-	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 	icv7 "github.com/strangelove-ventures/interchaintest/v7"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
@@ -24,6 +20,11 @@ import (
 	"github.com/strangelove-ventures/interchaintest/v7/testreporter"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/docker"
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 )
 
 // Test the announce module 'announce' TX
@@ -163,7 +164,7 @@ func TestAnnounce(t *testing.T) {
 	valSignature := simd1IsmValidator.Sign(digest)
 	valSigHex := hex.EncodeToString(valSignature)
 
-	//Announcement sends the announcement to the chain
+	// Announcement sends the announcement to the chain
 	processStdout := helpers.CallAnnounceMsg(t, ctx, simd1, announceWallet.KeyName(), valAddrHex, expectedStorageLocation, valSigHex)
 	announcementTxHash := helpers.ParseTxHash(string(processStdout))
 
@@ -262,7 +263,7 @@ func TestHyperlaneAnnounceWithValidator(t *testing.T) {
 	require.NoError(t, err)
 	fmt.Printf("simd mailbox domain: %d\n", simdDomain)
 	_, err = icv7.GetAndFundTestUserWithMnemonic(ctx, "valannounce", mnemonic, int64(10_000_000_000), simd1)
-	//announceWallet, err := icv7.GetAndFundTestUserWithMnemonic(ctx, "valannounce", mnemonic, int64(10_000_000_000), simd1)
+	// announceWallet, err := icv7.GetAndFundTestUserWithMnemonic(ctx, "valannounce", mnemonic, int64(10_000_000_000), simd1)
 	require.NoError(t, err)
 
 	userSimd := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd1)[0]

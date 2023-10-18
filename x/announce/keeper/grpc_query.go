@@ -18,13 +18,7 @@ func (k Keeper) GetAnnouncedValidators(ctx context.Context, req *types.GetAnnoun
 		return nil, status.Error(codes.InvalidArgument, "invalid request")
 	}
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-
-	resp, err := k.getAnnouncedValidators(sdkCtx)
-	if err != nil {
-		return nil, types.ErrMarshalAnnouncedValidators
-	}
-
-	return resp, nil
+	return k.getAnnouncedValidators(sdkCtx), nil
 }
 
 // GetAnnouncedStorageLocations returns the list of storage locations for each requested validator

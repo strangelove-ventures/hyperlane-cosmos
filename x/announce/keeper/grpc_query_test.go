@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
+
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 )
 

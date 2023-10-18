@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 )
@@ -49,14 +48,8 @@ func (k Keeper) Announcement(goCtx context.Context, msg *types.MsgAnnouncement) 
 
 	storedAnnouncements.Announcement = append(storedAnnouncements.Announcement, &types.StoredAnnouncement{
 		StorageLocation: msg.StorageLocation,
-		Signature:       msg.Signature,
 	})
 
-	valHex := hexutil.Encode(msg.Validator)
-	err = k.setAnnouncedValidators(ctx, valHex)
-	if err != nil {
-		return nil, types.ErrMarshalAnnouncedValidators
-	}
 	err = k.setAnnouncements(ctx, msg.Validator, storedAnnouncements)
 	if err != nil {
 		return nil, err

@@ -111,7 +111,7 @@ func VerifyAnnounceEvents(c *cosmos.CosmosChain, txHash string) (storageLocation
 }
 
 func ParseEnvVar(envVar, key string) (value string) {
-	//HYP_BASE_CHECKPOINTSYNCER_PATH=${val_dir}/signatures-simd1
+	// HYP_BASE_CHECKPOINTSYNCER_PATH=${val_dir}/signatures-simd1
 	pattern := fmt.Sprintf(`(?m)^%s=(?P<val>.*)$`, key)
 	r, _ := regexp.Compile(pattern)
 

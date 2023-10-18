@@ -16,11 +16,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+
 	icv7 "github.com/strangelove-ventures/interchaintest/v7"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	hyperlane "github.com/strangelove-ventures/interchaintest/v7/chain/hyperlane"
 	"go.uber.org/zap"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/counterchain"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/helpers"
@@ -37,7 +39,7 @@ const (
 	mnemonic          = "spare number knock scan copper method lunch camera trap inject fine suspect edit sure design crowd sorry actual better spatial cover grit entire raccoon" // Testing only, do NOT use this mnemonic
 	bech32Addr        = "cosmos13gpsgkxaavz3kcvh8y55xzat9umg944qnwxq4k"                                                                                                            // for the mnemonic above
 	mnemonicPrivKey   = "fe257759a16d7085ba4df68773c94647966e9fc8c7a7e1eb3311c40bbe1a0ed3"                                                                                         // for the mnemonic above                                                                                                      // Corresponds to the key above
-	//valPrivKey        = "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"                                                                                         // Testing only, do NOT use this key. Corresponds to the hyperlane validator signing key, not the mnemonic above
+	// valPrivKey        = "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"                                                                                         // Testing only, do NOT use this key. Corresponds to the hyperlane validator signing key, not the mnemonic above
 )
 
 var (
@@ -273,6 +275,246 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestHyperlaneCosmosMultiMessageE2E(t *testing.T) {
+	logger := NewLogger(t)
+
+	// Mailbox address - will be used in the hyperlane validator config
+	mailboxHex, expectedMailbox := helpers.GetMailboxAddress()
+	prefixedMailboxHex := "0x" + mailboxHex
+
+	// Directories where files related to this test will be stored
+	val1TmpDir := t.TempDir()
+	val2TmpDir := t.TempDir()
+	rlyTmpDir := t.TempDir()
+
+	// Get the hyperlane agent raw configs (before variable replacements)
+	valSimd1, valSimd2, rly := readHyperlaneConfig(t, COSMOS_E2E_CONFIG, logger)
+
+	// Get the validator key for the agents. We also need this key to configure the chain ISM.
+	valSimd1PrivKey, err := getHyperlaneBaseValidatorKey(valSimd1)
+	require.NoError(t, err)
+	valSimd2PrivKey, err := getHyperlaneBaseValidatorKey(valSimd2)
+	require.NoError(t, err)
+
+	// Build the chain docker image from the local repo
+	optionalBuildChainImage()
+
+	DockerImage := ibc.DockerImage{
+		Repository: docker.HyperlaneImageName,
+		Version:    "local",
+		UidGid:     "1025:1025",
+	}
+
+	simd1Domain := uint32(23456)
+	simd2Domain := uint32(34567)
+
+	// Set up two Cosmos chains (with our hyperlane modules) for the test.
+	// The images must be in our local registry so we skip image pull.
+	chains := CreateHyperlaneSimds(t, DockerImage, []uint32{simd1Domain, simd2Domain})
+	simd1 := chains[0].(*cosmos.CosmosChain)
+	simd1.SkipImagePull = true
+	simd2 := chains[1].(*cosmos.CosmosChain)
+	simd2.SkipImagePull = true
+
+	// Create a new Interchain object which describes the chains, relayers, and IBC connections we want to use
+	ic := interchaintest.NewInterchain()
+
+	for _, chain := range chains {
+		ic.AddChain(chain)
+	}
+
+	rep := testreporter.NewNopReporter()
+	eRep := rep.RelayerExecReporter(t)
+	ctx := context.Background()
+
+	// Note: make sure that both the 'ic' interchain AND the hyperlane network share this client/network
+	client, network := interchaintest.DockerSetup(t)
+	opts := interchaintest.InterchainBuildOptions{
+		TestName:          t.Name(),
+		Client:            client,
+		NetworkID:         network,
+		SkipPathCreation:  true,
+		BlockDatabaseFile: interchaintest.DefaultBlockDatabaseFilepath(),
+	}
+
+	err = ic.Build(ctx, eRep, opts)
+	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		_ = ic.Close()
+	})
+
+	// Query the cosmos chains and ensure the hyperlane domain configuration is as expected
+	verifyDomain(t, ctx, simd1, uint64(simd1Domain))
+	verifyDomain(t, ctx, simd2, uint64(simd2Domain))
+
+	// Now we need to configure the Hyperlane modules and setup some test users...
+	userSimd := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd1)[0]
+	userSimd2 := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd2)[0]
+
+	// Fund this wallet since the validator will announce its storage location with this mnemonic's private key.
+	_, err = icv7.GetAndFundTestUserWithMnemonic(ctx, "valannounce", mnemonic, int64(10_000_000_000), simd1)
+	require.NoError(t, err)
+	_, err = icv7.GetAndFundTestUserWithMnemonic(ctx, "valannounce", mnemonic, int64(10_000_000_000), simd2)
+	require.NoError(t, err)
+
+	msg := `{}`
+	_, contract := helpers.SetupContract(t, ctx, simd1, userSimd.KeyName(), "../contracts/hyperlane.wasm", msg)
+	logger.Info("simd1 contract", zap.String("address", contract))
+	_, contract2 := helpers.SetupContract(t, ctx, simd2, userSimd2.KeyName(), "../contracts/hyperlane.wasm", msg)
+	logger.Info("simd2 contract", zap.String("address", contract2))
+
+	verifyContractEntryPoints(t, ctx, simd1, userSimd, contract)
+	verifyContractEntryPoints(t, ctx, simd2, userSimd2, contract2)
+
+	// Create counter chain 1 with val set signing legacy multisig.
+	// The private key used here MUST be the one from the validator config file.
+	simd1IsmValidator := counterchain.CreateEmperorValidator(t, simd1Domain, counterchain.LEGACY_MULTISIG, valSimd1PrivKey)
+	// Create counter chain 2 with val set signing legacy multisig
+	simd2IsmValidator := counterchain.CreateEmperorValidator(t, simd2Domain, counterchain.LEGACY_MULTISIG, valSimd2PrivKey)
+
+	// Set default isms for counter chains for SIMD
+	helpers.SetDefaultIsm(t, ctx, simd1, userSimd.KeyName(), simd2IsmValidator)
+	// Set default isms for counter chains for SIMD2
+	helpers.SetDefaultIsm(t, ctx, simd2, userSimd2.KeyName(), simd1IsmValidator)
+
+	recipientAccAddr := sdk.MustAccAddressFromBech32(contract2).Bytes()
+	recipientDispatch := hexutil.Encode([]byte(recipientAccAddr))
+	fmt.Printf("Recipient dispatch addr hex: %s", recipientDispatch)
+
+	logger.Info("Preconfiguring Hyperlane (getting configs)")
+
+	valJson, err := preconfigureHyperlaneValidator(t, valSimd1, val1TmpDir, mnemonicPrivKey, chains[0].Config().ChainID, chains[0].Config().Name, chains[0].GetRPCAddress(), "http://"+chains[0].GetGRPCAddress(), prefixedMailboxHex, 23456)
+	require.NoError(t, err)
+
+	simd1MailboxHex, err := getMailbox(valJson, chains[0].Config().Name)
+	require.NoError(t, err)
+	_, simd1MailboxUnprefixed, found := strings.Cut(simd1MailboxHex, "0x")
+	require.True(t, found)
+	simd1Mailbox, err := hex.DecodeString(simd1MailboxUnprefixed)
+	require.NoError(t, err)
+	originMailboxB := []byte(simd1Mailbox)
+	require.Equal(t, expectedMailbox, originMailboxB)
+
+	valJson, err = preconfigureHyperlaneValidator(t, valSimd2, val2TmpDir, mnemonicPrivKey, chains[1].Config().ChainID, chains[1].Config().Name, chains[1].GetRPCAddress(), "http://"+chains[1].GetGRPCAddress(), prefixedMailboxHex, 34567)
+	require.NoError(t, err)
+	simd1ValidatorSignaturesDir := filepath.Join(val1TmpDir, "signatures-"+chains[0].Config().Name) //${val_dir}/signatures-${chainName}
+	simd2ValidatorSignaturesDir := filepath.Join(val2TmpDir, "signatures-"+chains[1].Config().Name) //${val_dir}/signatures-${chainName}
+
+	rlyCfgs := []chainCfg{
+		{
+			privKey:                mnemonicPrivKey,
+			chainID:                chains[0].Config().ChainID,
+			chainName:              chains[0].Config().Name,
+			rpcUrl:                 chains[0].GetRPCAddress(),
+			grpcUrl:                "http://" + chains[0].GetGRPCAddress(),
+			originMailboxHex:       prefixedMailboxHex,
+			domain:                 23456,
+			validatorSignaturePath: simd1ValidatorSignaturesDir,
+		},
+		{
+			privKey:                mnemonicPrivKey,
+			chainID:                chains[1].Config().ChainID,
+			chainName:              chains[1].Config().Name,
+			rpcUrl:                 chains[1].GetRPCAddress(),
+			grpcUrl:                "http://" + chains[1].GetGRPCAddress(),
+			originMailboxHex:       prefixedMailboxHex,
+			domain:                 34567,
+			validatorSignaturePath: simd2ValidatorSignaturesDir,
+		},
+	}
+	_, err = preconfigureHyperlaneRelayer(t, rly, rlyTmpDir, rlyCfgs)
+	require.NoError(t, err)
+
+	// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build .".
+	// Also make sure that the tags in hyperlane.yaml match the local docker image repo and version.
+	hyperlaneNetwork := hyperlane.NewHyperlaneNetwork(true, true)
+	err = hyperlaneNetwork.Build(ctx, logger, eRep, opts, *valSimd1, *valSimd2, *rly)
+	require.NoError(t, err)
+
+	// Give the hyperlane validators and relayer time to start up and start watching the mailbox for the chain
+	time.Sleep(10 * time.Second)
+
+	var eg errgroup.Group
+	numMsgs := 100
+
+	for i := 0; i < numMsgs; i++ {
+		i := i
+		eg.Go(func() (err error) {
+			dispatchedRecipientAddrHex, dispatchedMsgBody, dispatchSender, dispatchedMsgId := dispatchMsg(t, i, ctx, simd2Domain, recipientDispatch, userSimd.KeyName(), contract, simd1, logger)
+			return processMsg(t, ctx, simd1IsmValidator, simd2, simd1Domain, simd2Domain, dispatchedRecipientAddrHex, dispatchedMsgBody, dispatchSender, dispatchedMsgId)
+		})
+	}
+
+	err = eg.Wait()
+	require.NoError(t, err)
+}
+
+func processMsg(
+	t *testing.T,
+	ctx context.Context,
+	validator *counterchain.CounterChain,
+	destChain *cosmos.CosmosChain,
+	originDomain uint32,
+	destDomain uint32,
+	dispatchedRecipientAddrHex,
+	dispatchedMsgBody,
+	dispatchSender,
+	dispatchedMsgId string) error {
+	// Find the message ID of the dispatched message and wait for the message to be processed on the destination.
+	dispatchedRecipientAddr := hexutil.MustDecode(dispatchedRecipientAddrHex)
+	bech32Recipient := sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), dispatchedRecipientAddr)
+
+	b, err := hexutil.Decode(dispatchedMsgBody)
+	require.NoError(t, err)
+	message, _ := validator.CreateMessage(dispatchSender, originDomain, destDomain, bech32Recipient, string(b))
+	messageId := validator.GetMessageId(message)
+	require.Equal(t, dispatchedMsgId, hexutil.Encode(messageId))
+
+	return Await(func() (bool, error) {
+		return helpers.QueryMsgDelivered(t, ctx, destChain, dispatchedMsgId), nil
+	}, 10*time.Minute, 5*time.Second)
+}
+
+// Dispatch the message to the chain and verify it was sent successfully
+func dispatchMsg(
+	t *testing.T,
+	msgIndex int,
+	ctx context.Context,
+	destDomain uint32,
+	recipientAddr string,
+	keyName string,
+	contract string,
+	chain *cosmos.CosmosChain,
+	logger *zap.Logger,
+) (dispatchedRecipientAddrHex, dispatchedMsgBody, dispatchSender, dispatchedMsgId string) {
+	// Dispatch a message to SIMD1
+	dMsg := []byte("CosmosSimd1ToCosmosSimd2" + fmt.Sprintf("%d", msgIndex))
+	dispatchedMsg := hexutil.Encode(dMsg)
+
+	dispatchMsgStruct := helpers.ExecuteMsg{
+		DispatchMsg: &helpers.DispatchMsg{
+			DestinationAddr: destDomain,
+			RecipientAddr:   recipientAddr,
+			MessageBody:     dispatchedMsg,
+		},
+	}
+
+	// Dispatch the hyperlane message to simd1
+	dipatchMsg, err := json.Marshal(dispatchMsgStruct)
+	require.NoError(t, err)
+	dispatchedTxHash, err := chain.ExecuteContract(ctx, keyName, contract, string(dipatchMsg))
+	require.NoError(t, err)
+	logger.Info("Message dispatched to simd1")
+	var dispatchedDestDomain string
+	dispatchedDestDomain, dispatchedRecipientAddrHex, dispatchedMsgBody, dispatchedMsgId, dispatchSender, _, err = helpers.VerifyDispatchEvents(chain, dispatchedTxHash)
+	require.NoError(t, err)
+	require.NotEmpty(t, dispatchSender)
+	require.NotEmpty(t, dispatchedRecipientAddrHex)
+	require.Equal(t, fmt.Sprintf("%d", destDomain), dispatchedDestDomain)
+	return
+}
+
 // e2e style test that spins up two Cosmos nodes (with different origin domains),
 // a hyperlane validator (for Cosmos), and sends messages back and forth.
 // Does not use a hyperlane relayer.
@@ -403,7 +645,7 @@ func TestHyperlaneCosmosValidator(t *testing.T) {
 	require.NoError(t, err)
 
 	simd1ValidatorSignaturesDir := filepath.Join(val1TmpDir, "signatures-"+chains[0].Config().Name) //${val_dir}/signatures-${chainName}
-	//simd2ValidatorSignaturesDir := filepath.Join(tmpDir2, "signatures-"+chains[1].Config().Name) //${val_dir}/signatures-${chainName}
+	// simd2ValidatorSignaturesDir := filepath.Join(tmpDir2, "signatures-"+chains[1].Config().Name) //${val_dir}/signatures-${chainName}
 
 	// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build .".
 	// Also make sure that the tags in hyperlane.yaml match the local docker image repo and version.
