@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"bytes"
+
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -22,6 +24,7 @@ func (k Keeper) getAnnouncedValidators(ctx sdk.Context) *types.GetAnnouncedValid
 
 	for ; iterator.Valid(); iterator.Next() {
 		validator := iterator.Key()
+		validator = bytes.TrimPrefix(validator, types.AnnouncedStorageLocations)
 		validators = append(validators, hexutil.Encode(validator))
 	}
 

@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"bytes"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
@@ -59,6 +61,8 @@ func ExportAnnouncements(store sdk.KVStore) ([]*types.GenesisAnnouncement, error
 
 	for ; iterator.Valid(); iterator.Next() {
 		validator := iterator.Key()
+		validator = bytes.TrimPrefix(validator, types.AnnouncedStorageLocations)
+
 		storedAnnouncementsBytes := iterator.Value()
 		storedAnnouncements := &types.StoredAnnouncements{}
 		err := storedAnnouncements.Unmarshal(storedAnnouncementsBytes)

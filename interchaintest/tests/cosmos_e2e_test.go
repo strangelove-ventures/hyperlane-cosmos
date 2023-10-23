@@ -436,14 +436,24 @@ func TestHyperlaneCosmosMultiMessageE2E(t *testing.T) {
 	time.Sleep(10 * time.Second)
 
 	var eg errgroup.Group
-	numMsgs := 100
+	numMsgs := 10
 
 	for i := 0; i < numMsgs; i++ {
 		i := i
+		// Dispatch on SIMD1
 		eg.Go(func() (err error) {
 			dispatchedRecipientAddrHex, dispatchedMsgBody, dispatchSender, dispatchedMsgId := dispatchMsg(t, i, ctx, simd2Domain, recipientDispatch, userSimd.KeyName(), contract, simd1, logger)
 			return processMsg(t, ctx, simd1IsmValidator, simd2, simd1Domain, simd2Domain, dispatchedRecipientAddrHex, dispatchedMsgBody, dispatchSender, dispatchedMsgId)
 		})
+
+		// Dispatch on SIMD2
+		eg.Go(func() (err error) {
+			dispatchedRecipientAddrHex, dispatchedMsgBody, dispatchSender, dispatchedMsgId := dispatchMsg(t, i, ctx, simd1Domain, recipientDispatch, userSimd2.KeyName(), contract2, simd2, logger)
+			return processMsg(t, ctx, simd2IsmValidator, simd1, simd2Domain, simd1Domain, dispatchedRecipientAddrHex, dispatchedMsgBody, dispatchSender, dispatchedMsgId)
+		})
+
+		// Here we sleep for 5s to avoid sequence related issues with TX signatures
+		time.Sleep(5 * time.Second)
 	}
 
 	err = eg.Wait()

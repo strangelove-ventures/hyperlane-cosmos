@@ -23,6 +23,7 @@ require (
 	github.com/cometbft/cometbft v0.37.2
 	github.com/go-cmd/cmd v1.4.2
 	github.com/oriser/regroup v0.0.0-20230527212431-1b00c9bdbc5b
+	golang.org/x/sync v0.2.0
 )
 
 require (
@@ -253,7 +254,6 @@ require (
 	golang.org/x/mod v0.10.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.7.0 // indirect
-	golang.org/x/sync v0.2.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/term v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect

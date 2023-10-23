@@ -11,15 +11,12 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
 )
 
-func (suite *KeeperTestSuite) mockAnnounce(valPrivKey string, mailboxAddress []byte) (*types.MsgAnnouncement, *types.MsgAnnouncementResponse, error) {
+func (suite *KeeperTestSuite) mockAnnounce(valPrivKey, storageLocation string, mailboxAddress []byte) (*types.MsgAnnouncement, *types.MsgAnnouncementResponse, error) {
 	txSigner := "cosmos14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9s4hmalr"
 	validatorPrivateKey, err := crypto.HexToECDSA(valPrivKey)
 	suite.Require().NoError(err)
 	valAddr := crypto.PubkeyToAddress(validatorPrivateKey.PublicKey)
-	var validator *counterchain.CounterChain
-	storageLocation := "file:///tmp//signatures-simd1"
-
-	validator = counterchain.CreateEmperorValidator(suite.T(), suite.mailboxKeeper.GetDomain(suite.ctx), counterchain.LEGACY_MULTISIG, valPrivKey)
+	validator := counterchain.CreateEmperorValidator(suite.T(), suite.mailboxKeeper.GetDomain(suite.ctx), counterchain.LEGACY_MULTISIG, valPrivKey)
 	digest, err := types.GetAnnouncementDigest(suite.mailboxKeeper.GetDomain(suite.ctx), mailboxAddress, storageLocation)
 	suite.Require().NoError(err)
 	valSignature := validator.Sign(digest)
@@ -50,7 +47,8 @@ func (suite *KeeperTestSuite) TestAnnouncement() {
 			"success",
 			func() {
 				mailbox := suite.mailboxKeeper.GetMailboxAddress()
-				msg, resp, err = suite.mockAnnounce(valPrivKey, mailbox)
+				storageLocation := "file:///tmp//signatures-simd1"
+				msg, resp, err = suite.mockAnnounce(valPrivKey, storageLocation, mailbox)
 			},
 			true,
 		},
@@ -61,7 +59,8 @@ func (suite *KeeperTestSuite) TestAnnouncement() {
 				hs := hex.EncodeToString(mailbox)
 				mailboxHex := strings.Replace(hs, "c", "d", 1)
 				mbBytes, _ := hex.DecodeString(mailboxHex)
-				msg, resp, err = suite.mockAnnounce(valPrivKey, mbBytes)
+				storageLocation := "file:///tmp//signatures-simd1"
+				msg, resp, err = suite.mockAnnounce(valPrivKey, storageLocation, mbBytes)
 			},
 			false,
 		},
