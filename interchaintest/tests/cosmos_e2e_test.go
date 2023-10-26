@@ -470,7 +470,8 @@ func processMsg(
 	dispatchedRecipientAddrHex,
 	dispatchedMsgBody,
 	dispatchSender,
-	dispatchedMsgId string) error {
+	dispatchedMsgId string,
+) error {
 	// Find the message ID of the dispatched message and wait for the message to be processed on the destination.
 	dispatchedRecipientAddr := hexutil.MustDecode(dispatchedRecipientAddrHex)
 	bech32Recipient := sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), dispatchedRecipientAddr)

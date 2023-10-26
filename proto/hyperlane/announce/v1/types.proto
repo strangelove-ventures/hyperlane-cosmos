@@ -28,7 +28,7 @@ message StoredAnnouncements {
 // Genesis helper type for Hyperlane's Announcement.
 message GenesisAnnouncement {
   option (gogoproto.goproto_getters) = false;
-  StoredAnnouncement announcement = 1;
+  StoredAnnouncements announcements = 1;
   // The validator (in eth address format) that announced
   bytes validator = 2;
 }

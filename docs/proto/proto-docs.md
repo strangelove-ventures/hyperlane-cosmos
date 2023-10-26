@@ -4,95 +4,69 @@
 
 ## Table of Contents
 
-- [hyperlane/announce/v1/types.proto](#hyperlane/announce/v1/types.proto)
-    - [GenesisAnnouncement](#hyperlane.announce.v1.GenesisAnnouncement)
-    - [StorageMetadata](#hyperlane.announce.v1.StorageMetadata)
-    - [StoredAnnouncement](#hyperlane.announce.v1.StoredAnnouncement)
-    - [StoredAnnouncements](#hyperlane.announce.v1.StoredAnnouncements)
+- [hyperlane/mailbox/v1/types.proto](#hyperlane/mailbox/v1/types.proto)
+    - [MessageDelivered](#hyperlane.mailbox.v1.MessageDelivered)
+    - [Tree](#hyperlane.mailbox.v1.Tree)
   
-- [hyperlane/announce/v1/genesis.proto](#hyperlane/announce/v1/genesis.proto)
-    - [GenesisState](#hyperlane.announce.v1.GenesisState)
+- [hyperlane/mailbox/v1/genesis.proto](#hyperlane/mailbox/v1/genesis.proto)
+    - [GenesisState](#hyperlane.mailbox.v1.GenesisState)
   
-- [hyperlane/announce/v1/query.proto](#hyperlane/announce/v1/query.proto)
-    - [GetAnnouncedStorageLocationsRequest](#hyperlane.announce.v1.GetAnnouncedStorageLocationsRequest)
-    - [GetAnnouncedStorageLocationsResponse](#hyperlane.announce.v1.GetAnnouncedStorageLocationsResponse)
-    - [GetAnnouncedValidatorsRequest](#hyperlane.announce.v1.GetAnnouncedValidatorsRequest)
-    - [GetAnnouncedValidatorsResponse](#hyperlane.announce.v1.GetAnnouncedValidatorsResponse)
+- [hyperlane/mailbox/v1/query.proto](#hyperlane/mailbox/v1/query.proto)
+    - [QueryCurrentTreeMetadataRequest](#hyperlane.mailbox.v1.QueryCurrentTreeMetadataRequest)
+    - [QueryCurrentTreeMetadataResponse](#hyperlane.mailbox.v1.QueryCurrentTreeMetadataResponse)
+    - [QueryCurrentTreeRequest](#hyperlane.mailbox.v1.QueryCurrentTreeRequest)
+    - [QueryCurrentTreeResponse](#hyperlane.mailbox.v1.QueryCurrentTreeResponse)
+    - [QueryDomainRequest](#hyperlane.mailbox.v1.QueryDomainRequest)
+    - [QueryDomainResponse](#hyperlane.mailbox.v1.QueryDomainResponse)
+    - [QueryMsgDeliveredRequest](#hyperlane.mailbox.v1.QueryMsgDeliveredRequest)
+    - [QueryMsgDeliveredResponse](#hyperlane.mailbox.v1.QueryMsgDeliveredResponse)
   
-    - [Query](#hyperlane.announce.v1.Query)
+    - [Query](#hyperlane.mailbox.v1.Query)
   
-- [hyperlane/announce/v1/tx.proto](#hyperlane/announce/v1/tx.proto)
-    - [MsgAnnouncement](#hyperlane.announce.v1.MsgAnnouncement)
-    - [MsgAnnouncementResponse](#hyperlane.announce.v1.MsgAnnouncementResponse)
+- [hyperlane/mailbox/v1/tx.proto](#hyperlane/mailbox/v1/tx.proto)
+    - [MsgDispatch](#hyperlane.mailbox.v1.MsgDispatch)
+    - [MsgDispatchResponse](#hyperlane.mailbox.v1.MsgDispatchResponse)
+    - [MsgProcess](#hyperlane.mailbox.v1.MsgProcess)
+    - [MsgProcessResponse](#hyperlane.mailbox.v1.MsgProcessResponse)
   
-    - [Msg](#hyperlane.announce.v1.Msg)
+    - [Msg](#hyperlane.mailbox.v1.Msg)
   
 - [Scalar Value Types](#scalar-value-types)
 
 
 
-<a name="hyperlane/announce/v1/types.proto"></a>
+<a name="hyperlane/mailbox/v1/types.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/announce/v1/types.proto
+## hyperlane/mailbox/v1/types.proto
 
 
 
-<a name="hyperlane.announce.v1.GenesisAnnouncement"></a>
+<a name="hyperlane.mailbox.v1.MessageDelivered"></a>
 
-### GenesisAnnouncement
-Genesis helper type for Hyperlane's Announcement.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `announcement` | [StoredAnnouncement](#hyperlane.announce.v1.StoredAnnouncement) |  |  |
-| `validator` | [bytes](#bytes) |  | The validator (in eth address format) that announced |
-
-
-
-
-
-
-<a name="hyperlane.announce.v1.StorageMetadata"></a>
-
-### StorageMetadata
-Helper type for Hyperlane's getAnnouncedStorageLocations.
+### MessageDelivered
+Mailbox delivered message
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `metadata` | [string](#string) | repeated |  |
+| `id` | [string](#string) |  | Message id (hash) |
 
 
 
 
 
 
-<a name="hyperlane.announce.v1.StoredAnnouncement"></a>
+<a name="hyperlane.mailbox.v1.Tree"></a>
 
-### StoredAnnouncement
-Helper type for Hyperlane's Announcement.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `storage_location` | [string](#string) |  | location where signatures will be stored |
-
-
-
-
-
-
-<a name="hyperlane.announce.v1.StoredAnnouncements"></a>
-
-### StoredAnnouncements
-Helper type for Hyperlane's Announcement.
+### Tree
+Hyperlane's tree
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `announcement` | [StoredAnnouncement](#hyperlane.announce.v1.StoredAnnouncement) | repeated |  |
+| `count` | [uint32](#uint32) |  | Count of items inserted to tree |
+| `branch` | [bytes](#bytes) | repeated | Each item inserted |
 
 
 
@@ -108,22 +82,24 @@ Helper type for Hyperlane's Announcement.
 
 
 
-<a name="hyperlane/announce/v1/genesis.proto"></a>
+<a name="hyperlane/mailbox/v1/genesis.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/announce/v1/genesis.proto
+## hyperlane/mailbox/v1/genesis.proto
 
 
 
-<a name="hyperlane.announce.v1.GenesisState"></a>
+<a name="hyperlane.mailbox.v1.GenesisState"></a>
 
 ### GenesisState
-Hyperlane Announce's keeper genesis state
+Hyperlane mailbox's keeper genesis state
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `announcements` | [GenesisAnnouncement](#hyperlane.announce.v1.GenesisAnnouncement) | repeated |  |
+| `tree` | [Tree](#hyperlane.mailbox.v1.Tree) |  | Each genesis tree entry |
+| `delivered_messages` | [MessageDelivered](#hyperlane.mailbox.v1.MessageDelivered) | repeated | Each message that has been delivered |
+| `domain` | [uint32](#uint32) |  | The domain of this chain module, assigned by hyperlane |
 
 
 
@@ -139,66 +115,118 @@ Hyperlane Announce's keeper genesis state
 
 
 
-<a name="hyperlane/announce/v1/query.proto"></a>
+<a name="hyperlane/mailbox/v1/query.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/announce/v1/query.proto
+## hyperlane/mailbox/v1/query.proto
 
 
 
-<a name="hyperlane.announce.v1.GetAnnouncedStorageLocationsRequest"></a>
+<a name="hyperlane.mailbox.v1.QueryCurrentTreeMetadataRequest"></a>
 
-### GetAnnouncedStorageLocationsRequest
-GetAnnouncedStorageLocationsRequest is the request type for the
-GetAnnouncedStorageLocations RPC method.
-
-
-| Field | Type | Label | Description |
-| ----- | ---- | ----- | ----------- |
-| `validator` | [bytes](#bytes) | repeated | list of validators where each validator is in hex-encoded eth address format (20 bytes) |
+### QueryCurrentTreeMetadataRequest
+QueryCurrentTreeMetadataRequest is the request type for the Query/Tree
+metadata RPC method.
 
 
 
 
 
 
-<a name="hyperlane.announce.v1.GetAnnouncedStorageLocationsResponse"></a>
+<a name="hyperlane.mailbox.v1.QueryCurrentTreeMetadataResponse"></a>
 
-### GetAnnouncedStorageLocationsResponse
-GetAnnouncedStorageLocationsResponse is the response type for the
-GetAnnouncedStorageLocations RPC method.
+### QueryCurrentTreeMetadataResponse
+QueryCurrentTreeResponseResponse is the response type for the Query/Tree
+metadata RPC method.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `metadata` | [StorageMetadata](#hyperlane.announce.v1.StorageMetadata) | repeated |  |
+| `root` | [bytes](#bytes) |  |  |
+| `count` | [uint32](#uint32) |  |  |
 
 
 
 
 
 
-<a name="hyperlane.announce.v1.GetAnnouncedValidatorsRequest"></a>
+<a name="hyperlane.mailbox.v1.QueryCurrentTreeRequest"></a>
 
-### GetAnnouncedValidatorsRequest
-GetAnnouncedValidatorsRequest is the request type for the
-GetAnnouncedValidators RPC method.
-
+### QueryCurrentTreeRequest
+QueryCurrentTreeRequest is the request type for the Query/Tree RPC method
 
 
 
 
 
-<a name="hyperlane.announce.v1.GetAnnouncedValidatorsResponse"></a>
 
-### GetAnnouncedValidatorsResponse
-GetAnnouncedValidatorsResponse is the response type for the
-GetAnnouncedValidators RPC method.
+<a name="hyperlane.mailbox.v1.QueryCurrentTreeResponse"></a>
+
+### QueryCurrentTreeResponse
+QueryCurrentTreeResponse is the response type for the Query/Tree RPC method
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| `validator` | [string](#string) | repeated | list of validators where each validator is in hex-encoded eth address format (20 bytes) |
+| `branches` | [bytes](#bytes) | repeated |  |
+| `count` | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="hyperlane.mailbox.v1.QueryDomainRequest"></a>
+
+### QueryDomainRequest
+QueryDomain is the request type for the Query/Domain RPC
+method.
+
+
+
+
+
+
+<a name="hyperlane.mailbox.v1.QueryDomainResponse"></a>
+
+### QueryDomainResponse
+QueryDomainResponse is the response type for the Query/Domain RPC method.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `domain` | [uint32](#uint32) |  |  |
+
+
+
+
+
+
+<a name="hyperlane.mailbox.v1.QueryMsgDeliveredRequest"></a>
+
+### QueryMsgDeliveredRequest
+QueryMsgDeliveredRequest is the request type to check if message was
+delivered
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `message_id` | [bytes](#bytes) |  |  |
+
+
+
+
+
+
+<a name="hyperlane.mailbox.v1.QueryMsgDeliveredResponse"></a>
+
+### QueryMsgDeliveredResponse
+QueryMsgDeliveredResponse is the response type if message was delivered
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `delivered` | [bool](#bool) |  |  |
 
 
 
@@ -211,49 +239,83 @@ GetAnnouncedValidators RPC method.
  <!-- end HasExtensions -->
 
 
-<a name="hyperlane.announce.v1.Query"></a>
+<a name="hyperlane.mailbox.v1.Query"></a>
 
 ### Query
-Query service for hyperlane announce module
+Query service for hyperlane mailbox module
 
 | Method Name | Request Type | Response Type | Description | HTTP Verb | Endpoint |
 | ----------- | ------------ | ------------- | ------------| ------- | -------- |
-| `GetAnnouncedStorageLocations` | [GetAnnouncedStorageLocationsRequest](#hyperlane.announce.v1.GetAnnouncedStorageLocationsRequest) | [GetAnnouncedStorageLocationsResponse](#hyperlane.announce.v1.GetAnnouncedStorageLocationsResponse) | Gets the announced storage locations (where signatures are stored) for the requested validators | GET|/hyperlane/announce/v1/get_announced_storage_locations|
-| `GetAnnouncedValidators` | [GetAnnouncedValidatorsRequest](#hyperlane.announce.v1.GetAnnouncedValidatorsRequest) | [GetAnnouncedValidatorsResponse](#hyperlane.announce.v1.GetAnnouncedValidatorsResponse) | Gets a list of validators that have made announcements | GET|/hyperlane/announce/v1/get_announced_validators|
+| `CurrentTreeMetadata` | [QueryCurrentTreeMetadataRequest](#hyperlane.mailbox.v1.QueryCurrentTreeMetadataRequest) | [QueryCurrentTreeMetadataResponse](#hyperlane.mailbox.v1.QueryCurrentTreeMetadataResponse) | Get current tree metadata | GET|/hyperlane/mailbox/v1/tree_metadata|
+| `Domain` | [QueryDomainRequest](#hyperlane.mailbox.v1.QueryDomainRequest) | [QueryDomainResponse](#hyperlane.mailbox.v1.QueryDomainResponse) | Get domain | GET|/hyperlane/mailbox/v1/domain|
+| `CurrentTree` | [QueryCurrentTreeRequest](#hyperlane.mailbox.v1.QueryCurrentTreeRequest) | [QueryCurrentTreeResponse](#hyperlane.mailbox.v1.QueryCurrentTreeResponse) | Get current tree | GET|/hyperlane/mailbox/v1/tree|
+| `MsgDelivered` | [QueryMsgDeliveredRequest](#hyperlane.mailbox.v1.QueryMsgDeliveredRequest) | [QueryMsgDeliveredResponse](#hyperlane.mailbox.v1.QueryMsgDeliveredResponse) | Check if message was delivered | GET|/hyperlane/mailbox/v1/delivered|
 
  <!-- end services -->
 
 
 
-<a name="hyperlane/announce/v1/tx.proto"></a>
+<a name="hyperlane/mailbox/v1/tx.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## hyperlane/announce/v1/tx.proto
+## hyperlane/mailbox/v1/tx.proto
 
 
 
-<a name="hyperlane.announce.v1.MsgAnnouncement"></a>
+<a name="hyperlane.mailbox.v1.MsgDispatch"></a>
 
-### MsgAnnouncement
-MsgAnnouncement Announces a validator signature storage location
+### MsgDispatch
+MsgDispatch defines the request type for the Dispatch rpc.
 
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | `sender` | [string](#string) |  |  |
-| `validator` | [bytes](#bytes) |  | The validator (in eth address format) that is announcing its storage location |
-| `storage_location` | [string](#string) |  | location where signatures will be stored |
-| `signature` | [bytes](#bytes) |  | signed validator announcement |
+| `destination_domain` | [uint32](#uint32) |  |  |
+| `recipient_address` | [string](#string) |  |  |
+| `message_body` | [string](#string) |  |  |
 
 
 
 
 
 
-<a name="hyperlane.announce.v1.MsgAnnouncementResponse"></a>
+<a name="hyperlane.mailbox.v1.MsgDispatchResponse"></a>
 
-### MsgAnnouncementResponse
-MsgAnnouncementResponse defines the MsgAnnouncementResponse response type.
+### MsgDispatchResponse
+MsgDispatchResponse defines the Dispatch response type.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `message_id` | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="hyperlane.mailbox.v1.MsgProcess"></a>
+
+### MsgProcess
+MsgProcess defines the request type for the Process rpc.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| `sender` | [string](#string) |  |  |
+| `metadata` | [string](#string) |  |  |
+| `message` | [string](#string) |  |  |
+
+
+
+
+
+
+<a name="hyperlane.mailbox.v1.MsgProcessResponse"></a>
+
+### MsgProcessResponse
+MsgProcessResponse defines the Process response type.
 
 
 
@@ -266,14 +328,15 @@ MsgAnnouncementResponse defines the MsgAnnouncementResponse response type.
  <!-- end HasExtensions -->
 
 
-<a name="hyperlane.announce.v1.Msg"></a>
+<a name="hyperlane.mailbox.v1.Msg"></a>
 
 ### Msg
-Msg defines the hyperlane announce Msg service.
+Msg defines the hyperlane mailbox Msg service.
 
 | Method Name | Request Type | Response Type | Description | HTTP Verb | Endpoint |
 | ----------- | ------------ | ------------- | ------------| ------- | -------- |
-| `Announcement` | [MsgAnnouncement](#hyperlane.announce.v1.MsgAnnouncement) | [MsgAnnouncementResponse](#hyperlane.announce.v1.MsgAnnouncementResponse) | Announces a validator signature storage location | |
+| `Dispatch` | [MsgDispatch](#hyperlane.mailbox.v1.MsgDispatch) | [MsgDispatchResponse](#hyperlane.mailbox.v1.MsgDispatchResponse) | Dispatch sends interchain messages | |
+| `Process` | [MsgProcess](#hyperlane.mailbox.v1.MsgProcess) | [MsgProcessResponse](#hyperlane.mailbox.v1.MsgProcessResponse) | Process delivers interchain messages | |
 
  <!-- end services -->
 

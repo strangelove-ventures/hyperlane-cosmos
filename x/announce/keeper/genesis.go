@@ -11,29 +11,8 @@ import (
 // InitGenesis initializes the hyperlane announce module's state from a provided genesis
 // state.
 func (k Keeper) InitGenesis(ctx sdk.Context, gs types.GenesisState) error {
-	var storedAnnouncements *types.StoredAnnouncements
-	var err error
-
 	for _, announcement := range gs.Announcements {
-		storedAnnouncements, err = k.getAnnouncements(ctx, announcement.Validator)
-		if err != nil {
-			storedAnnouncements = &types.StoredAnnouncements{
-				Announcement: []*types.StoredAnnouncement{},
-			}
-		} else {
-			// Check for replays since there were existing announcements for this validator
-			for _, existingAnnouncement := range storedAnnouncements.Announcement {
-				if existingAnnouncement.StorageLocation == announcement.Announcement.StorageLocation {
-					return types.ErrReplayAnnouncement
-				}
-			}
-		}
-
-		storedAnnouncements.Announcement = append(storedAnnouncements.Announcement, &types.StoredAnnouncement{
-			StorageLocation: announcement.Announcement.StorageLocation,
-		})
-
-		err = k.setAnnouncements(ctx, announcement.Validator, storedAnnouncements)
+		err := k.setAnnouncements(ctx, announcement.Validator, announcement.Announcements)
 		if err != nil {
 			return err
 		}
@@ -69,13 +48,12 @@ func ExportAnnouncements(store sdk.KVStore) ([]*types.GenesisAnnouncement, error
 		if err != nil {
 			return nil, err
 		}
-		for _, curr := range storedAnnouncements.Announcement {
-			currAnnouncement := &types.GenesisAnnouncement{
-				Announcement: curr,
-				Validator:    validator,
-			}
-			announcements = append(announcements, currAnnouncement)
+
+		currAnnouncement := &types.GenesisAnnouncement{
+			Announcements: storedAnnouncements,
+			Validator:     validator,
 		}
+		announcements = append(announcements, currAnnouncement)
 	}
 	return announcements, nil
 }
