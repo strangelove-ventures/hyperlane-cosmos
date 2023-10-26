@@ -2,8 +2,10 @@ hyperlane-relayer:
   name: hyperlane-simd1-simd2 # hyperlane relayers can relay on multiple chains
   type: relayer
   bin: ./relayer # For heighliner built images, this should be /bin/validator
-  env-path: hyperlane-relayer-args.txt # path to the docker args file
-  bind-mounts: /tmp/hyperlane-validator-signatures:/tmp/hyperlane-validator-signatures,/tmp/hyperlane_db.txt:/tmp/hyperlane_db.txt
+  env-path: hyperlane-rly.txt # path to the docker args file
+  cmd-flags:
+    - --db ${rly_dir}/db.txt
+  bind-mounts: ${rly_dir}/db.txt:${rly_dir}/db.txt,${rly_dir}/rly.json:/config/rly.json,${val-sig-binds}
   images:
     - repository: hyperlane-monorepo
       uid-gid: 1025:1025
@@ -18,11 +20,11 @@ hyperlane-validator-simd1:
   type: validator
   env-path: hyperlane-validator.txt # path to the docker args file
   cmd-flags:
-    - --db /tmp/hyp/validator/simd1
-  bind-mounts: ${val_config_mount}:/config/${chainName}_val.json,/tmp/hyp/validator/simd1:/tmp/hyp/validator/simd1,/tmp/hyperlane-validator-signatures-simd1:/tmp/hyperlane-validator-signatures-simd1,/tmp/hyperlane_simd1_db.txt:/tmp/hyperlane_simd1_db.txt
+    - --db ${val_dir}/${chainName}_db.txt
+  bind-mounts: ${val_config_mount}:/config/${chainName}_val.json,${val_dir}/${chainName}:${val_dir}/${chainName},${val_dir}/signatures-${chainName}:${val_dir}/signatures-${chainName},${val_dir}/${chainName}_db.txt:${val_dir}/${chainName}_db.txt
   bin: ./validator # For heighliner built images, this should be /bin/validator
   images:
-    - repository: hyperlane-monorepo
+    - repository: 'hyperlane-monorepo'
       uid-gid: 1025:1025
       version: latest
     #- repository: ghcr.io/strangelove-ventures/heighliner/hyperlane-agents
@@ -35,11 +37,11 @@ hyperlane-validator-simd2:
   type: validator
   env-path: hyperlane-validator.txt # path to the docker args file
   cmd-flags:
-    - --db /tmp/hyp/validator/simd2
-  bind-mounts: ${val_config_mount}:/config/${chainName}_val.json,/tmp/hyp/validator/simd2:/tmp/hyp/validator/simd2,/tmp/hyperlane-validator-signatures-simd2:/tmp/hyperlane-validator-signatures-simd2,/tmp/hyperlane_simd2_db.txt:/tmp/hyperlane_simd2_db.txt
+    - --db ${val_dir}/${chainName}_db.txt
+  bind-mounts: ${val_config_mount}:/config/${chainName}_val.json,${val_dir}/${chainName}:${val_dir}/${chainName},${val_dir}/signatures-${chainName}:${val_dir}/signatures-${chainName},${val_dir}/${chainName}_db.txt:${val_dir}/${chainName}_db.txt
   bin: ./validator # For heighliner built images, this should be /bin/validator
   images:
-    - repository: hyperlane-monorepo
+    - repository: 'hyperlane-monorepo'
       uid-gid: 1025:1025
       version: latest
     #- repository: ghcr.io/strangelove-ventures/heighliner/hyperlane-agents

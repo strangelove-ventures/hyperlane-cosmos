@@ -33,6 +33,18 @@ func CreateVal(t *testing.T) *Val {
 	}
 }
 
+func CreateValFromKey(t *testing.T, ecdsaPrivKey string) *Val {
+	priv, err := crypto.HexToECDSA(ecdsaPrivKey)
+	require.NoError(t, err)
+
+	signer := hexutil.Encode(crypto.PubkeyToAddress(priv.PublicKey).Bytes())
+
+	return &Val{
+		Addr: signer,
+		Priv: priv,
+	}
+}
+
 func CreateValSet(t *testing.T, total uint32, threshold uint8) *ValSet {
 	var valSet ValSet
 	for i := uint32(0); i < total; i++ {

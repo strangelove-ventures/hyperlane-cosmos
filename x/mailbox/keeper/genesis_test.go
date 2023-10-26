@@ -49,7 +49,20 @@ func (suite *KeeperTestSuite) TestGenesis() {
 	// Comparing the two states to make sure they are the same
 	tree := suite.keeper.GetImtTree(suite.ctx)
 	suite.Require().Equal(8, countKeeperPopulatedSlices(tree.Branch))
-	suite.Require().Equal(128, len(suite.keeper.Delivered))
+
+	// Verify each delivered message is found
+	for i := 0; i < 128; i++ {
+		id, err := hexutil.Decode(idMap[i])
+		suite.Require().NoError(err)
+		req := types.QueryMsgDeliveredRequest{
+			MessageId: id,
+		}
+		resp, err := suite.queryClient.MsgDelivered(suite.ctx, &req)
+		suite.Require().NoError(err)
+		suite.Require().True(resp.Delivered, "Message delivered was not found")
+	}
+
+	// Check that the branches match
 	isEqual := reflect.DeepEqual(gs.Tree.Branch, tree.Branch[:])
 	suite.Require().True(isEqual, "Imported state is not the same as exported state")
 }

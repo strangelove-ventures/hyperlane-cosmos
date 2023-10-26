@@ -145,7 +145,7 @@ func TestHyperlaneIgp(t *testing.T) {
 	}
 
 	// Base setup
-	chains := CreateDoubleHyperlaneSimd(t, DockerImage, 23456, 34567)
+	chains := CreateHyperlaneSimds(t, DockerImage, []uint32{23456, 34567})
 	ctx := BuildInitialChain(t, chains)
 
 	// Chains

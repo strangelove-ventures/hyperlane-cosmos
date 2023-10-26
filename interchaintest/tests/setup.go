@@ -8,6 +8,8 @@ import (
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
+	announcetypes "github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types"
+
 	igptypes "github.com/strangelove-ventures/hyperlane-cosmos/x/igp/types"
 
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
@@ -46,6 +48,7 @@ func hyperlaneEncoding() *testutil.TestEncodingConfig {
 	message_id_multisig.RegisterInterfaces(cfg.InterfaceRegistry)
 	legacy_multisig.RegisterInterfaces(cfg.InterfaceRegistry)
 	igptypes.RegisterInterfaces(cfg.InterfaceRegistry)
+	announcetypes.RegisterInterfaces(cfg.InterfaceRegistry)
 
 	return &cfg
 }
@@ -93,60 +96,41 @@ func CreateSingleHyperlaneSimd(t *testing.T) []ibc.Chain {
 	return chains
 }
 
-func CreateDoubleHyperlaneSimd(t *testing.T, image ibc.DockerImage, firstChainDomain, secondChainDomain uint32) []ibc.Chain {
+// Create a hyperlane ibc.Chain for each chain domain passed in.
+func CreateHyperlaneSimds(t *testing.T, image ibc.DockerImage, chainDomains []uint32) []ibc.Chain {
+	chainNameFormat := "simd%d"
 	// Create chain factory with hyperlane-simd
-
 	votingPeriod := "10s"
 	maxDepositPeriod := "10s"
+	chainSpecs := []*interchaintest.ChainSpec{}
 
-	cf := interchaintest.NewBuiltinChainFactory(zaptest.NewLogger(t), []*interchaintest.ChainSpec{
-		{
-			ChainName: "simd-1",
+	for i, domain := range chainDomains {
+		chainName := fmt.Sprintf(chainNameFormat, i+1)
+		spec := &interchaintest.ChainSpec{
+			ChainName: chainName,
 			ChainConfig: ibc.ChainConfig{
 				Type:    "cosmos",
-				Name:    "simd",
-				ChainID: "simd-1",
+				Name:    chainName,
+				ChainID: chainName,
 				Images: []ibc.DockerImage{
 					image,
 				},
-				Bin:            "simd",
-				Bech32Prefix:   "cosmos",
-				Denom:          "stake",
-				CoinType:       "118",
-				GasPrices:      "0.00stake",
-				GasAdjustment:  1.8,
-				TrustingPeriod: "112h",
-				NoHostMount:    false,
-				// ConfigFileOverrides: nil,
+				Bin:                    "simd",
+				Bech32Prefix:           "cosmos",
+				Denom:                  "stake",
+				CoinType:               "118",
+				GasPrices:              "0.00stake",
+				GasAdjustment:          1.8,
+				TrustingPeriod:         "112h",
+				NoHostMount:            false,
 				EncodingConfig:         hyperlaneEncoding(),
-				ModifyGenesis:          ModifyGenesisProposalTime(votingPeriod, maxDepositPeriod, firstChainDomain),
+				ModifyGenesis:          ModifyGenesisProposalTime(votingPeriod, maxDepositPeriod, domain),
 				UsingNewGenesisCommand: true,
 			},
-		},
-		{
-			ChainName: "simd-2",
-			ChainConfig: ibc.ChainConfig{
-				Type:    "cosmos",
-				Name:    "simd",
-				ChainID: "simd-2",
-				Images: []ibc.DockerImage{
-					image,
-				},
-				Bin:            "simd",
-				Bech32Prefix:   "cosmos",
-				Denom:          "stake",
-				CoinType:       "118",
-				GasPrices:      "0.00stake",
-				GasAdjustment:  1.8,
-				TrustingPeriod: "112h",
-				NoHostMount:    false,
-				// ConfigFileOverrides: nil,
-				EncodingConfig:         hyperlaneEncoding(),
-				ModifyGenesis:          ModifyGenesisProposalTime(votingPeriod, maxDepositPeriod, secondChainDomain),
-				UsingNewGenesisCommand: true,
-			},
-		},
-	})
+		}
+		chainSpecs = append(chainSpecs, spec)
+	}
+	cf := interchaintest.NewBuiltinChainFactory(zaptest.NewLogger(t), chainSpecs)
 
 	// Get chains from the chain factory
 	chains, err := cf.Chains(t.Name())

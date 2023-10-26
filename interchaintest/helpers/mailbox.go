@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"regexp"
@@ -9,8 +10,10 @@ import (
 	"testing"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
+	mbtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
@@ -80,6 +83,26 @@ func VerifyDispatchEvents(c *cosmos.CosmosChain, txHash string) (destDomain, rec
 	}
 
 	return
+}
+
+func HasEvent(ctx context.Context, c *cosmos.CosmosChain, eventName string, attrKey string, attrVal string, height uint64) (bool, error) {
+	txs, err := c.FindTxs(ctx, height)
+	if err != nil {
+		return false, err
+	}
+	for _, tx := range txs {
+		for _, evt := range tx.Events {
+			if evt.Type == eventName {
+				for _, attr := range evt.Attributes {
+					if attr.Key == attrKey && attr.Value == attrVal {
+						return true, nil
+					}
+				}
+			}
+		}
+	}
+
+	return false, nil
 }
 
 func VerifyProcessEvents(c *cosmos.CosmosChain, txHash string) (msgId string, err error) {
@@ -209,4 +232,17 @@ func ParseQueryDomain(input string) (domain string) {
 	domain = strings.Replace(domain, "\"", "", -1)
 
 	return
+}
+
+func GetMailboxAddress() (string, []byte) {
+	mailboxAcc := authtypes.NewModuleAddress(mbtypes.ModuleName)
+	mailboxAddr := hex.EncodeToString(mailboxAcc.Bytes())
+	padding := 64 - len(mailboxAddr)
+
+	for i := 0; i < padding; i++ {
+		mailboxAddr = "0" + mailboxAddr
+	}
+
+	mailboxAddrBytes, _ := hex.DecodeString(mailboxAddr)
+	return mailboxAddr, mailboxAddrBytes
 }

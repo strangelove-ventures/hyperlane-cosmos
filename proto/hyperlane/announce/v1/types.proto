@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package hyperlane.announce.v1;
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types";
+
+// Helper type for Hyperlane's getAnnouncedStorageLocations.
+message StorageMetadata {
+  option (gogoproto.goproto_getters) = false;
+  repeated string metadata = 1;
+}
+
+// Helper type for Hyperlane's Announcement.
+message StoredAnnouncement {
+  option (gogoproto.goproto_getters) = false;
+
+  // location where signatures will be stored
+  string storage_location = 1;
+}
+
+// Helper type for Hyperlane's Announcement.
+message StoredAnnouncements {
+  option (gogoproto.goproto_getters) = false;
+  repeated StoredAnnouncement announcement = 1;
+}
+
+// Genesis helper type for Hyperlane's Announcement.
+message GenesisAnnouncement {
+  option (gogoproto.goproto_getters) = false;
+  StoredAnnouncements announcements = 1;
+  // The validator (in eth address format) that announced
+  bytes validator = 2;
+}

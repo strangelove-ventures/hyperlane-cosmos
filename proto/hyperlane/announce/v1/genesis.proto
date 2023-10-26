@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package hyperlane.announce.v1;
+import "hyperlane/announce/v1/types.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/announce/types";
+
+// Hyperlane Announce's keeper genesis state
+message GenesisState {
+  option (gogoproto.goproto_getters) = false;
+  repeated GenesisAnnouncement announcements = 1;
+}

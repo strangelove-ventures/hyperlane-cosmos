@@ -19,6 +19,8 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
 
+var _ ReadOnlyMailboxKeeper = (*Keeper)(nil)
+
 type Keeper struct {
 	// implements gRPC QueryServer interface
 	types.QueryServer
@@ -31,8 +33,21 @@ type Keeper struct {
 	authority   string
 	mailboxAddr sdk.AccAddress
 	version     byte
+}
 
-	Delivered map[string]bool
+type ReadOnlyMailboxKeeper interface {
+	GetMailboxAddress() []byte
+	GetDomain(context.Context) uint32
+}
+
+// Get 32 byte mailbox address, pad if necessary
+func (k Keeper) GetMailboxAddress() []byte {
+	mailboxAddr := k.mailboxAddr
+	for len(mailboxAddr) < 32 {
+		padding := make([]byte, 1)
+		mailboxAddr = append(padding, mailboxAddr...)
+	}
+	return mailboxAddr
 }
 
 func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwasm.Keeper, ismKeeper *ismkeeper.Keeper) Keeper {
@@ -48,7 +63,6 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwas
 		mailboxAddr: authtypes.NewModuleAddress(types.ModuleName),
 		version:     0,
 		pcwKeeper:   cosmwasm.NewDefaultPermissionKeeper(cwKeeper),
-		Delivered:   map[string]bool{},
 	}
 }
 
@@ -60,7 +74,7 @@ func (k *Keeper) SetDomain(c context.Context, domain uint32) {
 	store.Set(types.DomainKey, res)
 }
 
-func (k *Keeper) GetDomain(c context.Context) uint32 {
+func (k Keeper) GetDomain(c context.Context) uint32 {
 	ctx := sdk.UnwrapSDKContext(c)
 	store := ctx.KVStore(k.storeKey)
 
@@ -130,8 +144,7 @@ func (k Keeper) VerifyMessage(c context.Context, messageBytes []byte) (string, e
 	id := hexutil.Encode(idBytes)
 
 	// Verify message has not been delivered yet
-	val, ok := k.Delivered[id]
-	if ok && val {
+	if store.Has(types.MailboxDeliveredKey(id)) {
 		return "", types.ErrMsgDelivered
 	}
 

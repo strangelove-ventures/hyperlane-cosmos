@@ -2,6 +2,7 @@ package counterchain
 
 import (
 	"encoding/binary"
+	"encoding/hex"
 
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
@@ -24,7 +25,10 @@ func (c *CounterChain) CreateLegacyMetadata(message []byte, proof [imt.TreeDepth
 	binary.BigEndian.PutUint32(indexBytes, index)
 	metadata = append(metadata, indexBytes...)
 
-	originMailbox := []byte("12345678901234567890123456789012") // Shouldn't matter
+	originMailbox, err := hex.DecodeString("000000000000000000000000cc2a110c8df654a38749178a04402e88f65091d3")
+	if err != nil {
+		panic(err)
+	}
 	metadata = append(metadata, originMailbox...)
 
 	for i := 0; i < imt.TreeDepth; i++ {
@@ -43,4 +47,36 @@ func (c *CounterChain) CreateLegacyMetadata(message []byte, proof [imt.TreeDepth
 	}
 
 	return metadata
+}
+
+// Relayer assembles message, metadata, and proof but does not sign
+func (c *CounterChain) CreateRelayerLegacyMetadata(message []byte, proof [imt.TreeDepth][32]byte, originMailbox []byte) (metadata []byte) {
+	require.Equal(c.T, LEGACY_MULTISIG, c.IsmType)
+
+	merkleRoot := c.Tree.Root() // comes from origin, this should be queried from the simd mailbox QueryCurrentTreeMetadataResponse
+	metadata = append(metadata, merkleRoot...)
+
+	// comes from origin, this should be queried from the simd mailbox QueryCurrentTreeMetadataResponse
+	index := common.Nonce(message)
+	indexBytes := make([]byte, 4)
+	binary.BigEndian.PutUint32(indexBytes, index)
+	metadata = append(metadata, indexBytes...)
+	metadata = append(metadata, originMailbox...)
+
+	for i := 0; i < imt.TreeDepth; i++ {
+		metadata = append(metadata, proof[i][:]...)
+	}
+
+	metadata = append(metadata, c.ValSet.Threshold)
+	return metadata
+}
+
+func (c *CounterChain) Sign(digest []byte) []byte {
+	var signature []byte
+	for i := uint8(0); i < c.ValSet.Threshold; i++ {
+		sig, err := crypto.Sign(digest, c.ValSet.Vals[i].Priv)
+		require.NoError(c.T, err)
+		signature = append(signature, sig...)
+	}
+	return signature
 }
