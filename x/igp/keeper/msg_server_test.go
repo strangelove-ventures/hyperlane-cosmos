@@ -613,7 +613,7 @@ func (suite *KeeperTestSuite) TestPayForGas() {
 			suite.Require().NoError(err)
 			suite.Require().Equal(quoteExpected, nativeTokensOwedResp.Amount)
 
-			coinExpected := nativeTokensOwedResp.Amount.String() + nativeTokensOwedResp.Denom
+			coinExpected := nativeTokensOwedResp.Amount.String()
 			paymentResp, err = suite.mockPayForGas(igpId, payer, testMessageId, testDestinationDomain, testGasAmount, maxPayment)
 
 			events := suite.ctx.EventManager().Events()
@@ -627,6 +627,7 @@ func (suite *KeeperTestSuite) TestPayForGas() {
 					sdk.NewAttribute(types.AttributeKeySender, payer),
 					sdk.NewAttribute(types.AttributeBeneficiary, igpBeneficiary),
 					sdk.NewAttribute(types.AttributePayment, coinExpected),
+					sdk.NewAttribute(types.AttributeIgpId, strconv.FormatUint(uint64(igpId), 10)),
 				),
 				sdk.NewEvent(
 					sdk.EventTypeMessage,
@@ -738,7 +739,7 @@ func (suite *KeeperTestSuite) TestDispatchPayProcess() {
 			suite.Require().NoError(err)
 			suite.Require().Equal(quoteExpected, nativeTokensOwedResp.Amount)
 
-			coinExpected := nativeTokensOwedResp.Amount.String() + nativeTokensOwedResp.Denom
+			coinExpected := nativeTokensOwedResp.Amount.String()
 			_, err = suite.mockPayForGas(igpId, payer, string(testMessageId), testDestinationDomain, testGasAmount, maxPayment)
 
 			suite.Require().Contains(suite.ctx.EventManager().Events(), sdk.NewEvent(
@@ -748,6 +749,7 @@ func (suite *KeeperTestSuite) TestDispatchPayProcess() {
 				sdk.NewAttribute(types.AttributeKeySender, payer),
 				sdk.NewAttribute(types.AttributeBeneficiary, igpBeneficiary),
 				sdk.NewAttribute(types.AttributePayment, coinExpected),
+				sdk.NewAttribute(types.AttributeIgpId, strconv.FormatUint(uint64(igpId), 10)),
 			))
 		})
 	}

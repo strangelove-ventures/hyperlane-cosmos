@@ -102,10 +102,15 @@ type hyperlaneAddresses struct {
 	Igp      string `json:"interchainGasPaymaster,omitempty"`
 	Announce string `json:"validatorAnnounce,omitempty"`
 }
+type hyperlaneIndex struct {
+	From  int `json:"from,omitempty"`
+	Chunk int `json:"chunk,omitempty"`
+}
 type hyperlaneChainCfg struct {
 	Connection     *hyperlaneChainConnection `json:"connection,omitempty"`
 	Signer         *hyperlaneSigner          `json:"signer,omitempty"`
 	Addresses      *hyperlaneAddresses       `json:"addresses,omitempty"`
+	Index          *hyperlaneIndex           `json:"index,omitempty"`
 	Name           string                    `json:"name,omitempty"`
 	Domain         uint32                    `json:"domain,omitempty"`
 	Protocol       string                    `json:"protocol,omitempty"`
@@ -146,8 +151,12 @@ func generateHyperlaneRelayerConfig(chains []chainCfg) string {
 			},
 			Addresses: &hyperlaneAddresses{
 				Mailbox:  chain.originMailboxHex,
-				Igp:      "0x6cA0B6D22da47f091B7613223cD4BB03a2d77918",
+				Igp:      "0x0000000000000000000000000000000000000001",
 				Announce: "0x9bBdef63594D5FFc2f370Fe52115DdFFe97Bc524",
+			},
+			Index: &hyperlaneIndex{
+				From:  1,
+				Chunk: 5,
 			},
 			Name:           chain.chainName,
 			Domain:         chain.domain,

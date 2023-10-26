@@ -5,13 +5,15 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
-
+	
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -128,8 +130,9 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 	verifyDomain(t, ctx, simd2, uint64(simd2Domain))
 
 	// Now we need to configure the Hyperlane modules and setup some test users...
-	userSimd := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd1)[0]
+	userSimd1 := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd1)[0]
 	userSimd2 := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd2)[0]
+	simd1Oracle := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd1)[0]
 
 	// Fund this wallet since the validator will announce its storage location with this mnemonic's private key.
 	_, err = icv7.GetAndFundTestUserWithMnemonic(ctx, "valannounce", mnemonic, int64(10_000_000_000), simd1)
@@ -138,12 +141,12 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 	require.NoError(t, err)
 
 	msg := `{}`
-	_, contract := helpers.SetupContract(t, ctx, simd1, userSimd.KeyName(), "../contracts/hyperlane.wasm", msg)
+	_, contract := helpers.SetupContract(t, ctx, simd1, userSimd1.KeyName(), "../contracts/hyperlane.wasm", msg)
 	logger.Info("simd1 contract", zap.String("address", contract))
 	_, contract2 := helpers.SetupContract(t, ctx, simd2, userSimd2.KeyName(), "../contracts/hyperlane.wasm", msg)
 	logger.Info("simd2 contract", zap.String("address", contract2))
 
-	verifyContractEntryPoints(t, ctx, simd1, userSimd, contract)
+	verifyContractEntryPoints(t, ctx, simd1, userSimd1, contract)
 	verifyContractEntryPoints(t, ctx, simd2, userSimd2, contract2)
 
 	// Create counter chain 1 with val set signing legacy multisig.
@@ -153,7 +156,7 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 	simd2IsmValidator := counterchain.CreateEmperorValidator(t, simd2Domain, counterchain.LEGACY_MULTISIG, valSimd2PrivKey)
 
 	// Set default isms for counter chains for SIMD
-	helpers.SetDefaultIsm(t, ctx, simd1, userSimd.KeyName(), simd2IsmValidator)
+	helpers.SetDefaultIsm(t, ctx, simd1, userSimd1.KeyName(), simd2IsmValidator)
 	// Set default isms for counter chains for SIMD2
 	helpers.SetDefaultIsm(t, ctx, simd2, userSimd2.KeyName(), simd1IsmValidator)
 
@@ -229,7 +232,7 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 	// Dispatch the hyperlane message to simd1
 	dipatchMsg, err := json.Marshal(dispatchMsgStruct)
 	require.NoError(t, err)
-	dispatchedTxHash, err := simd1.ExecuteContract(ctx, userSimd.KeyName(), contract, string(dipatchMsg))
+	dispatchedTxHash, err := simd1.ExecuteContract(ctx, userSimd1.KeyName(), contract, string(dipatchMsg))
 	require.NoError(t, err)
 	logger.Info("Message dispatched to simd1")
 	dispatchedDestDomain, dispatchedRecipientAddrHex, dispatchedMsgBody, dispatchedMsgId, dispatchSender, _, err := helpers.VerifyDispatchEvents(simd1, dispatchedTxHash)
@@ -238,6 +241,63 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 	require.NotEmpty(t, dispatchedRecipientAddrHex)
 	require.Equal(t, fmt.Sprintf("%d", simd2Domain), dispatchedDestDomain)
 	// Finished sending message to simd1!
+
+	// ***************** IGP setup, copied from  ***************************************
+	exchangeRate := math.NewInt(1e10)
+	gasPrice := math.NewInt(1)
+	testGasAmount := math.NewInt(100_000)
+	quoteExpected := math.NewInt(100_000)
+	beneficiary := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
+
+	// This should be IGP 0, which we will ignore and not use for anything
+	out := helpers.CallCreateIgp(t, ctx, simd1, userSimd1.KeyName(), beneficiary)
+	igpTxHash := helpers.ParseTxHash(string(out))
+	igpIdUint, err := helpers.VerifyIgpEvents(simd1, igpTxHash)
+	require.NoError(t, err)
+	require.Equal(t, uint32(0), igpIdUint)
+
+	// This should be IGP 1
+	createigpout := helpers.CallCreateIgp(t, ctx, simd1, userSimd1.KeyName(), beneficiary)
+	igpTxHash = helpers.ParseTxHash(string(createigpout))
+	igpIdUint, err = helpers.VerifyIgpEvents(simd1, igpTxHash)
+	require.NoError(t, err)
+	require.Equal(t, uint32(1), igpIdUint)
+	igpId := strconv.FormatUint(uint64(igpIdUint), 10)
+
+	destDomainStr := strconv.FormatUint(uint64(simd2Domain), 10)
+	createOracleOutput := helpers.CallCreateOracle(t, ctx, simd1, userSimd1.KeyName(), simd1Oracle.FormattedAddress(), igpId, destDomainStr)
+	createOracleTxHash := helpers.ParseTxHash(string(createOracleOutput))
+	oracleEvtAddr, err := helpers.VerifyCreateOracleEvents(simd1, createOracleTxHash)
+	require.NoError(t, err)
+	require.Equal(t, simd1Oracle.FormattedAddress(), oracleEvtAddr)
+
+
+	// This should succeed, and we verify the events contain the expected domain/exchange rate/gas price.
+	setGasOutput := helpers.CallSetGasPriceMsg(t, ctx, simd1, simd1Oracle.KeyName(), igpId, destDomainStr, gasPrice.String(), exchangeRate.String())
+	setGasTxHash2 := helpers.ParseTxHash(string(setGasOutput))
+	setGasDomain, setGasRate, setGasPrice, err := helpers.VerifySetGasPriceEvents(simd1, setGasTxHash2)
+	require.NoError(t, err)
+	require.Equal(t, setGasDomain, destDomainStr)
+	require.Equal(t, setGasRate, exchangeRate.String())
+	require.Equal(t, setGasPrice, gasPrice.String())
+
+	// Look up the expected payment and verify it matches what we expected (according to the gas price, exchange rate, and scale).
+	quoteGasPaymentOutput := helpers.QueryQuoteGasPayment(t, ctx, simd1, userSimd1.KeyName(), igpId, destDomainStr, testGasAmount.String())
+	nativeTokensOwed, denom := helpers.ParseQuoteGasPayment(string(quoteGasPaymentOutput))
+	amountActual, _ := big.NewInt(0).SetString(nativeTokensOwed, 10)
+	require.Equal(t, amountActual.String(), quoteExpected.String())
+	require.Equal(t, denom, "stake")
+
+	maxPayment := sdk.NewCoin(denom, math.NewIntFromBigInt(amountActual))
+	payForGasOutput := helpers.CallPayForGasMsg(t, ctx, simd1, simd1Oracle.KeyName(), dispatchedMsgId, destDomainStr, testGasAmount.String(), igpId, maxPayment.String())
+	payForGasTxHash := helpers.ParseTxHash(string(payForGasOutput))
+	paidMsgId, nativePayment, gasAmount, err := helpers.VerifyPayForGasEvents(simd1, payForGasTxHash)
+	require.NoError(t, err)
+	require.Equal(t, dispatchedMsgId, paidMsgId)
+	require.Equal(t, nativePayment, nativeTokensOwed)
+	require.Equal(t, gasAmount, testGasAmount.String())
+
+	// *************** Continue with non-IGP testing ***********************
 
 	// Wait for the hyperlane validator to sign it. The first message will show up as 0.json
 	expectedSigFile := "0.json"

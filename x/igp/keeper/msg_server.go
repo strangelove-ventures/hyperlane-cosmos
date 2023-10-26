@@ -80,7 +80,8 @@ func (k Keeper) PayForGas(goCtx context.Context, msg *types.MsgPayForGas) (*type
 			sdk.NewAttribute(types.AttributeGasAmount, msg.GasAmount.String()),
 			sdk.NewAttribute(types.AttributeKeySender, msg.Sender),
 			sdk.NewAttribute(types.AttributeBeneficiary, beneficiary),
-			sdk.NewAttribute(types.AttributePayment, gasPayment.String()),
+			sdk.NewAttribute(types.AttributePayment, gasPayment.Amount.String()),
+			sdk.NewAttribute(types.AttributeIgpId, strconv.FormatUint(uint64(msg.IgpId), 10)),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
