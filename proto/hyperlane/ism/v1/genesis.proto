@@ -9,5 +9,7 @@ option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/type
 // Hyperlane ISM's keeper genesis state
 message GenesisState {
   // Genesis default ISM
-  repeated Ism default_ism = 1 [ (gogoproto.nullable) = false ];
+  repeated DefaultIsm default_ism = 1 [ (gogoproto.nullable) = false ];
+  // Custom Isms
+  repeated CustomIsm custom_ism = 2 [ (gogoproto.nullable) = false ];
 }

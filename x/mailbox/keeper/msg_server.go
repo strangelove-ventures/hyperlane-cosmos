@@ -35,6 +35,8 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 	return keeper
 }
 
+// func (k Keeper) CreateIsm(goCtx context.Context, msg *types.)
+
 // Dispatch defines a rpc handler method for MsgDispatch
 func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.MsgDispatchResponse, error) {
 	tree := k.GetImtTree(goCtx)
@@ -148,7 +150,7 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 	metadataBytes := hexutil.MustDecode(msg.Metadata)
 
 	// Verify message signatures
-	verified, err := k.ismKeeper.Verify(metadataBytes, messageBytes)
+	verified, err := k.ismKeeper.Verify(goCtx, metadataBytes, messageBytes)
 	if err != nil {
 		return nil, err
 	}

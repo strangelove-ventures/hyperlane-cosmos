@@ -1,21 +1,55 @@
 syntax = "proto3";
 package hyperlane.ism.v1;
 
+import "amino/amino.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/any.proto";
 import "hyperlane/ism/v1/ism.proto";
 
 option go_package = "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types";
 
 // Msg defines the hyperlane ISM Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // Create a custom ISM
+  rpc CreateIsm(MsgCreateIsm) returns (MsgCreateIsmResponse);
+
   // SetDefaultIsm defines a rpc handler method for MsgSetDefaultIsm.
   rpc SetDefaultIsm(MsgSetDefaultIsm) returns (MsgSetDefaultIsmResponse);
 }
 
 // MsgSetDefaultIsm defines the request type for the SetDefaultIsm rpc.
 message MsgSetDefaultIsm {
-  string signer = 1;
-  repeated Ism isms = 2;
+  option (cosmos.msg.v1.signer) = "sender";
+  option (amino.name) = "hyperlane-ism/MsgSetDefaultIsm";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string signer = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  repeated DefaultIsm isms = 2;
 }
 
 // MsgSetDefaultIsmResponse defines the Msg/SetDefaultIsm response type
 message MsgSetDefaultIsmResponse {}
+
+// MsgCreateIsm defines the request type to create a hyperlane ISM
+message MsgCreateIsm {
+  option (cosmos.msg.v1.signer) = "sender";
+  option (amino.name) = "hyperlane-ism/MsgCreateIsm";
+
+  option (gogoproto.equal) = false;
+  option (gogoproto.goproto_getters) = false;
+
+  string signer = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
+  google.protobuf.Any ism = 2;
+}
+
+// MsgCreateIsmResponse deines the MsgCreateIsm response type
+message MsgCreateIsmResponse {
+  // The unique ID assigned to the newly created ISM
+  uint32 ism_id = 1;
+}

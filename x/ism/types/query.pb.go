@@ -177,7 +177,7 @@ var xxx_messageInfo_QueryAllDefaultIsmsRequest proto.InternalMessageInfo
 // QueryAllDefaultIsmResponse is the response type for the AllDefaultIsms RPC
 // method.
 type QueryAllDefaultIsmsResponse struct {
-	DefaultIsms []*Ism `protobuf:"bytes,1,rep,name=default_isms,json=defaultIsms,proto3" json:"default_isms,omitempty"`
+	DefaultIsms []*DefaultIsm `protobuf:"bytes,1,rep,name=default_isms,json=defaultIsms,proto3" json:"default_isms,omitempty"`
 }
 
 func (m *QueryAllDefaultIsmsResponse) Reset()         { *m = QueryAllDefaultIsmsResponse{} }
@@ -218,9 +218,202 @@ func (m *QueryAllDefaultIsmsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryAllDefaultIsmsResponse proto.InternalMessageInfo
 
-func (m *QueryAllDefaultIsmsResponse) GetDefaultIsms() []*Ism {
+func (m *QueryAllDefaultIsmsResponse) GetDefaultIsms() []*DefaultIsm {
 	if m != nil {
 		return m.DefaultIsms
+	}
+	return nil
+}
+
+// QueryCustomIsmRequest is the request type for the CustomIsm RPC method.
+type QueryCustomIsmRequest struct {
+	IsmId uint32 `protobuf:"varint,1,opt,name=ism_id,json=ismId,proto3" json:"ism_id,omitempty"`
+}
+
+func (m *QueryCustomIsmRequest) Reset()         { *m = QueryCustomIsmRequest{} }
+func (m *QueryCustomIsmRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryCustomIsmRequest) ProtoMessage()    {}
+func (*QueryCustomIsmRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4dfd752fcec82ce5, []int{4}
+}
+
+func (m *QueryCustomIsmRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+
+func (m *QueryCustomIsmRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryCustomIsmRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+
+func (m *QueryCustomIsmRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryCustomIsmRequest.Merge(m, src)
+}
+
+func (m *QueryCustomIsmRequest) XXX_Size() int {
+	return m.Size()
+}
+
+func (m *QueryCustomIsmRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryCustomIsmRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryCustomIsmRequest proto.InternalMessageInfo
+
+func (m *QueryCustomIsmRequest) GetIsmId() uint32 {
+	if m != nil {
+		return m.IsmId
+	}
+	return 0
+}
+
+// QueryCustomIsmResponse is the response type for the CustomIsm RPC method.
+type QueryCustomIsmResponse struct {
+	CustomIsm *types.Any `protobuf:"bytes,1,opt,name=custom_ism,json=customIsm,proto3" json:"custom_ism,omitempty"`
+}
+
+func (m *QueryCustomIsmResponse) Reset()         { *m = QueryCustomIsmResponse{} }
+func (m *QueryCustomIsmResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryCustomIsmResponse) ProtoMessage()    {}
+func (*QueryCustomIsmResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4dfd752fcec82ce5, []int{5}
+}
+
+func (m *QueryCustomIsmResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+
+func (m *QueryCustomIsmResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryCustomIsmResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+
+func (m *QueryCustomIsmResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryCustomIsmResponse.Merge(m, src)
+}
+
+func (m *QueryCustomIsmResponse) XXX_Size() int {
+	return m.Size()
+}
+
+func (m *QueryCustomIsmResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryCustomIsmResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryCustomIsmResponse proto.InternalMessageInfo
+
+func (m *QueryCustomIsmResponse) GetCustomIsm() *types.Any {
+	if m != nil {
+		return m.CustomIsm
+	}
+	return nil
+}
+
+// QueryAllCustomIsmRequest is the request type for the AllCustomIsms RPC
+// method.
+type QueryAllCustomIsmsRequest struct{}
+
+func (m *QueryAllCustomIsmsRequest) Reset()         { *m = QueryAllCustomIsmsRequest{} }
+func (m *QueryAllCustomIsmsRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryAllCustomIsmsRequest) ProtoMessage()    {}
+func (*QueryAllCustomIsmsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4dfd752fcec82ce5, []int{6}
+}
+
+func (m *QueryAllCustomIsmsRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+
+func (m *QueryAllCustomIsmsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAllCustomIsmsRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+
+func (m *QueryAllCustomIsmsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAllCustomIsmsRequest.Merge(m, src)
+}
+
+func (m *QueryAllCustomIsmsRequest) XXX_Size() int {
+	return m.Size()
+}
+
+func (m *QueryAllCustomIsmsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAllCustomIsmsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAllCustomIsmsRequest proto.InternalMessageInfo
+
+// QueryAllCustomIsmResponse is the response type for the AllCustomIsms RPC
+// method.
+type QueryAllCustomIsmsResponse struct {
+	CustomIsms []*CustomIsm `protobuf:"bytes,1,rep,name=custom_isms,json=customIsms,proto3" json:"custom_isms,omitempty"`
+}
+
+func (m *QueryAllCustomIsmsResponse) Reset()         { *m = QueryAllCustomIsmsResponse{} }
+func (m *QueryAllCustomIsmsResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryAllCustomIsmsResponse) ProtoMessage()    {}
+func (*QueryAllCustomIsmsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_4dfd752fcec82ce5, []int{7}
+}
+
+func (m *QueryAllCustomIsmsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+
+func (m *QueryAllCustomIsmsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAllCustomIsmsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+
+func (m *QueryAllCustomIsmsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAllCustomIsmsResponse.Merge(m, src)
+}
+
+func (m *QueryAllCustomIsmsResponse) XXX_Size() int {
+	return m.Size()
+}
+
+func (m *QueryAllCustomIsmsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAllCustomIsmsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAllCustomIsmsResponse proto.InternalMessageInfo
+
+func (m *QueryAllCustomIsmsResponse) GetCustomIsms() []*CustomIsm {
+	if m != nil {
+		return m.CustomIsms
 	}
 	return nil
 }
@@ -230,38 +423,51 @@ func init() {
 	proto.RegisterType((*QueryOriginsDefaultIsmResponse)(nil), "hyperlane.ism.v1.QueryOriginsDefaultIsmResponse")
 	proto.RegisterType((*QueryAllDefaultIsmsRequest)(nil), "hyperlane.ism.v1.QueryAllDefaultIsmsRequest")
 	proto.RegisterType((*QueryAllDefaultIsmsResponse)(nil), "hyperlane.ism.v1.QueryAllDefaultIsmsResponse")
+	proto.RegisterType((*QueryCustomIsmRequest)(nil), "hyperlane.ism.v1.QueryCustomIsmRequest")
+	proto.RegisterType((*QueryCustomIsmResponse)(nil), "hyperlane.ism.v1.QueryCustomIsmResponse")
+	proto.RegisterType((*QueryAllCustomIsmsRequest)(nil), "hyperlane.ism.v1.QueryAllCustomIsmsRequest")
+	proto.RegisterType((*QueryAllCustomIsmsResponse)(nil), "hyperlane.ism.v1.QueryAllCustomIsmsResponse")
 }
 
 func init() { proto.RegisterFile("hyperlane/ism/v1/query.proto", fileDescriptor_4dfd752fcec82ce5) }
 
 var fileDescriptor_4dfd752fcec82ce5 = []byte{
-	// 413 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x92, 0xc1, 0xaa, 0xd3, 0x40,
-	0x18, 0x85, 0x3b, 0x57, 0xbc, 0x8b, 0x89, 0x8a, 0x0e, 0x2a, 0xd7, 0x58, 0xc3, 0x25, 0x28, 0x5e,
-	0xc4, 0xcc, 0x78, 0x2b, 0xa2, 0x0b, 0x37, 0x15, 0x37, 0xae, 0xc4, 0x2e, 0x2c, 0xb8, 0x29, 0xd3,
-	0x76, 0x9a, 0x0e, 0x4c, 0x66, 0xd2, 0xfc, 0x93, 0x60, 0xb6, 0x3e, 0x81, 0xe0, 0xca, 0x07, 0xf0,
-	0x5d, 0x04, 0x37, 0x05, 0x37, 0x2e, 0xa5, 0xf5, 0x41, 0xa4, 0x93, 0xd8, 0x56, 0xd3, 0x4a, 0x97,
-	0x93, 0x7f, 0xce, 0x39, 0xdf, 0x7f, 0x32, 0xb8, 0x3d, 0x2d, 0x53, 0x91, 0x29, 0xae, 0x05, 0x93,
-	0x90, 0xb0, 0xe2, 0x9c, 0xcd, 0x72, 0x91, 0x95, 0x34, 0xcd, 0x8c, 0x35, 0xe4, 0xea, 0x7a, 0x4a,
-	0x25, 0x24, 0xb4, 0x38, 0xf7, 0xdb, 0xb1, 0x31, 0xb1, 0x12, 0x8c, 0xa7, 0x92, 0x71, 0xad, 0x8d,
-	0xe5, 0x56, 0x1a, 0x0d, 0xd5, 0x7d, 0xdf, 0x6f, 0xb8, 0xad, 0x64, 0xd5, 0xec, 0x56, 0xad, 0x74,
-	0xa7, 0x61, 0x3e, 0x61, 0x5c, 0xd7, 0x31, 0xe1, 0x53, 0x7c, 0xe7, 0xcd, 0x2a, 0xf5, 0x75, 0x26,
-	0x63, 0xa9, 0xe1, 0xa5, 0x98, 0xf0, 0x5c, 0xd9, 0x57, 0x90, 0xf4, 0xc4, 0x2c, 0x17, 0x60, 0xc9,
-	0x4d, 0x7c, 0x6c, 0xdc, 0xec, 0x04, 0x9d, 0xa2, 0xb3, 0xcb, 0xbd, 0xfa, 0x14, 0xf6, 0x71, 0xb0,
-	0x4f, 0x08, 0xa9, 0xd1, 0x20, 0xc8, 0x13, 0xec, 0x8d, 0xab, 0xaf, 0x03, 0x09, 0x89, 0x93, 0x7b,
-	0x9d, 0xeb, 0xb4, 0x62, 0xa1, 0x7f, 0x58, 0x68, 0x57, 0x97, 0x3d, 0x3c, 0x5e, 0xcb, 0xc3, 0x36,
-	0xf6, 0x9d, 0x71, 0x57, 0xa9, 0x8d, 0x29, 0xd4, 0x38, 0x61, 0x1f, 0xdf, 0xde, 0x39, 0xad, 0x33,
-	0x9f, 0xe1, 0x4b, 0x5b, 0x99, 0x70, 0x82, 0x4e, 0x2f, 0x9c, 0x79, 0x9d, 0x1b, 0xf4, 0xdf, 0x32,
-	0xe9, 0x0a, 0xd4, 0xdb, 0xa4, 0x42, 0xe7, 0xdb, 0x11, 0xbe, 0xe8, 0x9c, 0xc9, 0x17, 0x84, 0xaf,
-	0x35, 0xb6, 0x22, 0xac, 0xe9, 0xf1, 0xdf, 0xe2, 0xfc, 0x47, 0x87, 0x0b, 0x2a, 0xf8, 0x30, 0xfa,
-	0xf0, 0xfd, 0xd7, 0xa7, 0xa3, 0xfb, 0xe4, 0x1e, 0x6b, 0xfc, 0xcb, 0xaa, 0x74, 0x18, 0x6c, 0x2d,
-	0x47, 0x3e, 0x23, 0x7c, 0xe5, 0xef, 0x1a, 0xc8, 0xc3, 0x3d, 0x99, 0x3b, 0xbb, 0xf4, 0xa3, 0x03,
-	0x6f, 0xd7, 0x78, 0x0f, 0x1c, 0xde, 0x5d, 0x12, 0x36, 0xf1, 0xb8, 0x52, 0xdb, 0x68, 0xf0, 0xe2,
-	0xed, 0xd7, 0x45, 0x80, 0xe6, 0x8b, 0x00, 0xfd, 0x5c, 0x04, 0xe8, 0xe3, 0x32, 0x68, 0xcd, 0x97,
-	0x41, 0xeb, 0xc7, 0x32, 0x68, 0xbd, 0x7b, 0x1e, 0x4b, 0x3b, 0xcd, 0x87, 0x74, 0x64, 0x12, 0x06,
-	0x36, 0xe3, 0x3a, 0x16, 0xca, 0x14, 0x22, 0x2a, 0x84, 0xb6, 0x79, 0x26, 0x60, 0x63, 0x1e, 0x8d,
-	0x0c, 0x24, 0x06, 0xd8, 0x7b, 0x97, 0x62, 0xcb, 0x54, 0xc0, 0xf0, 0xd8, 0x3d, 0x9b, 0xc7, 0xbf,
-	0x03, 0x00, 0x00, 0xff, 0xff, 0x18, 0x2b, 0x2f, 0xf2, 0x3c, 0x03, 0x00, 0x00,
+	// 552 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x93, 0xc1, 0x6e, 0xd3, 0x40,
+	0x10, 0x86, 0x63, 0xa0, 0x91, 0x3a, 0xa1, 0x08, 0x56, 0xb4, 0x6a, 0x9d, 0x60, 0x15, 0x53, 0xd4,
+	0x00, 0x8d, 0x4d, 0x53, 0x21, 0x2e, 0x95, 0x50, 0x81, 0x4b, 0x0f, 0x08, 0x91, 0x03, 0x48, 0x3d,
+	0x10, 0x39, 0xc9, 0x36, 0x5d, 0xc9, 0xde, 0x75, 0x3d, 0xeb, 0x88, 0x5c, 0x11, 0x0f, 0x80, 0x84,
+	0x38, 0xf0, 0x00, 0xbc, 0x0b, 0xc7, 0x4a, 0x5c, 0x38, 0xa2, 0x84, 0x13, 0x4f, 0x81, 0xba, 0xde,
+	0xd8, 0x6e, 0x9c, 0xd0, 0x1c, 0xed, 0x99, 0xf9, 0xff, 0x6f, 0xc6, 0xbf, 0xa1, 0x76, 0x32, 0x0c,
+	0x69, 0xe4, 0x7b, 0x9c, 0xba, 0x0c, 0x03, 0x77, 0xb0, 0xeb, 0x9e, 0xc6, 0x34, 0x1a, 0x3a, 0x61,
+	0x24, 0xa4, 0x20, 0x37, 0xd3, 0xaa, 0xc3, 0x30, 0x70, 0x06, 0xbb, 0x66, 0xad, 0x2f, 0x44, 0xdf,
+	0xa7, 0xae, 0x17, 0x32, 0xd7, 0xe3, 0x5c, 0x48, 0x4f, 0x32, 0xc1, 0x31, 0xe9, 0x37, 0xcd, 0x82,
+	0xda, 0xf9, 0x58, 0x52, 0xdb, 0xd0, 0x93, 0xea, 0xa9, 0x13, 0x1f, 0xbb, 0x1e, 0xd7, 0x36, 0xf6,
+	0x53, 0xb8, 0xf3, 0xe6, 0xdc, 0xf5, 0x75, 0xc4, 0xfa, 0x8c, 0xe3, 0x4b, 0x7a, 0xec, 0xc5, 0xbe,
+	0x3c, 0xc4, 0xa0, 0x45, 0x4f, 0x63, 0x8a, 0x92, 0xac, 0x41, 0x59, 0xa8, 0xda, 0xba, 0xb1, 0x69,
+	0xd4, 0x57, 0x5a, 0xfa, 0xc9, 0x7e, 0x07, 0xd6, 0xbc, 0x41, 0x0c, 0x05, 0x47, 0x4a, 0x9e, 0x40,
+	0xa5, 0x97, 0xbc, 0x6d, 0x33, 0x0c, 0xd4, 0x78, 0xa5, 0x79, 0xdb, 0x49, 0x58, 0x9c, 0x09, 0x8b,
+	0x73, 0xc0, 0x87, 0x2d, 0xe8, 0xa5, 0xe3, 0x76, 0x0d, 0x4c, 0x25, 0x7c, 0xe0, 0xfb, 0x99, 0x28,
+	0x6a, 0x1c, 0xfb, 0x3d, 0x54, 0x67, 0x56, 0xb5, 0xe7, 0x33, 0xb8, 0x9e, 0xf3, 0xc4, 0x75, 0x63,
+	0xf3, 0x6a, 0xbd, 0xd2, 0xac, 0x39, 0xd3, 0xc7, 0x74, 0x72, 0xbc, 0x95, 0xcc, 0x1c, 0x6d, 0x07,
+	0x56, 0x95, 0xfe, 0x8b, 0x18, 0xa5, 0x08, 0x72, 0x77, 0x58, 0x85, 0x32, 0xc3, 0xa0, 0xcd, 0x7a,
+	0xfa, 0x0e, 0x4b, 0x0c, 0x83, 0xc3, 0x9e, 0xfd, 0x0a, 0xd6, 0xa6, 0xfb, 0x35, 0xca, 0x1e, 0x40,
+	0x57, 0xbd, 0xbc, 0x74, 0xfb, 0xe5, 0xee, 0x64, 0xd8, 0xae, 0xc2, 0xc6, 0x64, 0xbd, 0x54, 0x31,
+	0xdd, 0xfd, 0x28, 0xbb, 0x4c, 0xbe, 0xa8, 0xfd, 0xf6, 0xa1, 0x92, 0xf9, 0x4d, 0x36, 0xaf, 0x16,
+	0x37, 0xcf, 0x48, 0x21, 0xf5, 0xc5, 0xe6, 0xdf, 0x6b, 0xb0, 0xa4, 0xc4, 0xc9, 0x77, 0x03, 0x6e,
+	0x15, 0x3e, 0x2a, 0x71, 0x8b, 0x42, 0xff, 0xcd, 0x8d, 0xf9, 0x78, 0xf1, 0x81, 0x64, 0x01, 0xbb,
+	0xf1, 0xf1, 0xe7, 0x9f, 0x2f, 0x57, 0xb6, 0xc9, 0x7d, 0xb7, 0x10, 0xe5, 0x24, 0x73, 0xd8, 0xce,
+	0x7d, 0x5b, 0xf2, 0xcd, 0x80, 0x1b, 0x17, 0x53, 0x40, 0x76, 0xe6, 0x78, 0xce, 0x8c, 0x92, 0xd9,
+	0x58, 0xb0, 0x5b, 0xe3, 0x3d, 0x54, 0x78, 0x5b, 0xc4, 0x2e, 0xe2, 0x79, 0xbe, 0x9f, 0x47, 0x43,
+	0xf2, 0xc9, 0x80, 0xe5, 0xf4, 0xce, 0x64, 0x7b, 0x8e, 0xd1, 0x74, 0xc6, 0xcc, 0xfa, 0xe5, 0x8d,
+	0x1a, 0x66, 0x4b, 0xc1, 0x58, 0xa4, 0x56, 0x84, 0xc9, 0x42, 0x40, 0xbe, 0x1a, 0xb0, 0x72, 0x21,
+	0x2c, 0xe4, 0xd1, 0xfc, 0x9d, 0x0b, 0x79, 0x33, 0x77, 0x16, 0x6b, 0xd6, 0x48, 0x0f, 0x14, 0xd2,
+	0x3d, 0x72, 0x77, 0xf6, 0x7d, 0x72, 0xd9, 0x7c, 0xfe, 0xf6, 0xc7, 0xc8, 0x32, 0xce, 0x46, 0x96,
+	0xf1, 0x7b, 0x64, 0x19, 0x9f, 0xc7, 0x56, 0xe9, 0x6c, 0x6c, 0x95, 0x7e, 0x8d, 0xad, 0xd2, 0xd1,
+	0x7e, 0x9f, 0xc9, 0x93, 0xb8, 0xe3, 0x74, 0x45, 0xe0, 0xa2, 0x8c, 0x3c, 0xde, 0xa7, 0xbe, 0x18,
+	0xd0, 0xc6, 0x80, 0x72, 0x19, 0x47, 0x14, 0x33, 0xed, 0x46, 0x57, 0x60, 0x20, 0xd0, 0xfd, 0xa0,
+	0x4c, 0xe4, 0x30, 0xa4, 0xd8, 0x29, 0xab, 0xdf, 0x6a, 0xef, 0x5f, 0x00, 0x00, 0x00, 0xff, 0xff,
+	0xde, 0xf5, 0xd4, 0x41, 0x5a, 0x05, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -282,6 +488,10 @@ type QueryClient interface {
 	OriginsDefaultIsm(ctx context.Context, in *QueryOriginsDefaultIsmRequest, opts ...grpc.CallOption) (*QueryOriginsDefaultIsmResponse, error)
 	// Get all current default multisig ISMs
 	AllDefaultIsms(ctx context.Context, in *QueryAllDefaultIsmsRequest, opts ...grpc.CallOption) (*QueryAllDefaultIsmsResponse, error)
+	// Get custom ISM
+	CustomIsm(ctx context.Context, in *QueryCustomIsmRequest, opts ...grpc.CallOption) (*QueryCustomIsmResponse, error)
+	// Get all custom ISMs
+	AllCustomIsms(ctx context.Context, in *QueryAllCustomIsmsRequest, opts ...grpc.CallOption) (*QueryAllCustomIsmsResponse, error)
 }
 
 type queryClient struct {
@@ -310,12 +520,34 @@ func (c *queryClient) AllDefaultIsms(ctx context.Context, in *QueryAllDefaultIsm
 	return out, nil
 }
 
+func (c *queryClient) CustomIsm(ctx context.Context, in *QueryCustomIsmRequest, opts ...grpc.CallOption) (*QueryCustomIsmResponse, error) {
+	out := new(QueryCustomIsmResponse)
+	err := c.cc.Invoke(ctx, "/hyperlane.ism.v1.Query/CustomIsm", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) AllCustomIsms(ctx context.Context, in *QueryAllCustomIsmsRequest, opts ...grpc.CallOption) (*QueryAllCustomIsmsResponse, error) {
+	out := new(QueryAllCustomIsmsResponse)
+	err := c.cc.Invoke(ctx, "/hyperlane.ism.v1.Query/AllCustomIsms", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Get current default multisig ISM for an origin
 	OriginsDefaultIsm(context.Context, *QueryOriginsDefaultIsmRequest) (*QueryOriginsDefaultIsmResponse, error)
 	// Get all current default multisig ISMs
 	AllDefaultIsms(context.Context, *QueryAllDefaultIsmsRequest) (*QueryAllDefaultIsmsResponse, error)
+	// Get custom ISM
+	CustomIsm(context.Context, *QueryCustomIsmRequest) (*QueryCustomIsmResponse, error)
+	// Get all custom ISMs
+	AllCustomIsms(context.Context, *QueryAllCustomIsmsRequest) (*QueryAllCustomIsmsResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -327,6 +559,14 @@ func (*UnimplementedQueryServer) OriginsDefaultIsm(ctx context.Context, req *Que
 
 func (*UnimplementedQueryServer) AllDefaultIsms(ctx context.Context, req *QueryAllDefaultIsmsRequest) (*QueryAllDefaultIsmsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AllDefaultIsms not implemented")
+}
+
+func (*UnimplementedQueryServer) CustomIsm(ctx context.Context, req *QueryCustomIsmRequest) (*QueryCustomIsmResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CustomIsm not implemented")
+}
+
+func (*UnimplementedQueryServer) AllCustomIsms(ctx context.Context, req *QueryAllCustomIsmsRequest) (*QueryAllCustomIsmsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AllCustomIsms not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -369,6 +609,42 @@ func _Query_AllDefaultIsms_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_CustomIsm_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryCustomIsmRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).CustomIsm(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/hyperlane.ism.v1.Query/CustomIsm",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).CustomIsm(ctx, req.(*QueryCustomIsmRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_AllCustomIsms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryAllCustomIsmsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).AllCustomIsms(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/hyperlane.ism.v1.Query/AllCustomIsms",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).AllCustomIsms(ctx, req.(*QueryAllCustomIsmsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "hyperlane.ism.v1.Query",
 	HandlerType: (*QueryServer)(nil),
@@ -380,6 +656,14 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AllDefaultIsms",
 			Handler:    _Query_AllDefaultIsms_Handler,
+		},
+		{
+			MethodName: "CustomIsm",
+			Handler:    _Query_CustomIsm_Handler,
+		},
+		{
+			MethodName: "AllCustomIsms",
+			Handler:    _Query_AllCustomIsms_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -509,6 +793,129 @@ func (m *QueryAllDefaultIsmsResponse) MarshalToSizedBuffer(dAtA []byte) (int, er
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryCustomIsmRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryCustomIsmRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryCustomIsmRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.IsmId != 0 {
+		i = encodeVarintQuery(dAtA, i, uint64(m.IsmId))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryCustomIsmResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryCustomIsmResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryCustomIsmResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.CustomIsm != nil {
+		{
+			size, err := m.CustomIsm.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryAllCustomIsmsRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAllCustomIsmsRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAllCustomIsmsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryAllCustomIsmsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAllCustomIsmsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAllCustomIsmsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.CustomIsms) > 0 {
+		for iNdEx := len(m.CustomIsms) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.CustomIsms[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -563,6 +970,55 @@ func (m *QueryAllDefaultIsmsResponse) Size() (n int) {
 	_ = l
 	if len(m.DefaultIsms) > 0 {
 		for _, e := range m.DefaultIsms {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *QueryCustomIsmRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.IsmId != 0 {
+		n += 1 + sovQuery(uint64(m.IsmId))
+	}
+	return n
+}
+
+func (m *QueryCustomIsmResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.CustomIsm != nil {
+		l = m.CustomIsm.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryAllCustomIsmsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *QueryAllCustomIsmsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.CustomIsms) > 0 {
+		for _, e := range m.CustomIsms {
 			l = e.Size()
 			n += 1 + l + sovQuery(uint64(l))
 		}
@@ -844,8 +1300,301 @@ func (m *QueryAllDefaultIsmsResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.DefaultIsms = append(m.DefaultIsms, &Ism{})
+			m.DefaultIsms = append(m.DefaultIsms, &DefaultIsm{})
 			if err := m.DefaultIsms[len(m.DefaultIsms)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+
+func (m *QueryCustomIsmRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryCustomIsmRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryCustomIsmRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field IsmId", wireType)
+			}
+			m.IsmId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.IsmId |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+
+func (m *QueryCustomIsmResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryCustomIsmResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryCustomIsmResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CustomIsm", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.CustomIsm == nil {
+				m.CustomIsm = &types.Any{}
+			}
+			if err := m.CustomIsm.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+
+func (m *QueryAllCustomIsmsRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAllCustomIsmsRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAllCustomIsmsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+
+func (m *QueryAllCustomIsmsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAllCustomIsmsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAllCustomIsmsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field CustomIsms", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.CustomIsms = append(m.CustomIsms, &CustomIsm{})
+			if err := m.CustomIsms[len(m.CustomIsms)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

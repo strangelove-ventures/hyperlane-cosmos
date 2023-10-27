@@ -19,6 +19,15 @@ service Query {
       returns (QueryAllDefaultIsmsResponse) {
     option (google.api.http).get = "/hyperlane/ism/v1/all_default_isms";
   }
+  // Get custom ISM
+  rpc CustomIsm(QueryCustomIsmRequest) returns (QueryCustomIsmResponse) {
+    option (google.api.http).get = "/hyperlane/ism/v1/custom_ism";
+  }
+  // Get all custom ISMs
+  rpc AllCustomIsms(QueryAllCustomIsmsRequest)
+      returns (QueryAllCustomIsmsResponse) {
+    option (google.api.http).get = "/hyperlane/ism/v1/all_custom_isms";
+  }
 }
 
 // QueryDefaultIsmRequest is the request type for the DefaultIsm RPC method.
@@ -33,4 +42,18 @@ message QueryAllDefaultIsmsRequest {}
 
 // QueryAllDefaultIsmResponse is the response type for the AllDefaultIsms RPC
 // method.
-message QueryAllDefaultIsmsResponse { repeated Ism default_isms = 1; }
+message QueryAllDefaultIsmsResponse { repeated DefaultIsm default_isms = 1; }
+
+// QueryCustomIsmRequest is the request type for the CustomIsm RPC method.
+message QueryCustomIsmRequest { uint32 ism_id = 1; }
+
+// QueryCustomIsmResponse is the response type for the CustomIsm RPC method.
+message QueryCustomIsmResponse { google.protobuf.Any custom_ism = 1; }
+
+// QueryAllCustomIsmRequest is the request type for the AllCustomIsms RPC
+// method.
+message QueryAllCustomIsmsRequest {}
+
+// QueryAllCustomIsmResponse is the response type for the AllCustomIsms RPC
+// method.
+message QueryAllCustomIsmsResponse { repeated CustomIsm custom_isms = 1; }
