@@ -104,21 +104,21 @@ func CreateCustomIsm(t *testing.T, ctx context.Context, chain *cosmos.CosmosChai
 	switch counterChain.IsmType {
 	case counterchain.LEGACY_MULTISIG:
 		ism = &legacy_multisig.LegacyMultiSig{
-				Threshold:        uint32(counterChain.ValSet.Threshold),
-				ValidatorPubKeys: valSet,
-			}
+			Threshold:        uint32(counterChain.ValSet.Threshold),
+			ValidatorPubKeys: valSet,
+		}
 	case counterchain.MERKLE_ROOT_MULTISIG:
 		ism = &merkle_root_multisig.MerkleRootMultiSig{
-				Threshold:        uint32(counterChain.ValSet.Threshold),
-				ValidatorPubKeys: valSet,
-			}
+			Threshold:        uint32(counterChain.ValSet.Threshold),
+			ValidatorPubKeys: valSet,
+		}
 	case counterchain.MESSAGE_ID_MULTISIG:
 		ism = &message_id_multisig.MessageIdMultiSig{
-				Threshold:        uint32(counterChain.ValSet.Threshold),
-				ValidatorPubKeys: valSet,
-			}
+			Threshold:        uint32(counterChain.ValSet.Threshold),
+			ValidatorPubKeys: valSet,
+		}
 	}
-	
+
 	msgBz, err := chain.Config().EncodingConfig.Codec.MarshalJSON(ism)
 	fmt.Println("Msg: ", string(msgBz))
 	require.NoError(t, err)
@@ -146,7 +146,7 @@ func CreateCustomIsm(t *testing.T, ctx context.Context, chain *cosmos.CosmosChai
 	require.NoError(t, err)
 
 	ismTxHash := ParseTxHash(string(stdout))
-	
+
 	events, err := GetEvents(chain, ismTxHash)
 	require.NoError(t, err)
 	ismId, found := GetEventAttribute(events, ismtypes.EventTypeCreateCustomIsm, ismtypes.AttributeKeyIndex)

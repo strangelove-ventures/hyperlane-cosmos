@@ -28,6 +28,12 @@ service Query {
       returns (QueryMsgDeliveredResponse) {
     option (google.api.http).get = "/hyperlane/mailbox/v1/delivered";
   }
+
+  // Query ISM ID from recipient
+  rpc RecipientsIsmId(QueryRecipientsIsmIdRequest)
+      returns (QueryRecipientsIsmIdResponse) {
+    option (google.api.http).get = "/hyperlane/mailbox/v1/recipients_ism_id";
+  }
 }
 
 // QueryCurrentTreeMetadataRequest is the request type for the Query/Tree
@@ -63,3 +69,9 @@ message QueryMsgDeliveredRequest { bytes message_id = 1; }
 
 // QueryMsgDeliveredResponse is the response type if message was delivered
 message QueryMsgDeliveredResponse { bool delivered = 1; }
+
+// QueryRecipientsIsmIdRequest is the request type to get the ISM ID
+message QueryRecipientsIsmIdRequest { bytes recipient = 1; }
+
+// QueryRecipientsIsmIdResponse is the response type containing the ISM ID
+message QueryRecipientsIsmIdResponse { uint32 ism_id = 1; }

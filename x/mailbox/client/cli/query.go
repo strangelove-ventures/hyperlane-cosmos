@@ -6,6 +6,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/version"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/spf13/cobra"
@@ -131,6 +132,44 @@ func getMsgDeliveredCmd() *cobra.Command {
 			}
 
 			res, err := queryClient.MsgDelivered(context.Background(), &req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// getRecipientsIsmIdCmd defines the command to query a recipient's ISM ID
+func getRecipientsIsmIdCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "recipients-ism-id [bech32 address]",
+		Short:   "Query recipients ISM ID",
+		Long:    "Query recipients ISM ID",
+		Example: fmt.Sprintf("%s query %s recipients-ism-id [bech32 address]", version.AppName, types.ModuleName),
+		Args:    cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			recipientBz, err := sdk.AccAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+
+			req := types.QueryRecipientsIsmIdRequest{
+				Recipient: recipientBz,
+			}
+
+			res, err := queryClient.RecipientsIsmId(context.Background(), &req)
 			if err != nil {
 				return err
 			}

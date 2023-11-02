@@ -22,6 +22,7 @@ func GetQueryCmd() *cobra.Command {
 		getCurrentTreeCmd(),
 		getDomainCmd(),
 		getMsgDeliveredCmd(),
+		getRecipientsIsmIdCmd(),
 	)
 
 	return queryCmd

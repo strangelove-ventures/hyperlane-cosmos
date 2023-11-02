@@ -68,7 +68,7 @@ func (k Keeper) CreateIsm(goCtx context.Context, msg *types.MsgCreateIsm) (*type
 	}
 
 	events := sdk.Events{}
-    events = events.AppendEvent(ism.CustomIsmEvent(ismId))
+	events = events.AppendEvent(ism.CustomIsmEvent(ismId))
 
 	events = events.AppendEvent(sdk.NewEvent(
 		sdk.EventTypeMessage,

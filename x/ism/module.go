@@ -50,7 +50,7 @@ func (AppModuleBasic) RegisterInterfaces(registry codectypes.InterfaceRegistry) 
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(&types.GenesisState{
 		DefaultIsm: []types.DefaultIsm{},
-		CustomIsm: []types.CustomIsm{},
+		CustomIsm:  []types.CustomIsm{},
 	})
 }
 

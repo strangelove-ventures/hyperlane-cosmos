@@ -147,7 +147,7 @@ $ %s tx %s create-ism LegacyMultiSig
 
 			msg := types.MsgCreateIsm{
 				Signer: clientCtx.GetFromAddress().String(),
-				Ism: ismAny,
+				Ism:    ismAny,
 			}
 
 			if err := msg.ValidateBasic(); err != nil {

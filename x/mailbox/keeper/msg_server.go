@@ -139,12 +139,13 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 	recipientBytes := common.Recipient(messageBytes)
 	recipient := sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), recipientBytes)
 
-	// Verify message signatures
+	// Get receiver's ISM ID
 	ismId, err := k.getReceiversIsm(ctx, recipient)
 	if err != nil {
 		return nil, err
 	}
 
+	// Verify message signatures
 	verified, err := k.ismKeeper.Verify(goCtx, metadataBytes, messageBytes, ismId)
 	if err != nil {
 		return nil, err

@@ -44,20 +44,20 @@ func (k Keeper) getAllDefaultIsms(ctx sdk.Context) ([]*types.DefaultIsm, error) 
 		if err != nil {
 			return nil, err
 		}
-		
+
 		var ism types.AbstractIsm
 		err = k.cdc.UnmarshalInterface(iterator.Value(), &ism)
 		if err != nil {
 			return nil, err
 		}
-		
+
 		ismAny, err := types.PackAbstractIsm(ism)
 		if err != nil {
 			return nil, err
 		}
 
 		defaultIsms = append(defaultIsms, &types.DefaultIsm{
-			Origin: uint32(origin64),
+			Origin:      uint32(origin64),
 			AbstractIsm: ismAny,
 		})
 	}
@@ -105,20 +105,20 @@ func (k Keeper) getAllCustomIsms(ctx sdk.Context) ([]*types.CustomIsm, error) {
 		if err != nil {
 			return nil, err
 		}
-		
+
 		var ism types.AbstractIsm
 		err = k.cdc.UnmarshalInterface(iterator.Value(), &ism)
 		if err != nil {
 			return nil, err
 		}
-		
+
 		ismAny, err := types.PackAbstractIsm(ism)
 		if err != nil {
 			return nil, err
 		}
 
 		customIsms = append(customIsms, &types.CustomIsm{
-			Index: uint32(index64),
+			Index:       uint32(index64),
 			AbstractIsm: ismAny,
 		})
 	}

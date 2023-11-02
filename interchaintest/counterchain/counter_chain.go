@@ -12,8 +12,8 @@ import (
 	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
-	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/message_id_multisig"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/message_id_multisig"
 )
 
 const MAX_MESSAGE_BODY_BYTES = 2_000
@@ -141,7 +141,7 @@ func (c *CounterChain) VerifyAbstractIsm(ism ismtypes.AbstractIsm) bool {
 			}
 			return true
 		}
-		
+
 	case MERKLE_ROOT_MULTISIG:
 		mrms := ism.(*merkle_root_multisig.MerkleRootMultiSig)
 		if mrms.Threshold == uint32(c.ValSet.Threshold) {
@@ -152,7 +152,7 @@ func (c *CounterChain) VerifyAbstractIsm(ism ismtypes.AbstractIsm) bool {
 			}
 			return true
 		}
-		
+
 	}
 
 	return false

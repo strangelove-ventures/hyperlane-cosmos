@@ -16,8 +16,8 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/imt"
 	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 	ismkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
-	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/receiver"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
 
 var _ ReadOnlyMailboxKeeper = (*Keeper)(nil)

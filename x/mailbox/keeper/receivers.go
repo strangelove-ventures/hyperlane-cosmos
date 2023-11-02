@@ -12,7 +12,7 @@ type QueryMsg struct {
 	QueryIsmMsg *QueryIsmMsg `json:"ism,omitempty"`
 }
 
-type QueryIsmMsg struct {}
+type QueryIsmMsg struct{}
 
 type QueryIsmResponse struct {
 	IsmId uint32 `json:"ism_id,omitempty"`
@@ -45,7 +45,7 @@ func (k Keeper) getReceiversIsm(ctx sdk.Context, recipient string) (uint32, erro
 			return 0, err
 		}
 
-		req := QueryMsg{ QueryIsmMsg: &QueryIsmMsg{} }
+		req := QueryMsg{QueryIsmMsg: &QueryIsmMsg{}}
 		reqBz, err := json.Marshal(req)
 		if err != nil {
 			return 0, err

@@ -147,7 +147,6 @@ func TestHyperlaneMailboxWithCustomISM(t *testing.T) {
 
 	// Set custom isms for counter chains
 	ismId1 := helpers.CreateCustomIsm(t, ctx, simd, user.KeyName(), counterChain1)
-	helpers.SetContractsIsm(t, ctx, simd, user, contract, ismId1)
 	ismId2 := helpers.CreateCustomIsm(t, ctx, simd, user.KeyName(), counterChain2)
 	ismId3 := helpers.CreateCustomIsm(t, ctx, simd, user.KeyName(), counterChain3)
 
@@ -157,14 +156,14 @@ func TestHyperlaneMailboxWithCustomISM(t *testing.T) {
 	err := simd.Config().EncodingConfig.InterfaceRegistry.UnpackAny(customIsmResp1.CustomIsm, &abstractIsm1)
 	require.NoError(t, err)
 	require.True(t, counterChain1.VerifyAbstractIsm(abstractIsm1))
-	
+
 	// Query custom ISM 2
 	customIsmResp2 := helpers.QueryCustomIsm(t, ctx, simd, ismId2)
 	var abstractIsm2 ismtypes.AbstractIsm
 	err = simd.Config().EncodingConfig.InterfaceRegistry.UnpackAny(customIsmResp2.CustomIsm, &abstractIsm2)
 	require.NoError(t, err)
 	require.True(t, counterChain2.VerifyAbstractIsm(abstractIsm2))
-	
+
 	// Query custom ISM 3
 	customIsmResp3 := helpers.QueryCustomIsm(t, ctx, simd, ismId3)
 	var abstractIsm3 ismtypes.AbstractIsm
@@ -180,9 +179,14 @@ func TestHyperlaneMailboxWithCustomISM(t *testing.T) {
 	require.Equal(t, customIsmResp2.CustomIsm.Value, allCustomIsms.CustomIsms[1].AbstractIsm.Value)
 	require.Equal(t, customIsmResp3.CustomIsm.TypeUrl, allCustomIsms.CustomIsms[2].AbstractIsm.TypeUrl)
 	require.Equal(t, customIsmResp3.CustomIsm.Value, allCustomIsms.CustomIsms[2].AbstractIsm.Value)
-	
+
 	sender := "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7"
 	destDomain := uint32(12345)
+	
+	// Update contract to use Legacy MultiSig ISM
+	helpers.SetContractsIsm(t, ctx, simd, user, contract, ismId1)
+	contractsIsmId := helpers.QueryRecipientsIsmId(t, ctx, simd, contract)
+	require.Equal(t, ismId1, contractsIsmId)
 
 	// Create first legacy multisig message from counter chain 1
 	message1, proof1 := counterChain1.CreateMessage(sender, 1, destDomain, contract, "Legacy Multisig 1")
@@ -216,6 +220,9 @@ func TestHyperlaneMailboxWithCustomISM(t *testing.T) {
 
 	// Update contract to use Message ID MultiSig ISM
 	helpers.SetContractsIsm(t, ctx, simd, user, contract, ismId2)
+	contractsIsmId = helpers.QueryRecipientsIsmId(t, ctx, simd, contract)
+	require.Equal(t, ismId2, contractsIsmId)
+	
 	// Create first message id multisig message from counter chain 2
 	message4, _ := counterChain2.CreateMessage(sender, 2, destDomain, contract, "Message Id Multisig 1")
 	metadata4 := counterChain2.CreateMessageIdMetadata(message4)
@@ -228,6 +235,9 @@ func TestHyperlaneMailboxWithCustomISM(t *testing.T) {
 
 	// Update contract to use Merkle Root MultiSig ISM
 	helpers.SetContractsIsm(t, ctx, simd, user, contract, ismId3)
+	contractsIsmId = helpers.QueryRecipientsIsmId(t, ctx, simd, contract)
+	require.Equal(t, ismId3, contractsIsmId)
+	
 	// Create first merkle root multisig message from counter chain 3
 	message5, proof5 := counterChain3.CreateMessage(sender, 3, destDomain, contract, "Merkle Root Multisig 1")
 	metadata5 := counterChain3.CreateMerkleRootMetadata(message5, proof5)

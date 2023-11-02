@@ -34,7 +34,7 @@ func (suite *KeeperTestSuite) TestGenesis() {
 		actualDefaultIsm := types.MustUnpackAbstractIsm(gs.DefaultIsm[i].AbstractIsm)
 		suite.Require().Equal(defaultIsms[i].Origin, gs.DefaultIsm[i].Origin)
 		suite.Require().Equal(expectedIsm, actualDefaultIsm)
-		
+
 		actualCustomIsm := types.MustUnpackAbstractIsm(gs.CustomIsm[i].AbstractIsm)
 		suite.Require().Equal(uint32(i+1), gs.CustomIsm[i].Index)
 		suite.Require().Equal(expectedIsm, actualCustomIsm)
@@ -68,9 +68,9 @@ func (suite *KeeperTestSuite) TestGenesis() {
 		actualDefaultIsm := types.MustUnpackAbstractIsm(defaultIsmResp.DefaultIsm)
 		suite.Require().Equal(defaultIsms[i].Origin, gs.DefaultIsm[i].Origin)
 		suite.Require().Equal(expectedIsm, actualDefaultIsm)
-		
+
 		customIsmReq := types.QueryCustomIsmRequest{
-			IsmId: uint32(i+1),
+			IsmId: uint32(i + 1),
 		}
 		customIsmResp, err := suite.queryClient.CustomIsm(suite.ctx, &customIsmReq)
 		suite.Require().NoError(err)
