@@ -120,6 +120,125 @@ func TestHyperlaneMailbox(t *testing.T) {
 	require.NoError(t, err)
 }
 
+// TestHyperlaneMailboxWithCustomISM ensures the mailbox module & bindings work properly with a custom ISM.
+func TestHyperlaneMailboxWithCustomISM(t *testing.T) {
+	t.Parallel()
+
+	// Base setup
+	chains := CreateSingleHyperlaneSimd(t)
+	ctx := BuildInitialChain(t, chains)
+
+	// Chains
+	simd := chains[0].(*cosmos.CosmosChain)
+	t.Log("simd.GetHostRPCAddress()", simd.GetHostRPCAddress())
+	t.Log("simd.GetHostGRPCAddress()", simd.GetHostGRPCAddress())
+
+	users := icv7.GetAndFundTestUsers(t, ctx, "default", int64(10_000_000_000), simd)
+	user := users[0]
+
+	msg := fmt.Sprintf(`{}`)
+	_, contract := helpers.SetupContract(t, ctx, simd, user.KeyName(), "../contracts/hyperlane.wasm", msg)
+	t.Log("coreContract", contract)
+
+	// Create counter chain 1, with origin 1, with val set signing legacy multisig
+	counterChain1 := counterchain.CreateCounterChain(t, 1, counterchain.LEGACY_MULTISIG)
+	counterChain2 := counterchain.CreateCounterChain(t, 2, counterchain.MESSAGE_ID_MULTISIG)
+	counterChain3 := counterchain.CreateCounterChain(t, 3, counterchain.MERKLE_ROOT_MULTISIG)
+
+	// Set custom isms for counter chains
+	ismId1 := helpers.CreateCustomIsm(t, ctx, simd, user.KeyName(), counterChain1)
+	helpers.SetContractsIsm(t, ctx, simd, user, contract, ismId1)
+	ismId2 := helpers.CreateCustomIsm(t, ctx, simd, user.KeyName(), counterChain2)
+	ismId3 := helpers.CreateCustomIsm(t, ctx, simd, user.KeyName(), counterChain3)
+
+	// Query custom ISM 1
+	customIsmResp1 := helpers.QueryCustomIsm(t, ctx, simd, ismId1)
+	var abstractIsm1 ismtypes.AbstractIsm
+	err := simd.Config().EncodingConfig.InterfaceRegistry.UnpackAny(customIsmResp1.CustomIsm, &abstractIsm1)
+	require.NoError(t, err)
+	require.True(t, counterChain1.VerifyAbstractIsm(abstractIsm1))
+	
+	// Query custom ISM 2
+	customIsmResp2 := helpers.QueryCustomIsm(t, ctx, simd, ismId2)
+	var abstractIsm2 ismtypes.AbstractIsm
+	err = simd.Config().EncodingConfig.InterfaceRegistry.UnpackAny(customIsmResp2.CustomIsm, &abstractIsm2)
+	require.NoError(t, err)
+	require.True(t, counterChain2.VerifyAbstractIsm(abstractIsm2))
+	
+	// Query custom ISM 3
+	customIsmResp3 := helpers.QueryCustomIsm(t, ctx, simd, ismId3)
+	var abstractIsm3 ismtypes.AbstractIsm
+	err = simd.Config().EncodingConfig.InterfaceRegistry.UnpackAny(customIsmResp3.CustomIsm, &abstractIsm3)
+	require.NoError(t, err)
+	require.True(t, counterChain3.VerifyAbstractIsm(abstractIsm3))
+
+	// Query all custom ISMs
+	allCustomIsms := helpers.QueryAllCustomIsms(t, ctx, simd)
+	require.Equal(t, customIsmResp1.CustomIsm.TypeUrl, allCustomIsms.CustomIsms[0].AbstractIsm.TypeUrl)
+	require.Equal(t, customIsmResp1.CustomIsm.Value, allCustomIsms.CustomIsms[0].AbstractIsm.Value)
+	require.Equal(t, customIsmResp2.CustomIsm.TypeUrl, allCustomIsms.CustomIsms[1].AbstractIsm.TypeUrl)
+	require.Equal(t, customIsmResp2.CustomIsm.Value, allCustomIsms.CustomIsms[1].AbstractIsm.Value)
+	require.Equal(t, customIsmResp3.CustomIsm.TypeUrl, allCustomIsms.CustomIsms[2].AbstractIsm.TypeUrl)
+	require.Equal(t, customIsmResp3.CustomIsm.Value, allCustomIsms.CustomIsms[2].AbstractIsm.Value)
+	
+	sender := "0xbcb815f38D481a5EBA4D7ac4c9E74D9D0FC2A7e7"
+	destDomain := uint32(12345)
+
+	// Create first legacy multisig message from counter chain 1
+	message1, proof1 := counterChain1.CreateMessage(sender, 1, destDomain, contract, "Legacy Multisig 1")
+	metadata1 := counterChain1.CreateLegacyMetadata(message1, proof1)
+	msgId1 := hexutil.Encode(common.Id(message1))
+	delivered := helpers.QueryMsgDelivered(t, ctx, simd, msgId1)
+	require.False(t, delivered)
+	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata1), hexutil.Encode(message1))
+	delivered = helpers.QueryMsgDelivered(t, ctx, simd, msgId1)
+	require.True(t, delivered)
+
+	// Create second legacy multisig message from counter chain 1
+	message2, proof2 := counterChain1.CreateMessage(sender, 1, destDomain, contract, "Legacy Multisig 2")
+	metadata2 := counterChain1.CreateLegacyMetadata(message2, proof2)
+	msgId2 := hexutil.Encode(common.Id(message2))
+	delivered = helpers.QueryMsgDelivered(t, ctx, simd, msgId2)
+	require.False(t, delivered)
+	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata2), hexutil.Encode(message2))
+	delivered = helpers.QueryMsgDelivered(t, ctx, simd, msgId2)
+	require.True(t, delivered)
+
+	// Create third legacy multisig message from counter chain 1
+	message3, proof3 := counterChain1.CreateMessage(sender, 1, destDomain, contract, "Legacy Multisig 3")
+	metadata3 := counterChain1.CreateLegacyMetadata(message3, proof3)
+	msgId3 := hexutil.Encode(common.Id(message3))
+	delivered = helpers.QueryMsgDelivered(t, ctx, simd, msgId3)
+	require.False(t, delivered)
+	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata3), hexutil.Encode(message3))
+	delivered = helpers.QueryMsgDelivered(t, ctx, simd, msgId3)
+	require.True(t, delivered)
+
+	// Update contract to use Message ID MultiSig ISM
+	helpers.SetContractsIsm(t, ctx, simd, user, contract, ismId2)
+	// Create first message id multisig message from counter chain 2
+	message4, _ := counterChain2.CreateMessage(sender, 2, destDomain, contract, "Message Id Multisig 1")
+	metadata4 := counterChain2.CreateMessageIdMetadata(message4)
+	msgId4 := hexutil.Encode(common.Id(message4))
+	delivered = helpers.QueryMsgDelivered(t, ctx, simd, msgId4)
+	require.False(t, delivered)
+	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata4), hexutil.Encode(message4))
+	delivered = helpers.QueryMsgDelivered(t, ctx, simd, msgId4)
+	require.True(t, delivered)
+
+	// Update contract to use Merkle Root MultiSig ISM
+	helpers.SetContractsIsm(t, ctx, simd, user, contract, ismId3)
+	// Create first merkle root multisig message from counter chain 3
+	message5, proof5 := counterChain3.CreateMessage(sender, 3, destDomain, contract, "Merkle Root Multisig 1")
+	metadata5 := counterChain3.CreateMerkleRootMetadata(message5, proof5)
+	msgId5 := hexutil.Encode(common.Id(message5))
+	delivered = helpers.QueryMsgDelivered(t, ctx, simd, msgId5)
+	require.False(t, delivered)
+	helpers.CallProcessMsg(t, ctx, simd, user.KeyName(), hexutil.Encode(metadata5), hexutil.Encode(message5))
+	delivered = helpers.QueryMsgDelivered(t, ctx, simd, msgId5)
+	require.True(t, delivered)
+}
+
 func TestHyperlaneIgp(t *testing.T) {
 	t.Parallel()
 

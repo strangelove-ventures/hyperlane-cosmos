@@ -22,6 +22,7 @@ type ExecuteMsg struct {
 	DispatchMsg         *DispatchMsg         `json:"dispatch_msg,omitempty"`
 	ProcessMsg          *ProcessMsg          `json:"process_msg,omitempty"`
 	ChangeContractOwner *ChangeContractOwner `json:"change_contract_owner,omitempty"`
+	SetIsmId            *SetIsmId            `json:"set_ism_id,omitempty"`
 }
 
 type ExecuteRsp struct{}
@@ -38,4 +39,8 @@ type ProcessMsg struct {
 
 type ChangeContractOwner struct {
 	NewOwner string `json:"new_owner"`
+}
+
+type SetIsmId struct {
+	IsmId uint32 `json:"ism_id"`
 }

@@ -108,7 +108,7 @@ func (suite *KeeperTestSuite) TestVerify() {
 			_, err := suite.msgServer.SetDefaultIsm(suite.ctx, msg)
 			suite.Require().NoError(err)
 
-			pass, err := suite.keeper.Verify(suite.ctx, tc.metadata, tc.message)
+			pass, err := suite.keeper.Verify(suite.ctx, tc.metadata, tc.message, 0)
 
 			if tc.expPass {
 				suite.Require().True(pass)

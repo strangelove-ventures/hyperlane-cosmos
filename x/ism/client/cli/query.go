@@ -81,3 +81,72 @@ func getAllDefaultIsmsCmd() *cobra.Command {
 
 	return cmd
 }
+
+// getCustomIsmCmd defines the command to query a custom ISM
+func getCustomIsmCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "custom-ism [ism-id]",
+		Short:   "Query custom ISM",
+		Long:    "Query custom ISM given an ism-id",
+		Example: fmt.Sprintf("%s query %s custom-ism [ism-id]", version.AppName, types.ModuleName),
+		Args:    cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			ismId, err := strconv.ParseUint(args[0], 10, 32)
+			if err != nil {
+				return err
+			}
+
+			req := types.QueryCustomIsmRequest{
+				IsmId: uint32(ismId),
+			}
+
+			res, err := queryClient.CustomIsm(context.Background(), &req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// getAllCustomIsmsCmd defines the command to query all custom ISMs
+func getAllCustomIsmsCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "all-custom-isms",
+		Short:   "Query all custom ISMs",
+		Long:    "Query all custom ISMs",
+		Example: fmt.Sprintf("%s query %s all-custom-isms", version.AppName, types.ModuleName),
+		Args:    cobra.ExactArgs(0),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			req := types.QueryAllCustomIsmsRequest{}
+
+			res, err := queryClient.AllCustomIsms(context.Background(), &req)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}

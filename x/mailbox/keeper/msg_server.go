@@ -3,12 +3,10 @@ package keeper
 import (
 	"context"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 
@@ -20,22 +18,10 @@ var _ types.MsgServer = (*Keeper)(nil)
 
 const MAX_MESSAGE_BODY_BYTES = 2_000
 
-type ContractMsg struct {
-	ContractProcessMsg ContractProcessMsg `json:"process_msg,omitempty"`
-}
-
-type ContractProcessMsg struct {
-	Origin uint32 `json:"origin"`
-	Sender string `json:"sender"`
-	Msg    string `json:"msg"`
-}
-
 // NewMsgServerImpl return an implementation of the mailbox MsgServer interface for the provided keeper
 func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 	return keeper
 }
-
-// func (k Keeper) CreateIsm(goCtx context.Context, msg *types.)
 
 // Dispatch defines a rpc handler method for MsgDispatch
 func (k Keeper) Dispatch(goCtx context.Context, msg *types.MsgDispatch) (*types.MsgDispatchResponse, error) {
@@ -149,8 +135,17 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 
 	metadataBytes := hexutil.MustDecode(msg.Metadata)
 
+	// Parse the recipient and get the contract address
+	recipientBytes := common.Recipient(messageBytes)
+	recipient := sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), recipientBytes)
+
 	// Verify message signatures
-	verified, err := k.ismKeeper.Verify(goCtx, metadataBytes, messageBytes)
+	ismId, err := k.getReceiversIsm(ctx, recipient)
+	if err != nil {
+		return nil, err
+	}
+
+	verified, err := k.ismKeeper.Verify(goCtx, metadataBytes, messageBytes, ismId)
 	if err != nil {
 		return nil, err
 	}
@@ -161,35 +156,14 @@ func (k Keeper) Process(goCtx context.Context, msg *types.MsgProcess) (*types.Ms
 	}
 	fmt.Println("ISM verify succeeded") // TODO: remove, debug only
 
-	// Parse the recipient and get the contract address
-	recipientBytes := common.Recipient(messageBytes)
-	recipient := sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), recipientBytes)
-	contractAddr, err := sdk.AccAddressFromBech32(recipient)
-	if err != nil {
-		return nil, sdkerrors.Wrap(err, "contract")
-	}
-
 	// Parse origin, sender, and body for the contract msg
 	origin := common.Origin(messageBytes)
 	senderBytes := common.Sender(messageBytes)
 	senderHex := hexutil.Encode(senderBytes)
 	body := common.Body(messageBytes)
-	contractMsg := ContractMsg{
-		ContractProcessMsg: ContractProcessMsg{
-			Origin: origin,
-			Sender: senderHex,
-			Msg:    string(body),
-		},
-	}
-	encodedMsg, err := json.Marshal(contractMsg)
-	if err != nil {
-		return nil, err
-	}
 
-	// Call the recipient contract
-	_, err = k.pcwKeeper.Execute(ctx, contractAddr, k.mailboxAddr, encodedMsg, sdk.NewCoins())
+	err = k.processMsg(ctx, recipient, origin, senderHex, string(body))
 	if err != nil {
-		fmt.Println("Contract err: ", err) // TODO: remove, debug only
 		return nil, err
 	}
 

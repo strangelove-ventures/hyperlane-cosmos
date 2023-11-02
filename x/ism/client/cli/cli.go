@@ -20,6 +20,8 @@ func GetQueryCmd() *cobra.Command {
 	queryCmd.AddCommand(
 		getOriginsDefaultIsmCmd(),
 		getAllDefaultIsmsCmd(),
+		getCustomIsmCmd(),
+		getAllCustomIsmsCmd(),
 	)
 
 	return queryCmd
@@ -37,6 +39,7 @@ func NewTxCmd() *cobra.Command {
 
 	txCmd.AddCommand(
 		setDefaultIsmCmd(),
+		createMultiSigIsmCmd(),
 	)
 
 	return txCmd

@@ -1,7 +1,9 @@
 use crate::{
     error::ContractError,
     msg::{ExecuteMsg, InstantiateMsg, MigrateMsg, QueryMsg},
-    state::OWNER,
+    state::{
+        OWNER, ISM,
+    },
     execute, queries,
     hyperlane_bindings::HyperlaneMsg,
 };
@@ -19,6 +21,7 @@ pub fn instantiate(
     _msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
     OWNER.save(deps.storage, &info.sender)?;
+    ISM.save(deps.storage, &0)?;
 
     Ok(Response::new()
         .add_event(Event::new("hyperlane_init").add_attribute("attr", "value"))
@@ -53,6 +56,9 @@ pub fn execute(
         ExecuteMsg::ChangeContractOwner { new_owner } => {
             execute::change_contract_owner(deps, info, new_owner)
         }
+        ExecuteMsg::SetIsmId { ism_id } => {
+            execute::set_ism(deps, info, ism_id)
+        }
     }
 }
 
@@ -61,5 +67,6 @@ pub fn execute(
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
         QueryMsg::Owner {} => to_binary(&queries::query_owner(deps)?),
+        QueryMsg::Ism {} => to_binary(&queries::query_ism(deps)?),
     }
 }

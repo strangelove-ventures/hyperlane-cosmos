@@ -245,8 +245,8 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 	// ***************** IGP setup, copied from  ***************************************
 	exchangeRate := math.NewInt(1e10)
 	gasPrice := math.NewInt(1)
-	testGasAmount := math.NewInt(100_000)
-	quoteExpected := math.NewInt(100_000)
+	testGasAmount := math.NewInt(200_000)
+	quoteExpected := math.NewInt(200_000)
 	beneficiary := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
 
 	// This should be IGP 0, which we will ignore and not use for anything

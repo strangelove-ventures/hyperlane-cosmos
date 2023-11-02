@@ -27,9 +27,7 @@ var (
 	_ module.AppModuleBasic = (*AppModule)(nil)
 )
 
-// AppModuleBasic defines the basic application module used by the hyperlane mailbox.
-// Only the RegisterInterfaces function needs to be implemented. All other function perform
-// a no-op.
+// AppModuleBasic defines the basic application module used by the hyperlane ISM.
 type AppModuleBasic struct{}
 
 // Name returns the hyperlane ISM module name.

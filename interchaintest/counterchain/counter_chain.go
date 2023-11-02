@@ -10,14 +10,18 @@ import (
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/imt"
 	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
+	ismtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/legacy_multisig"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/message_id_multisig"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/merkle_root_multisig"
 )
 
 const MAX_MESSAGE_BODY_BYTES = 2_000
 
 var (
-	LEGACY_MULTISIG      = "legacy_multisig"
-	MERKLE_ROOT_MULTISIG = "merkle_root_multisig"
-	MESSAGE_ID_MULTISIG  = "message_id_multisig"
+	LEGACY_MULTISIG      = "LegacyMultiSig"
+	MERKLE_ROOT_MULTISIG = "MerkleRootMultiSig"
+	MESSAGE_ID_MULTISIG  = "MessageIdMultiSig"
 )
 
 type CounterChain struct {
@@ -112,4 +116,44 @@ func (c *CounterChain) CreateMessage(sender string, originDomain uint32, destDom
 	require.NoError(c.T, err)
 
 	return message, proof
+}
+
+func (c *CounterChain) VerifyAbstractIsm(ism ismtypes.AbstractIsm) bool {
+	switch c.IsmType {
+	case LEGACY_MULTISIG:
+		lms := ism.(*legacy_multisig.LegacyMultiSig)
+		if lms.Threshold == uint32(c.ValSet.Threshold) {
+			for i, val := range c.ValSet.Vals {
+				if val.Addr != lms.ValidatorPubKeys[i] {
+					return false
+				}
+			}
+			return true
+		}
+
+	case MESSAGE_ID_MULTISIG:
+		mims := ism.(*message_id_multisig.MessageIdMultiSig)
+		if mims.Threshold == uint32(c.ValSet.Threshold) {
+			for i, val := range c.ValSet.Vals {
+				if val.Addr != mims.ValidatorPubKeys[i] {
+					return false
+				}
+			}
+			return true
+		}
+		
+	case MERKLE_ROOT_MULTISIG:
+		mrms := ism.(*merkle_root_multisig.MerkleRootMultiSig)
+		if mrms.Threshold == uint32(c.ValSet.Threshold) {
+			for i, val := range c.ValSet.Vals {
+				if val.Addr != mrms.ValidatorPubKeys[i] {
+					return false
+				}
+			}
+			return true
+		}
+		
+	}
+
+	return false
 }

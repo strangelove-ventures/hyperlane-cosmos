@@ -28,11 +28,11 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, authority string)
 	}
 }
 
-func (k Keeper) Verify(goCtx context.Context, metadata, message []byte) (bool, error) {
+func (k Keeper) Verify(goCtx context.Context, metadata, message []byte, ismId uint32) (bool, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	msgOrigin := common.Origin(message)
-	// Look up recipient contract's ISM, if 0, use default multi sig (just use default for now)
-	ism, err := k.getDefaultIsm(ctx, msgOrigin)
+	
+	ism, err := k.getIsm(ctx, ismId, msgOrigin)
 	if err != nil {
 		return false, err
 	}

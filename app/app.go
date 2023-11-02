@@ -639,7 +639,8 @@ func NewSimApp(
 	// domain := uint32(12345)
 	app.IgpKeeper = igpkeeper.NewKeeper(appCodec, keys[igptypes.StoreKey], app.BankKeeper.(bankkeeper.SendKeeper), app.StakingKeeper, "")
 	app.IsmKeeper = ismkeeper.NewKeeper(appCodec, keys[ismtypes.StoreKey], authtypes.NewModuleAddress(govtypes.ModuleName).String())
-	app.MailboxKeeper = mailboxkeeper.NewKeeper(appCodec, keys[mailboxtypes.StoreKey], &app.WasmKeeper, &app.IsmKeeper)
+	app.MailboxKeeper = mailboxkeeper.NewKeeper(appCodec, keys[mailboxtypes.StoreKey], &app.IsmKeeper)
+	app.MailboxKeeper.AddWasmReceiver(&app.WasmKeeper)
 	app.AnnounceKeeper = announcekeeper.NewKeeper(appCodec, keys[announcetypes.StoreKey], app.MailboxKeeper)
 	// app.MailboxKeeper.SetDomain(domain)
 
