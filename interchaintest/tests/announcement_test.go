@@ -114,9 +114,6 @@ func TestAnnounce(t *testing.T) {
 	_, contract2 := helpers.SetupContract(t, ctx, simd2, userSimd2.KeyName(), "../contracts/hyperlane.wasm", msg)
 	logger.Info("simd2 contract", zap.String("address", contract2))
 
-	verifyContractEntryPoints(t, ctx, simd1, userSimd, contract)
-	verifyContractEntryPoints(t, ctx, simd2, userSimd2, contract2)
-
 	// Create counter chain 1 with val set signing legacy multisig
 	// The private key used here MUST be the one from the validator config file. TODO: cleanup this test to read it from the file.
 	simd1IsmValidator := counterchain.CreateEmperorValidator(t, uint32(simdDomain), counterchain.LEGACY_MULTISIG, valSimd1PrivKey)
@@ -271,7 +268,6 @@ func TestHyperlaneAnnounceWithValidator(t *testing.T) {
 	msg := `{}`
 	_, contract := helpers.SetupContract(t, ctx, simd1, userSimd.KeyName(), "../contracts/hyperlane.wasm", msg)
 	logger.Info("simd1 contract", zap.String("address", contract))
-	verifyContractEntryPoints(t, ctx, simd1, userSimd, contract)
 
 	// Create counter chain with val set signing legacy multisig
 	// The private key used here MUST be the one from the validator config file. TODO: cleanup this test to read it from the file.

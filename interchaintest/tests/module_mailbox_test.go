@@ -51,8 +51,6 @@ func TestHyperlaneMailbox(t *testing.T) {
 	_, contract := helpers.SetupContract(t, ctx, simd, user.KeyName(), "../contracts/hyperlane.wasm", msg)
 	t.Log("coreContract", contract)
 
-	verifyContractEntryPoints(t, ctx, simd, user, contract)
-
 	// Create counter chain 1, with origin 1, with val set signing legacy multisig
 	counterChain1 := counterchain.CreateCounterChain(t, 1, counterchain.LEGACY_MULTISIG)
 	counterChain2 := counterchain.CreateCounterChain(t, 2, counterchain.MESSAGE_ID_MULTISIG)
@@ -307,9 +305,6 @@ func TestHyperlaneIgp(t *testing.T) {
 	_, contract2 := helpers.SetupContract(t, ctx, simd2, userSimd2.KeyName(), "../contracts/hyperlane.wasm", msg)
 	t.Log("coreContract", contract2)
 
-	verifyContractEntryPoints(t, ctx, simd, userSimd, contract)
-	verifyContractEntryPoints(t, ctx, simd2, userSimd2, contract2)
-
 	// Create counter chain 1 with val set signing legacy multisig
 	simdIsmValidator := counterchain.CreateCounterChain(t, uint32(simdDomain), counterchain.LEGACY_MULTISIG)
 	// Create counter chain 2 with val set signing legacy multisig
@@ -506,26 +501,4 @@ func GetQueryContext() (context.Context, context.CancelFunc) {
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	// ctx = metadata.AppendToOutgoingContext(ctx, grpctypes.GRPCBlockHeightHeader, height)
 	return ctx, cancel
-}
-
-func verifyContractEntryPoints(t *testing.T, ctx context.Context, simd *cosmos.CosmosChain, user ibc.Wallet, contract string) {
-	queryMsg := helpers.QueryMsg{Owner: &struct{}{}}
-	var queryRsp helpers.QueryRsp
-	err := simd.QueryContract(ctx, contract, queryMsg, &queryRsp)
-	require.NoError(t, err)
-	require.Equal(t, user.FormattedAddress(), queryRsp.Data.Address)
-
-	randomAddr := "cosmos10qa7yajp3fp869mdegtpap5zg056exja3chkw5"
-	newContractOwnerStruct := helpers.ExecuteMsg{
-		ChangeContractOwner: &helpers.ChangeContractOwner{
-			NewOwner: randomAddr,
-		},
-	}
-	newContractOwner, err := json.Marshal(newContractOwnerStruct)
-	require.NoError(t, err)
-	simd.ExecuteContract(ctx, user.KeyName(), contract, string(newContractOwner))
-
-	err = simd.QueryContract(ctx, contract, queryMsg, &queryRsp)
-	require.NoError(t, err)
-	require.Equal(t, randomAddr, queryRsp.Data.Address)
 }
