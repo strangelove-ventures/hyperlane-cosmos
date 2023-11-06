@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"encoding/json"
-	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -33,7 +32,6 @@ func (k Keeper) getReceiversIsm(ctx sdk.Context, recipient string) (uint32, erro
 	for _, receiver := range k.receivers {
 		// If recipient matches the receiver address, query its ISM
 		if recipient == receiver.Address() {
-			fmt.Println("Receiver ISM ID response: ", receiver.QueryIsm())
 			return receiver.QueryIsm(), nil
 		}
 	}
@@ -61,7 +59,6 @@ func (k Keeper) getReceiversIsm(ctx sdk.Context, recipient string) (uint32, erro
 			return 0, err
 		}
 
-		fmt.Println("Contract ISM ID response: ", ismResp.IsmId)
 		return ismResp.IsmId, nil
 	}
 
@@ -73,9 +70,8 @@ func (k Keeper) processMsg(ctx sdk.Context, recipient string, origin uint32, sen
 	for _, receiver := range k.receivers {
 		// If recipient matches the receiver address, process the message
 		if recipient == receiver.Address() {
-			fmt.Println("Receiver process")
-			receiver.Process(origin, sender, msg)
-			return nil
+			err := receiver.Process(origin, sender, msg)
+			return err
 		}
 	}
 
@@ -101,11 +97,9 @@ func (k Keeper) processMsg(ctx sdk.Context, recipient string, origin uint32, sen
 		// Call the recipient contract
 		_, err = k.pcwKeeper.Execute(ctx, receiverAddr, k.mailboxAddr, encodedMsg, sdk.NewCoins())
 		if err != nil {
-			fmt.Println("Contract err: ", err) // TODO: remove, debug only
 			return err
 		}
 
-		fmt.Println("Contract process")
 		return nil
 	}
 
