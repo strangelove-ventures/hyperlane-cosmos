@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errorsmod "cosmossdk.io/errors"
+
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
 
 type QueryMsg struct {
@@ -62,7 +64,7 @@ func (k Keeper) getReceiversIsm(ctx sdk.Context, recipient string) (uint32, erro
 		return ismResp.IsmId, nil
 	}
 
-	return 0, sdkerrors.ErrInvalidAddress
+	return 0, types.ErrInvalidRecipient
 }
 
 func (k Keeper) processMsg(ctx sdk.Context, recipient string, origin uint32, sender string, msg string) error {
@@ -91,7 +93,7 @@ func (k Keeper) processMsg(ctx sdk.Context, recipient string, origin uint32, sen
 
 		receiverAddr, err := sdk.AccAddressFromBech32(recipient)
 		if err != nil {
-			return sdkerrors.Wrap(err, "contract")
+			return errorsmod.Wrap(err, "invalid bech32 recipient")
 		}
 
 		// Call the recipient contract
@@ -103,5 +105,5 @@ func (k Keeper) processMsg(ctx sdk.Context, recipient string, origin uint32, sen
 		return nil
 	}
 
-	return sdkerrors.ErrInvalidAddress
+	return types.ErrInvalidRecipient
 }
