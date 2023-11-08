@@ -16,6 +16,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ava-labs/coreth/core/types"
+	"github.com/ava-labs/coreth/ethclient"
+	"github.com/avast/retry-go"
 	"github.com/go-cmd/cmd"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/hyperlane"
@@ -117,29 +120,27 @@ func Await(f func() (bool, error), maxWait time.Duration, retryInterval time.Dur
 	}
 }
 
-// Launch Avalanche local node network.
-// subnetEvmPath - The path to the subnet-evm repo cloned from github.com/ava-labs/subnet-evm.git.
-// localNodeUri - Will usually be "http://127.0.0.1:9650"
-func launchAvalanche(subnetEvmPath, localNodeUri string) (*cmd.Cmd, error) {
-	// TODO: wait for build to finish somehow
-	_, err := RunCommand(subnetEvmPath + "/scripts/build.sh")
+func awaitAvalancheTx(ctx context.Context, client ethclient.Client, tx *types.Transaction) (*types.Receipt, error) {
+	var receipt *types.Receipt
+	err := retry.Do(
+		func() error {
+			rc, err := client.TransactionReceipt(ctx, tx.Hash())
+			if err != nil {
+				return err
+			}
+			receipt = rc
+			return nil
+		},
+		retry.Delay(1*time.Second),
+		retry.Attempts(10),
+	)
 	if err != nil {
 		return nil, err
 	}
-	time.Sleep(2 * time.Second)
-
-	cmd, err := RunCommand(subnetEvmPath + "/scripts/run.sh")
-	if err != nil {
-		return nil, err
-	}
-
-	f := func() (bool, error) {
-		return healthCheck(localNodeUri + "/ext/health")
-	}
-	return cmd, Await(f, 5*time.Minute, 5*time.Second)
+	return receipt, nil
 }
 
-func readHyperlaneConfig(t *testing.T, configName string, logger *zap.Logger) (
+func readHyperlaneConfig(t *testing.T, configName string, chain1 string, chain2 string, logger *zap.Logger) (
 	valSimd1 *hyperlane.HyperlaneChainConfig,
 	valSimd2 *hyperlane.HyperlaneChainConfig,
 	rly *hyperlane.HyperlaneChainConfig,
@@ -154,9 +155,9 @@ func readHyperlaneConfig(t *testing.T, configName string, logger *zap.Logger) (
 	// Read the hyperlane agent config file
 	hyperlaneCfg, err := hyperlane.ReadHyperlaneConfig(hyperlaneConfigPath, logger)
 	require.NoError(t, err)
-	valSimd1, ok = hyperlaneCfg["hyperlane-validator-simd1"]
+	valSimd1, ok = hyperlaneCfg[chain1]
 	require.True(t, ok)
-	valSimd2, ok = hyperlaneCfg["hyperlane-validator-simd2"]
+	valSimd2, ok = hyperlaneCfg[chain2]
 	require.True(t, ok)
 	rly, ok = hyperlaneCfg["hyperlane-relayer"]
 	require.True(t, ok)

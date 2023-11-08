@@ -1,0 +1,44 @@
+hyperlane-relayer:
+  name: hyperlane-simd1-simd2 # hyperlane relayers can relay on multiple chains
+  type: relayer
+  bin: ./relayer # For heighliner built images, this should be /bin/validator
+  env-path: avalanche-cosmos-rly.txt # path to the docker args file
+  cmd-flags:
+    - --db ${rly_dir}/db.txt
+  bind-mounts: ${rly_dir}/db.txt:${rly_dir}/db.txt,${rly_dir}/rly.json:/config/rly.json,${val-sig-binds}
+  images:
+    - repository: hyperlane-monorepo
+      uid-gid: 1025:1025
+      version: latest
+  no-host-mount: true
+
+hyperlane-avalanche-validator:
+  name: hyperlane-ava
+  type: validator
+  env-path: hyperlane-validator.txt # path to the docker args file
+  cmd-flags:
+    - --db /tmp/hyp/validator/ava
+  bind-mounts: ${val_config_mount}:/config/${chainName}_val.json,/tmp/hyp/validator/ava:/tmp/hyp/validator/ava,/tmp/hyperlane-validator-signatures-ava:/tmp/hyperlane-validator-signatures-ava,/tmp/hyperlane_ava_db.txt:/tmp/hyperlane_ava_db.txt
+  bin: ./validator
+  images:
+    - repository: hyperlane-monorepo
+      uid-gid: 1025:1025
+      version: latest
+  no-host-mount: true
+
+hyperlane-validator-simd1:
+  name: hyperlane-simd1
+  type: validator
+  env-path: hyperlane-validator.txt # path to the docker args file
+  cmd-flags:
+    - --db ${val_dir}/${chainName}_db.txt
+  bind-mounts: ${val_config_mount}:/config/${chainName}_val.json,${val_dir}/${chainName}:${val_dir}/${chainName},${val_dir}/signatures-${chainName}:${val_dir}/signatures-${chainName},${val_dir}/${chainName}_db.txt:${val_dir}/${chainName}_db.txt
+  bin: ./validator # For heighliner built images, this should be /bin/validator
+  images:
+    - repository: 'hyperlane-monorepo'
+      uid-gid: 1025:1025
+      version: latest
+    #- repository: ghcr.io/strangelove-ventures/heighliner/hyperlane-agents
+    #  uid-gid: 1025:1025
+    #  version: v1.5.1
+  no-host-mount: true

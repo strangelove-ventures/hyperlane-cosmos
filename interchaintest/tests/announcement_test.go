@@ -40,7 +40,7 @@ func TestAnnounce(t *testing.T) {
 	val2TmpDir := t.TempDir()
 
 	// Get the hyperlane agent raw configs (before variable replacements)
-	valSimd1, valSimd2, _ := readHyperlaneConfig(t, COSMOS_E2E_CONFIG, logger)
+	valSimd1, valSimd2, _ := readHyperlaneConfig(t, COSMOS_E2E_CONFIG, "hyperlane-validator-simd1", "hyperlane-validator-simd2", logger)
 
 	// Get the validator key for the agents. We also need this key to configure the chain ISM.
 	valSimd1PrivKey, err := getHyperlaneBaseValidatorKey(valSimd1)
@@ -208,7 +208,7 @@ func TestHyperlaneAnnounceWithValidator(t *testing.T) {
 	tmpDir := t.TempDir()
 
 	// Get the hyperlane agent raw configs (before variable replacements)
-	valSimd1, _, _ := readHyperlaneConfig(t, COSMOS_E2E_CONFIG, logger)
+	valSimd1, _, _ := readHyperlaneConfig(t, COSMOS_E2E_CONFIG, "hyperlane-validator-simd1", "hyperlane-validator-simd2", logger)
 
 	// Get the validator key for the agents. We also need this key to configure the chain ISM.
 	valSimd1PrivKey, err := getHyperlaneBaseValidatorKey(valSimd1)

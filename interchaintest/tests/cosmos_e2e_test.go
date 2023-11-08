@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 	"time"
-	
+
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -69,7 +69,7 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 	rlyTmpDir := t.TempDir()
 
 	// Get the hyperlane agent raw configs (before variable replacements)
-	valSimd1, valSimd2, rly := readHyperlaneConfig(t, COSMOS_E2E_CONFIG, logger)
+	valSimd1, valSimd2, rly := readHyperlaneConfig(t, COSMOS_E2E_CONFIG, "hyperlane-validator-simd1", "hyperlane-validator-simd2", logger)
 
 	// Get the validator key for the agents. We also need this key to configure the chain ISM.
 	valSimd1PrivKey, err := getHyperlaneBaseValidatorKey(valSimd1)
@@ -183,8 +183,8 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 	simd1ValidatorSignaturesDir := filepath.Join(val1TmpDir, "signatures-"+chains[0].Config().Name) //${val_dir}/signatures-${chainName}
 	simd2ValidatorSignaturesDir := filepath.Join(val2TmpDir, "signatures-"+chains[1].Config().Name) //${val_dir}/signatures-${chainName}
 
-	rlyCfgs := []chainCfg{
-		{
+	rlyCfgs := []RelayerChainConfig{
+		&cosmosRelayerChainCfg{
 			privKey:                mnemonicPrivKey,
 			chainID:                chains[0].Config().ChainID,
 			chainName:              chains[0].Config().Name,
@@ -194,7 +194,7 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 			domain:                 23456,
 			validatorSignaturePath: simd1ValidatorSignaturesDir,
 		},
-		{
+		&cosmosRelayerChainCfg{
 			privKey:                mnemonicPrivKey,
 			chainID:                chains[1].Config().ChainID,
 			chainName:              chains[1].Config().Name,
@@ -270,7 +270,6 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 	oracleEvtAddr, err := helpers.VerifyCreateOracleEvents(simd1, createOracleTxHash)
 	require.NoError(t, err)
 	require.Equal(t, simd1Oracle.FormattedAddress(), oracleEvtAddr)
-
 
 	// This should succeed, and we verify the events contain the expected domain/exchange rate/gas price.
 	setGasOutput := helpers.CallSetGasPriceMsg(t, ctx, simd1, simd1Oracle.KeyName(), igpId, destDomainStr, gasPrice.String(), exchangeRate.String())
@@ -348,7 +347,7 @@ func TestHyperlaneCosmosMultiMessageE2E(t *testing.T) {
 	rlyTmpDir := t.TempDir()
 
 	// Get the hyperlane agent raw configs (before variable replacements)
-	valSimd1, valSimd2, rly := readHyperlaneConfig(t, COSMOS_E2E_CONFIG, logger)
+	valSimd1, valSimd2, rly := readHyperlaneConfig(t, COSMOS_E2E_CONFIG, "hyperlane-validator-simd1", "hyperlane-validator-simd2", logger)
 
 	// Get the validator key for the agents. We also need this key to configure the chain ISM.
 	valSimd1PrivKey, err := getHyperlaneBaseValidatorKey(valSimd1)
@@ -461,8 +460,8 @@ func TestHyperlaneCosmosMultiMessageE2E(t *testing.T) {
 	simd1ValidatorSignaturesDir := filepath.Join(val1TmpDir, "signatures-"+chains[0].Config().Name) //${val_dir}/signatures-${chainName}
 	simd2ValidatorSignaturesDir := filepath.Join(val2TmpDir, "signatures-"+chains[1].Config().Name) //${val_dir}/signatures-${chainName}
 
-	rlyCfgs := []chainCfg{
-		{
+	rlyCfgs := []RelayerChainConfig{
+		&cosmosRelayerChainCfg{
 			privKey:                mnemonicPrivKey,
 			chainID:                chains[0].Config().ChainID,
 			chainName:              chains[0].Config().Name,
@@ -472,7 +471,7 @@ func TestHyperlaneCosmosMultiMessageE2E(t *testing.T) {
 			domain:                 23456,
 			validatorSignaturePath: simd1ValidatorSignaturesDir,
 		},
-		{
+		&cosmosRelayerChainCfg{
 			privKey:                mnemonicPrivKey,
 			chainID:                chains[1].Config().ChainID,
 			chainName:              chains[1].Config().Name,
@@ -606,7 +605,7 @@ func TestHyperlaneCosmosValidator(t *testing.T) {
 	val2TmpDir := t.TempDir()
 
 	// Get the hyperlane agent raw configs (before variable replacements)
-	valSimd1, valSimd2, _ := readHyperlaneConfig(t, COSMOS_E2E_CONFIG, logger)
+	valSimd1, valSimd2, _ := readHyperlaneConfig(t, COSMOS_E2E_CONFIG, "hyperlane-validator-simd1", "hyperlane-validator-simd2", logger)
 
 	// Get the validator key for the agents. We also need this key to configure the chain ISM.
 	valSimd1PrivKey, err := getHyperlaneBaseValidatorKey(valSimd1)
