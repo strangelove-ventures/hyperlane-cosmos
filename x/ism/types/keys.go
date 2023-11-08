@@ -11,9 +11,15 @@ const (
 	// StoreKey is the store key string for hyperlane mailbox
 	StoreKey = ModuleName
 
-	KeyOriginsDefaultIsm = "defaultIsm"
+	KeyOriginsDefaultIsm  = "defaultIsm"
+	KeyCustomIsm          = "customIsm"
+	KeyNextCustomIsmIndex = "nextCustomIsmIndex"
 )
 
-func OriginKey(origin uint32) []byte {
+func DefaultIsmKey(origin uint32) []byte {
 	return []byte(fmt.Sprintf("%s/%d", KeyOriginsDefaultIsm, origin))
+}
+
+func CustomIsmKey(index uint32) []byte {
+	return []byte(fmt.Sprintf("%s/%d", KeyCustomIsm, index))
 }

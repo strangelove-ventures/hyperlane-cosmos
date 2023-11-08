@@ -58,8 +58,67 @@ func (suite *KeeperTestSuite) TestMsgSetDefaultIsm() {
 				expectedEvents := sdk.Events{}
 				for _, originIsm := range defaultIsms {
 					ism := types.MustUnpackAbstractIsm(originIsm.AbstractIsm)
-					expectedEvents.AppendEvent(ism.Event(originIsm.Origin))
+					expectedEvents.AppendEvent(ism.DefaultIsmEvent(originIsm.Origin))
 				}
+				expectedEvents.AppendEvent(sdk.NewEvent(
+					sdk.EventTypeMessage,
+					sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+				))
+
+				for _, evt := range expectedEvents {
+					suite.Require().Contains(events, evt)
+				}
+			} else {
+				suite.Require().Error(err)
+				suite.Require().Nil(res)
+				suite.Require().Empty(events)
+			}
+		})
+	}
+}
+
+func (suite *KeeperTestSuite) TestMsgCreateIsm() {
+	var (
+		msg    *types.MsgCreateIsm
+		signer string
+	)
+
+	testCases := []struct {
+		name     string
+		malleate func()
+		expPass  bool
+	}{
+		{
+			"success",
+			func() {
+				msg = types.NewMsgCreateIsm(signer, defaultIsms[0].AbstractIsm)
+			},
+			true,
+		},
+	}
+
+	for _, tc := range testCases {
+		suite.Run(tc.name, func() {
+			suite.SetupTest()
+
+			signer = authtypes.NewModuleAddress(types.ModuleName).String()
+
+			tc.malleate()
+
+			err := msg.ValidateBasic()
+			suite.Require().NoError(err)
+
+			res, err := suite.msgServer.CreateIsm(suite.ctx, msg)
+			events := suite.ctx.EventManager().Events()
+
+			if tc.expPass {
+				suite.Require().NoError(err)
+				suite.Require().NotNil(res)
+
+				// Verify events
+				expectedEvents := sdk.Events{}
+				ism := types.MustUnpackAbstractIsm(defaultIsms[0].AbstractIsm)
+				expectedEvents.AppendEvent(ism.CustomIsmEvent(1))
 				expectedEvents.AppendEvent(sdk.NewEvent(
 					sdk.EventTypeMessage,
 					sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),

@@ -10,5 +10,6 @@ type AbstractIsm interface {
 
 	Validate() error
 	Verify(metadata []byte, message []byte) (bool, error)
-	Event(origin uint32) sdk.Event
+	DefaultIsmEvent(origin uint32) sdk.Event
+	CustomIsmEvent(index uint32) sdk.Event
 }

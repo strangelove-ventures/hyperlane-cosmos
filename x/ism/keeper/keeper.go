@@ -1,7 +1,10 @@
 package keeper
 
 import (
+	"context"
+
 	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 
 	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
@@ -15,7 +18,6 @@ type Keeper struct {
 	storeKey   storetypes.StoreKey
 	cdc        codec.BinaryCodec
 	authority  string
-	defaultIsm map[uint32]types.AbstractIsm
 }
 
 func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, authority string) Keeper {
@@ -23,14 +25,17 @@ func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, authority string)
 		cdc:        cdc,
 		storeKey:   key,
 		authority:  authority,
-		defaultIsm: map[uint32]types.AbstractIsm{},
 	}
 }
 
-func (k Keeper) Verify(metadata, message []byte) (bool, error) {
+func (k Keeper) Verify(goCtx context.Context, metadata, message []byte) (bool, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
 	msgOrigin := common.Origin(message)
 	// Look up recipient contract's ISM, if 0, use default multi sig (just use default for now)
-	ism := k.defaultIsm[msgOrigin]
+	ism, err := k.getDefaultIsm(ctx, msgOrigin)
+	if err != nil {
+		return false, err
+	}
 	if ism != nil {
 		return ism.Verify(metadata, message)
 	}

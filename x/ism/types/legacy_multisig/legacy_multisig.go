@@ -1,7 +1,6 @@
 package legacy_multisig
 
 import (
-	"fmt"
 	"reflect"
 	"strconv"
 
@@ -16,7 +15,7 @@ import (
 
 var _ types.AbstractIsm = (*LegacyMultiSig)(nil)
 
-func (i *LegacyMultiSig) Event(origin uint32) sdk.Event {
+func (i *LegacyMultiSig) DefaultIsmEvent(origin uint32) sdk.Event {
 	originStr := strconv.FormatUint(uint64(origin), 10)
 	thresholdStr := strconv.FormatUint(uint64(i.Threshold), 10)
 	eventAttributes := []sdk.Attribute{}
@@ -30,6 +29,24 @@ func (i *LegacyMultiSig) Event(origin uint32) sdk.Event {
 	}
 	return sdk.NewEvent(
 		types.EventTypeSetDefaultIsm,
+		eventAttributes...,
+	)
+}
+
+func (i *LegacyMultiSig) CustomIsmEvent(index uint32) sdk.Event {
+	indexStr := strconv.FormatUint(uint64(index), 10)
+	thresholdStr := strconv.FormatUint(uint64(i.Threshold), 10)
+	eventAttributes := []sdk.Attribute{}
+	eventAttributes = append(eventAttributes, sdk.NewAttribute(types.AttributeKeyIndex, indexStr))
+	eventAttributes = append(eventAttributes, sdk.NewAttribute(types.AttributeKeyThreshold, thresholdStr))
+	for index := 0; index < len(i.ValidatorPubKeys); index++ {
+		eventAttributes = append(eventAttributes, sdk.NewAttribute(
+			types.AttributeKeyValidator,
+			i.ValidatorPubKeys[index],
+		))
+	}
+	return sdk.NewEvent(
+		types.EventTypeCreateCustomIsm,
 		eventAttributes...,
 	)
 }
@@ -79,8 +96,6 @@ func (i *LegacyMultiSig) VerifyValidatorSignatures(metadata []byte, message []by
 		signerAddress := crypto.PubkeyToAddress(*signer)
 		// Loop through remaining validators until we find a match
 		for validatorIndex < validatorCount {
-			fmt.Println("Signer: ", hexutil.Encode(signerAddress[:]))
-			fmt.Println("Val: ", i.ValidatorPubKeys[validatorIndex])
 			valAddress, err := hexutil.Decode(i.ValidatorPubKeys[validatorIndex])
 			if err != nil {
 				return false

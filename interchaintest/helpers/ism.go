@@ -21,7 +21,7 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types/message_id_multisig"
 )
 
-func GetDefaultIsms(counterChains ...*counterchain.CounterChain) (isms []*ismtypes.Ism) {
+func GetDefaultIsms(counterChains ...*counterchain.CounterChain) (isms []*ismtypes.DefaultIsm) {
 	for _, counterChain := range counterChains {
 		var valSet []string
 		for _, val := range counterChain.ValSet.Vals {
@@ -51,7 +51,7 @@ func GetDefaultIsms(counterChains ...*counterchain.CounterChain) (isms []*ismtyp
 				},
 			)
 		}
-		isms = append(isms, &ismtypes.Ism{
+		isms = append(isms, &ismtypes.DefaultIsm{
 			Origin:      counterChain.Domain,
 			AbstractIsm: ism,
 		})

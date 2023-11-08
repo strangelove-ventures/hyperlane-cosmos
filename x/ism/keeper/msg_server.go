@@ -17,7 +17,7 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 	return keeper
 }
 
-// StoreCode defines a rpc handler method for MsgStoreCode
+// SetDefaultIsm defines a rpc handler method for MsgSetDefaultIsm
 func (k Keeper) SetDefaultIsm(goCtx context.Context, msg *types.MsgSetDefaultIsm) (*types.MsgSetDefaultIsmResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
@@ -25,28 +25,18 @@ func (k Keeper) SetDefaultIsm(goCtx context.Context, msg *types.MsgSetDefaultIsm
 		return nil, sdkerrors.Wrapf(govtypes.ErrInvalidSigner, "invalid authority: expected %s, got %s", k.authority, msg.Signer)
 	}
 
-	ismBzMap := map[uint32][]byte{}
-	ismMap := map[uint32]types.AbstractIsm{}
 	events := sdk.Events{}
 	for _, originIsm := range msg.Isms {
 		ism, err := types.UnpackAbstractIsm(originIsm.AbstractIsm)
 		if err != nil {
 			return &types.MsgSetDefaultIsmResponse{}, err
 		}
-		ismMap[originIsm.Origin] = ism
-
-		ismBz, err := k.cdc.MarshalInterface(ism)
+		err = k.storeDefaultIsm(ctx, originIsm.Origin, ism)
 		if err != nil {
 			return &types.MsgSetDefaultIsmResponse{}, err
 		}
-		ismBzMap[originIsm.Origin] = ismBz
-		events.AppendEvent(ism.Event(originIsm.Origin))
-	}
 
-	store := ctx.KVStore(k.storeKey)
-	for _, originIsm := range msg.Isms {
-		k.defaultIsm[originIsm.Origin] = ismMap[originIsm.Origin]
-		store.Set(types.OriginKey(originIsm.Origin), ismBzMap[originIsm.Origin])
+		events.AppendEvent(ism.DefaultIsmEvent(originIsm.Origin))
 	}
 
 	events.AppendEvent(sdk.NewEvent(
@@ -56,4 +46,37 @@ func (k Keeper) SetDefaultIsm(goCtx context.Context, msg *types.MsgSetDefaultIsm
 	ctx.EventManager().EmitEvents(events)
 
 	return &types.MsgSetDefaultIsmResponse{}, nil
+}
+
+// CreateIsm defines a rpc handler method for MsgCreateIsm
+func (k Keeper) CreateIsm(goCtx context.Context, msg *types.MsgCreateIsm) (*types.MsgCreateIsmResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	ismId, err := k.getNextCustomIsmIndex(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	ism, err := types.UnpackAbstractIsm(msg.Ism)
+	if err != nil {
+		return nil, err
+	}
+
+	err = k.storeCustomIsm(ctx, ismId, ism)
+	if err != nil {
+		return nil, err
+	}
+
+	events := sdk.Events{}
+    events.AppendEvent(ism.CustomIsmEvent(ismId))
+
+	events.AppendEvent(sdk.NewEvent(
+		sdk.EventTypeMessage,
+		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+	))
+	ctx.EventManager().EmitEvents(events)
+
+	return &types.MsgCreateIsmResponse{
+		IsmId: ismId,
+	}, nil
 }

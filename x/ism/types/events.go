@@ -2,13 +2,14 @@ package types
 
 // Hyperlane ISM event types
 const (
-	EventTypeSetDefaultIsm = "set_default_ism"
+	EventTypeSetDefaultIsm   = "set_default_ism"
+	EventTypeCreateCustomIsm = "create_custom_ism"
 )
 
 // Hyperlane ISM attribute keys
 const (
-	AttributeKeySetDefaultIsm = "updated_ism"
 	AttributeKeyOrigin        = "origin"
+	AttributeKeyIndex         = "index"
 	AttributeKeyThreshold     = "threshold"
 	AttributeKeyValidator     = "validator"
 )

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 	"time"
-	
+
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -270,7 +270,6 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 	oracleEvtAddr, err := helpers.VerifyCreateOracleEvents(simd1, createOracleTxHash)
 	require.NoError(t, err)
 	require.Equal(t, simd1Oracle.FormattedAddress(), oracleEvtAddr)
-
 
 	// This should succeed, and we verify the events contain the expected domain/exchange rate/gas price.
 	setGasOutput := helpers.CallSetGasPriceMsg(t, ctx, simd1, simd1Oracle.KeyName(), igpId, destDomainStr, gasPrice.String(), exchangeRate.String())

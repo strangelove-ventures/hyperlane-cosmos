@@ -22,7 +22,7 @@ var messages = [...]string{
 	"000000045a000000010000000000000000000000009311cee522a7c122b843b66cc31c6a63e2f926410000a86a0000000000000000000000002a925cd8a5d919c5c6599633090c37fe38a561b648656c6c6f21",
 }
 
-var defaultIsms = []*types.Ism{
+var defaultIsms = []*types.DefaultIsm{
 	{
 		Origin: 1, // Ethereum origin
 		AbstractIsm: types.MustPackAbstractIsm(

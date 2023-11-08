@@ -5,6 +5,8 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 )
@@ -13,11 +15,15 @@ var _ types.QueryServer = (*Keeper)(nil)
 
 // OriginsDefaultIsm implements the Query origins default ISM gRPC method
 func (k Keeper) OriginsDefaultIsm(c context.Context, req *types.QueryOriginsDefaultIsmRequest) (*types.QueryOriginsDefaultIsmResponse, error) {
+	ctx := sdk.UnwrapSDKContext(c)
 	if req == nil || *req == (types.QueryOriginsDefaultIsmRequest{}) {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	defaultIsm := k.defaultIsm[req.Origin]
+	defaultIsm, err := k.getDefaultIsm(ctx, req.Origin)
+	if err != nil {
+		return nil, err
+	}
 	if defaultIsm != nil {
 		ismAny, err := types.PackAbstractIsm(defaultIsm)
 		if err != nil {
@@ -32,23 +38,55 @@ func (k Keeper) OriginsDefaultIsm(c context.Context, req *types.QueryOriginsDefa
 
 // AllDefaultIsms implements the Query all default ISMs gRPC method
 func (k Keeper) AllDefaultIsms(c context.Context, req *types.QueryAllDefaultIsmsRequest) (*types.QueryAllDefaultIsmsResponse, error) {
+	ctx := sdk.UnwrapSDKContext(c)
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	var allDefaultIsms types.QueryAllDefaultIsmsResponse
-	for origin := range k.defaultIsm {
-		ism := k.defaultIsm[origin]
-		ismAny, err := types.PackAbstractIsm(ism)
+	defaultIsms, err := k.getAllDefaultIsms(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &types.QueryAllDefaultIsmsResponse{
+		DefaultIsms: defaultIsms,
+	}, nil
+}
+
+// CustomIsm implements the Query custom ISM gRPC method
+func (k Keeper) CustomIsm(c context.Context, req *types.QueryCustomIsmRequest) (*types.QueryCustomIsmResponse, error) {
+	ctx := sdk.UnwrapSDKContext(c)
+	if req == nil || *req == (types.QueryCustomIsmRequest{}) {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	customIsm, err := k.getCustomIsm(ctx, req.IsmId)
+	if err != nil {
+		return nil, err
+	}
+	if customIsm != nil {
+		ismAny, err := types.PackAbstractIsm(customIsm)
 		if err != nil {
 			return nil, err
 		}
-		allDefaultIsms.DefaultIsms = append(allDefaultIsms.DefaultIsms, &types.Ism{
-			Origin:      origin,
-			AbstractIsm: ismAny,
-		})
+		return &types.QueryCustomIsmResponse{
+			CustomIsm: ismAny,
+		}, nil
 	}
-	return &allDefaultIsms, nil
+	return &types.QueryCustomIsmResponse{}, nil
 }
 
-// TODO: do these queries need UnpackInterfaces? See: https://github.com/cosmos/cosmos-sdk/issues/8327
+// AllCustomIsms implements the Query all custom ISMs gRPC method
+func (k Keeper) AllCustomIsms(c context.Context, req *types.QueryAllCustomIsmsRequest) (*types.QueryAllCustomIsmsResponse, error) {
+	ctx := sdk.UnwrapSDKContext(c)
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	customIsms, err := k.getAllCustomIsms(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &types.QueryAllCustomIsmsResponse{
+		CustomIsms: customIsms,
+	}, nil
+}
