@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/ava-labs/coreth/accounts/abi/bind"
+	"github.com/ava-labs/coreth/core/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -40,34 +41,19 @@ import (
 )
 
 const (
-	COSMOS_AVA_E2E      = "hyperlane-cosmos-avalanche.yaml"
-	AVA_FUNDED_TEST_KEY = "56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027" // the Avalanche genesis funded private key
+	COSMOS_AVA_E2E           = "hyperlane-cosmos-avalanche.yaml"
+	AVA_FUNDED_TEST_KEY      = "56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027" // the Avalanche genesis funded private key
+	TEST_KEY_GENESIS_FUNDING = "d3c21bcecceda1000000"                                             // the amount in the subnet-evm genesis for the above test key
 )
 
 // Set up the solidity smart contracts on our Avalanche node
+// IMPORTANT NOTE: there is currently a bug in the Avalanche chain cleanup.
+// After you run a test, containers/volumes won't be cleaned up and it will cause future tests to fail.
+// Tests will fail w/ a message about "invalid genesis hash" in the container logs.
 func TestConfigureAvalanche(t *testing.T) {
 	avaPrivateKey, _ := crypto.HexToECDSA(AVA_FUNDED_TEST_KEY)
 	avalancheAddr := crypto.PubkeyToAddress(avaPrivateKey.PublicKey)
 	logger := NewLogger(t)
-
-	// Start setup for Docker network
-	// Mailbox address - will be used in the hyperlane validator config
-	mailboxHex, expectedMailbox := helpers.GetMailboxAddress()
-	prefixedMailboxHex := "0x" + mailboxHex
-
-	// Directories where files related to this test will be stored
-	val1TmpDir := t.TempDir()
-	val2TmpDir := t.TempDir()
-	rlyTmpDir := t.TempDir()
-
-	// Get the hyperlane agent raw configs (before variable replacements)
-	valSimd1, valAvalanche, rly := readHyperlaneConfig(t, COSMOS_AVA_E2E, "hyperlane-validator-simd1", "hyperlane-avalanche-validator", logger)
-
-	// Get the validator key for the agents. We also need this key to configure the chain ISM.
-	valSimd1PrivKey, err := getHyperlaneBaseValidatorKey(valSimd1)
-	require.NoError(t, err)
-	valSimd2PrivKey, err := getHyperlaneBaseValidatorKey(valAvalanche)
-	require.NoError(t, err)
 
 	// Build the chain docker image from the local repo
 	optionalBuildChainImage()
@@ -75,19 +61,12 @@ func TestConfigureAvalanche(t *testing.T) {
 	simd1Domain := uint32(23456)
 	avalancheDomain := uint32(34567)
 
-	// Set up one Cosmos chain (with our hyperlane modules) for the test.
-	// The image must be in our local registry so we skip image pull.
-	chains := CreateHyperlaneSimds(t, ibc.DockerImage{
-		Repository: docker.HyperlaneImageName,
-		Version:    "local",
-		UidGid:     "1025:1025",
-	}, []uint32{simd1Domain})
-	simd1 := chains[0].(*cosmos.CosmosChain)
-	simd1.SkipImagePull = true
-
 	// Set up the Avalanche chain
 	nv := 5
 	nf := 0
+
+	// Note: make sure that both the 'ic' interchain AND the hyperlane network share this client/network
+	client, network := interchaintest.DockerSetup(t)
 
 	avaChain, err := interchaintest.NewBuiltinChainFactory(zaptest.NewLogger(t), []*interchaintest.ChainSpec{
 		{
@@ -117,9 +96,46 @@ func TestConfigureAvalanche(t *testing.T) {
 	},
 	).Chains(t.Name())
 
+	require.NoError(t, err, "failed to get avalanche chain")
+	require.Len(t, avaChain, 1)
+	ctx := context.Background()
 	avalancheChain := avaChain[0].(*avalanche.AvalancheChain)
-	chains = append(chains, avalancheChain)
+
+	err = avalancheChain.Initialize(ctx, t.Name(), client, network)
+	require.NoError(t, err, "failed to initialize avalanche chain")
+
+	err = avalancheChain.Start(t.Name(), ctx)
+	require.NoError(t, err, "failed to start avalanche chain")
+	time.Sleep(30 * time.Second)
 	avalancheNode := avalancheChain.Node()
+
+	// Mailbox address - will be used in the hyperlane validator config
+	mailboxHex, expectedMailbox := helpers.GetMailboxAddress()
+	prefixedMailboxHex := "0x" + mailboxHex
+
+	// Directories where files related to this test will be stored
+	val1TmpDir := t.TempDir()
+	val2TmpDir := t.TempDir()
+	rlyTmpDir := t.TempDir()
+
+	// Get the hyperlane agent raw configs (before variable replacements)
+	valSimd1, valAvalanche, rly := readHyperlaneConfig(t, COSMOS_AVA_E2E, "hyperlane-validator-simd1", "hyperlane-avalanche-validator", logger)
+
+	// Get the validator key for the agents. We also need this key to configure the chain ISM.
+	valSimd1PrivKey, err := getHyperlaneBaseValidatorKey(valSimd1)
+	require.NoError(t, err)
+	valSimd2PrivKey, err := getHyperlaneBaseValidatorKey(valAvalanche)
+	require.NoError(t, err)
+
+	// Set up one Cosmos chain (with our hyperlane modules) for the test.
+	// The image must be in our local registry so we skip image pull.
+	chains := CreateHyperlaneSimds(t, ibc.DockerImage{
+		Repository: docker.HyperlaneImageName,
+		Version:    "local",
+		UidGid:     "1025:1025",
+	}, []uint32{simd1Domain})
+	simd1 := chains[0].(*cosmos.CosmosChain)
+	simd1.SkipImagePull = true
 
 	// Create a new Interchain object which describes the chains, relayers, and IBC connections we want to use
 	ic := interchaintest.NewInterchain()
@@ -130,10 +146,7 @@ func TestConfigureAvalanche(t *testing.T) {
 
 	rep := testreporter.NewNopReporter()
 	eRep := rep.RelayerExecReporter(t)
-	ctx := context.Background()
 
-	// Note: make sure that both the 'ic' interchain AND the hyperlane network share this client/network
-	client, network := interchaintest.DockerSetup(t)
 	opts := interchaintest.InterchainBuildOptions{
 		TestName:         t.Name(),
 		Client:           client,
@@ -175,8 +188,84 @@ func TestConfigureAvalanche(t *testing.T) {
 
 	// Set default isms for counter chains
 	helpers.SetDefaultIsm(t, ctx, simd1, userSimd1.KeyName(), avaIsmValidator)
-	// TODO: isms for Avalanche
-	// helpers.SetDefaultIsm(t, ctx, simd2, userSimd2.KeyName(), simd1IsmValidator)
+
+	ec, err := avalancheNode.GetSubnetEvmClient(ctx, 0)
+	require.NoError(t, err)
+	testKeyEthAddr := crypto.PubkeyToAddress(avaPrivateKey.PublicKey)
+
+	// Check the balance is what we expected
+	balanceC, err := ec.BalanceAt(ctx, testKeyEthAddr, nil)
+	require.NoError(t, err)
+	fmt.Printf("Address: 0x%s, subnet-evm balance: %s\n", AVA_FUNDED_TEST_KEY, balanceC.String())
+	testKeyFundingExpected, err := hexutil.DecodeBig("0x" + TEST_KEY_GENESIS_FUNDING)
+	require.NoError(t, err)
+	require.EqualValues(t, testKeyFundingExpected, balanceC)
+
+	// Record the current subnet-evm block
+	_, err = ec.BlockNumber(ctx)
+	require.NoError(t, err)
+
+	networkId, err := ec.ChainID(ctx)
+	require.NoError(t, err)
+	auth, err := bind.NewKeyedTransactorWithChainID(avaPrivateKey, networkId)
+	require.NoError(t, err)
+
+	// Set the suggested gas price prior to submitting a TX.
+	// Note: at present, any TX will fail with ExtDataHash error if this is not done.
+	gasPrice, err := ec.SuggestGasPrice(ctx)
+	fmt.Printf("Suggested gas price: %s\n", gasPrice.String())
+	require.NoError(t, err)
+	auth.GasPrice = gasPrice
+	auth.GasLimit = 0
+
+	// Deploy the mailbox contract and wait for the deployment to succeed
+	mailboxAddr, mailboxTx, mailboxContract, err := mailbox.DeployMailbox(auth, ec, avalancheDomain)
+	require.NoError(t, err)
+	mailboxTxReceipt, err := awaitAvalancheTx(ctx, ec, mailboxTx)
+	require.NoError(t, err)
+	require.Equal(t, mailboxTxReceipt.Status, types.ReceiptStatusSuccessful)
+
+	// Deploy the legacy multisig ISM contract and wait for the deployment to succeed
+	legacyMultisigAddr, legacyMultisigTx, legacyMultisigContract, err := legacy_multisig.DeployLegacyMultisig(auth, ec)
+	require.NoError(t, err)
+	legacyMultisigTxReceipt, err := awaitAvalancheTx(ctx, ec, legacyMultisigTx)
+	require.NoError(t, err)
+	require.Equal(t, legacyMultisigTxReceipt.Status, types.ReceiptStatusSuccessful)
+
+	avaValidatorPrivateKey, _ := crypto.HexToECDSA(valSimd1PrivKey)
+	avaValAddr := crypto.PubkeyToAddress(avaValidatorPrivateKey.PublicKey)
+
+	// Set the validator address for the remote domain (simd1)
+	enrollTx, err := legacyMultisigContract.EnrollValidator(auth, simd1Domain, avaValAddr)
+	require.NoError(t, err)
+	enrollTxReceipt, err := awaitAvalancheTx(ctx, ec, enrollTx)
+	require.NoError(t, err)
+	require.Equal(t, enrollTxReceipt.Status, types.ReceiptStatusSuccessful)
+
+	// Set a threshold of 1 so a single validator can sign
+	thresholdTx, err := legacyMultisigContract.SetThreshold(auth, simd1Domain, 1)
+	require.NoError(t, err)
+	thresholdTxReceipt, err := awaitAvalancheTx(ctx, ec, thresholdTx)
+	require.NoError(t, err)
+	require.Equal(t, thresholdTxReceipt.Status, types.ReceiptStatusSuccessful)
+
+	// Set the owner and default ISM
+	mailboxInitTx, err := mailboxContract.Initialize(auth, avalancheAddr, legacyMultisigAddr)
+	require.NoError(t, err)
+	mailboxInitTxReceipt, err := awaitAvalancheTx(ctx, ec, mailboxInitTx)
+	require.NoError(t, err)
+	require.Equal(t, mailboxInitTxReceipt.Status, types.ReceiptStatusSuccessful)
+
+	// Deploy the validator announce contract and wait for the deployment to succeed
+	announceAddr, announceTx, _, err := announce.DeployAnnounce(auth, ec, mailboxAddr)
+	require.NoError(t, err)
+	announceTxReceipt, err := awaitAvalancheTx(ctx, ec, announceTx)
+	require.NoError(t, err)
+	require.Equal(t, announceTxReceipt.Status, types.ReceiptStatusSuccessful)
+
+	avalancheMailboxAddrHex := hexutil.Encode(mailboxAddr.Bytes())
+	avalancheAnnounceAddrHex := hexutil.Encode(announceAddr.Bytes())
+
 	var avaRecipientContract common.Address
 	recipientDispatch := hexutil.Encode(avaRecipientContract.Bytes())
 	fmt.Printf("Recipient dispatch addr hex: %s", recipientDispatch)
@@ -201,58 +290,6 @@ func TestConfigureAvalanche(t *testing.T) {
 	simd1ValidatorSignaturesDir := filepath.Join(val1TmpDir, "signatures-"+chains[0].Config().Name)          //${val_dir}/signatures-${chainName}
 	avalancheValidatorSignaturesDir := filepath.Join(val2TmpDir, "signatures-"+avalancheChain.Config().Name) //${val_dir}/signatures-${chainName}
 
-	// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build .".
-	// Also make sure that the tags in hyperlane.yaml match the local docker image repo and version.
-	hyperlaneNetwork := hyperlane.NewHyperlaneNetwork(true, true)
-	err = hyperlaneNetwork.Build(ctx, logger, eRep, opts, *valSimd1, *valAvalanche, *rly)
-	require.NoError(t, err)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
-	defer cancel()
-
-	ec, err := avalancheNode.GetSubnetEvmClient(ctx, 0)
-	require.NoError(t, err)
-
-	networkId, err := ec.ChainID(ctx)
-	require.NoError(t, err)
-	auth, err := bind.NewKeyedTransactorWithChainID(avaPrivateKey, networkId)
-	require.NoError(t, err)
-
-	// Deploy the mailbox contract and wait for the deployment to succeed
-	mailboxAddr, mailboxTx, mailboxContract, err := mailbox.DeployMailbox(auth, ec, avalancheDomain)
-	require.NoError(t, err)
-	mailboxTxReceipt, err := awaitAvalancheTx(ctx, ec, mailboxTx)
-	require.NoError(t, err)
-	require.Equal(t, mailboxTxReceipt.Status, 0)
-
-	// Deploy the legacy multisig ISM contract and wait for the deployment to succeed
-	legacyMultisigAddr, legacyMultisigTx, legacyMultisigContract, err := legacy_multisig.DeployLegacyMultisig(auth, ec)
-	require.NoError(t, err)
-	legacyMultisigTxReceipt, err := awaitAvalancheTx(ctx, ec, legacyMultisigTx)
-	require.NoError(t, err)
-	require.Equal(t, legacyMultisigTxReceipt.Status, 0)
-
-	avaValidatorPrivateKey, _ := crypto.HexToECDSA(valSimd1PrivKey)
-	avaValAddr := crypto.PubkeyToAddress(avaValidatorPrivateKey.PublicKey)
-
-	// Set the validator address for the remote domain (simd1)
-	legacyMultisigContract.EnrollValidator(auth, simd1Domain, avaValAddr)
-	// Set a threshold of 1 so a single validator can sign
-	legacyMultisigContract.SetThreshold(auth, simd1Domain, 1)
-
-	// Set the owner and default ISM
-	mailboxContract.Initialize(auth, avalancheAddr, legacyMultisigAddr)
-
-	// Deploy the validator announce contract and wait for the deployment to succeed
-	announceAddr, announceTx, _, err := announce.DeployAnnounce(auth, ec, mailboxAddr)
-	require.NoError(t, err)
-	announceTxReceipt, err := awaitAvalancheTx(ctx, ec, announceTx)
-	require.NoError(t, err)
-	require.Equal(t, announceTxReceipt.Status, 0)
-
-	avalancheMailboxAddrHex := hexutil.Encode(mailboxAddr.Bytes())
-	avalancheAnnounceAddrHex := hexutil.Encode(announceAddr.Bytes())
-
 	rlyCfgs := []RelayerChainConfig{
 		&cosmosRelayerChainCfg{
 			privKey:                mnemonicPrivKey,
@@ -276,6 +313,12 @@ func TestConfigureAvalanche(t *testing.T) {
 		},
 	}
 	_, err = preconfigureHyperlaneRelayer(t, rly, rlyTmpDir, rlyCfgs)
+	require.NoError(t, err)
+
+	// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build .".
+	// Also make sure that the tags in hyperlane.yaml match the local docker image repo and version.
+	hyperlaneNetwork := hyperlane.NewHyperlaneNetwork(true, true)
+	err = hyperlaneNetwork.Build(ctx, logger, eRep, opts, *valSimd1, *valAvalanche, *rly)
 	require.NoError(t, err)
 
 	// Give the hyperlane validators and relayer time to start up and start watching the mailbox for the chain

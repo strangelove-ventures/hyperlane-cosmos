@@ -1,5 +1,5 @@
 hyperlane-relayer:
-  name: hyperlane-simd1-simd2 # hyperlane relayers can relay on multiple chains
+  name: hyperlane-simd1-ava # hyperlane relayers can relay on multiple chains
   type: relayer
   bin: ./relayer # For heighliner built images, this should be /bin/validator
   env-path: avalanche-cosmos-rly.txt # path to the docker args file
