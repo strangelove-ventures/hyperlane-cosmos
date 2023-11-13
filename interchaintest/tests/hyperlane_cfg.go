@@ -52,10 +52,10 @@ func preconfigureAvalancheValidator(
 	node *hyperlane.HyperlaneChainConfig,
 	tmpDir,
 	privKey,
-	chainID,
 	chainName, // e.g. simd1 or simd2
 	chainRpcUrl, // RPC endpoint for e.g. simd1
 	mailboxAddrHex string,
+	announceAddrHex string,
 	hyperlaneDomain uint32,
 ) (valJson string, err error) {
 	hyperlaneConfigPath := filepath.Join(tmpDir, chainName+".json")
@@ -63,7 +63,7 @@ func preconfigureAvalancheValidator(
 
 	// Write the hyperlane CONFIG_FILES to disk where the bind mount will expect it.
 	// See also https://docs.hyperlane.xyz/docs/operators/agent-configuration#config-files-with-docker.
-	valJson = generateAvalancheValidatorConfig(chainRpcUrl, privKey, chainName, chainID, mailboxAddrHex, hyperlaneDomain)
+	valJson = generateAvalancheValidatorConfig(chainRpcUrl, privKey, chainName, mailboxAddrHex, announceAddrHex, hyperlaneDomain)
 	err = os.WriteFile(hyperlaneConfigPath, []byte(valJson), 777)
 	if err != nil {
 		return
@@ -269,7 +269,7 @@ func generateHyperlaneRelayerConfig(chains []RelayerChainConfig) string {
 	return string(b)
 }
 
-func generateAvalancheValidatorConfig(rpcUrl, privKey, chainName, chainID, mailboxAddrHex string, domain uint32) string {
+func generateAvalancheValidatorConfig(rpcUrl, privKey, chainName, mailboxAddrHex, valAnnounceAddrHex string, domain uint32) string {
 	// TODO: the IGP address below is a no-op and will only work when the relayer config is set to NO ENFORCEMENT for gas relay.
 	rawJson := `{
 		"chains": {
@@ -287,7 +287,7 @@ func generateAvalancheValidatorConfig(rpcUrl, privKey, chainName, chainID, mailb
 		  }
 		}
 	  }`
-	return fmt.Sprintf(rawJson, rpcUrl, privKey, chainName, domain, chainID, mailboxAddrHex)
+	return fmt.Sprintf(rawJson, chainName, rpcUrl, privKey, chainName, domain, mailboxAddrHex, valAnnounceAddrHex)
 }
 
 func generateHyperlaneValidatorConfig(privKey, chainID, chainName, rpcUrl, grpcUrl string, originMailboxHex string, domain uint32) string {

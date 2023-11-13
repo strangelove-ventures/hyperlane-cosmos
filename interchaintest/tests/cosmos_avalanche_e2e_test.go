@@ -46,6 +46,94 @@ const (
 	TEST_KEY_GENESIS_FUNDING = "d3c21bcecceda1000000"                                             // the amount in the subnet-evm genesis for the above test key
 )
 
+func TestAvalancheConfigs(t *testing.T) {
+	logger := NewLogger(t)
+	avalancheDomain := uint32(43114)
+
+	// Note: make sure that both the 'ic' interchain AND the hyperlane network share this client/network
+	client, network := interchaintest.DockerSetup(t)
+	ctx := context.Background()
+
+	// Mailbox address - will be used in the hyperlane validator config
+	mailboxHex, expectedMailbox := helpers.GetMailboxAddress()
+	prefixedMailboxHex := "0x" + mailboxHex
+
+	// Directories where files related to this test will be stored
+	_, filename, _, _ := runtime.Caller(0)
+	tmpDir := filepath.Dir(filename)
+	tmpDir = filepath.Join(tmpDir, "configs")
+
+	// Get the hyperlane agent raw configs (before variable replacements)
+	valSimd1, valAvalanche, rly := readHyperlaneConfig(t, COSMOS_AVA_E2E, "hyperlane-validator-simd1", "hyperlane-avalanche-validator", logger)
+
+	var avaRecipientContract common.Address
+	recipientDispatch := hexutil.Encode(avaRecipientContract.Bytes())
+	fmt.Printf("Recipient dispatch addr hex: %s", recipientDispatch)
+	logger.Info("Preconfiguring Hyperlane (getting configs)")
+
+	valJson, err := preconfigureHyperlaneValidator(t, valSimd1, tmpDir, mnemonicPrivKey, "simd1", "simd1", "http://simd1-rpc:26659", "http://simd1-grpc:9090", prefixedMailboxHex, 23456)
+	require.NoError(t, err)
+
+	simd1MailboxHex, err := getMailbox(valJson, "simd1")
+	require.NoError(t, err)
+	_, simd1MailboxUnprefixed, found := strings.Cut(simd1MailboxHex, "0x")
+	require.True(t, found)
+	simd1Mailbox, err := hex.DecodeString(simd1MailboxUnprefixed)
+	require.NoError(t, err)
+	originMailboxB := []byte(simd1Mailbox)
+	require.Equal(t, expectedMailbox, originMailboxB)
+	avalancheRpcEndpoint := "http://avalanche-rpc"
+
+	avalancheMailboxAddrHex := simd1MailboxHex
+	avalancheAnnounceAddrHex := simd1MailboxHex
+
+	valJson, err = preconfigureAvalancheValidator(t, valAvalanche, tmpDir, AVA_FUNDED_TEST_KEY,
+		"avalanche-1", avalancheRpcEndpoint, avalancheMailboxAddrHex, avalancheAnnounceAddrHex, avalancheDomain)
+	require.NoError(t, err)
+	simd1ValidatorSignaturesDir := filepath.Join(tmpDir, "signatures-simd1")          //${val_dir}/signatures-${chainName}
+	avalancheValidatorSignaturesDir := filepath.Join(tmpDir, "signatures-avalanche1") //${val_dir}/signatures-${chainName}
+
+	rlyCfgs := []RelayerChainConfig{
+		&cosmosRelayerChainCfg{
+			privKey:                mnemonicPrivKey,
+			chainID:                "simd1",
+			chainName:              "simd1",
+			rpcUrl:                 "http://simd1-rpc:26659",
+			grpcUrl:                "http://simd1-grpc:9090",
+			originMailboxHex:       prefixedMailboxHex,
+			domain:                 23456,
+			validatorSignaturePath: simd1ValidatorSignaturesDir,
+		},
+		&avalancheRelayerChainCfg{
+			privKey:                AVA_FUNDED_TEST_KEY,
+			chainID:                "avalanche",
+			chainName:              "avalanche",
+			rpcUrl:                 avalancheRpcEndpoint,
+			originMailboxHex:       avalancheMailboxAddrHex,
+			domain:                 avalancheDomain,
+			validatorSignaturePath: avalancheValidatorSignaturesDir,
+			validatorAnnounceAddr:  avalancheAnnounceAddrHex,
+		},
+	}
+	_, err = preconfigureHyperlaneRelayer(t, rly, tmpDir, rlyCfgs)
+	require.NoError(t, err)
+
+	// Our images are currently local. You must build locally in monorepo, e.g. "cd rust && docker build .".
+	// Also make sure that the tags in hyperlane.yaml match the local docker image repo and version.
+	hyperlaneNetwork := hyperlane.NewHyperlaneNetwork(true, true)
+	rep := testreporter.NewNopReporter()
+	eRep := rep.RelayerExecReporter(t)
+
+	opts := interchaintest.InterchainBuildOptions{
+		TestName:         t.Name(),
+		Client:           client,
+		NetworkID:        network,
+		SkipPathCreation: true,
+	}
+	err = hyperlaneNetwork.Build(ctx, logger, eRep, opts, *valSimd1, *valAvalanche, *rly)
+	require.NoError(t, err)
+}
+
 // Set up the solidity smart contracts on our Avalanche node
 // IMPORTANT NOTE: there is currently a bug in the Avalanche chain cleanup.
 // After you run a test, containers/volumes won't be cleaned up and it will cause future tests to fail.
@@ -59,7 +147,7 @@ func TestConfigureAvalanche(t *testing.T) {
 	optionalBuildChainImage()
 
 	simd1Domain := uint32(23456)
-	avalancheDomain := uint32(34567)
+	avalancheDomain := uint32(13371)
 
 	// Set up the Avalanche chain
 	nv := 5
@@ -70,8 +158,9 @@ func TestConfigureAvalanche(t *testing.T) {
 
 	avaChain, err := interchaintest.NewBuiltinChainFactory(zaptest.NewLogger(t), []*interchaintest.ChainSpec{
 		{
-			Name:    "avalanche",
-			Version: "v1.10.1",
+			Name:      "avalanche",
+			ChainName: "test1", // Required, as 'test1' is a hyperlane reserved domain ID
+			Version:   "v1.10.1",
 			ChainConfig: ibc.ChainConfig{
 				ChainID: "neto-123123",
 				Images: []ibc.DockerImage{
@@ -100,6 +189,8 @@ func TestConfigureAvalanche(t *testing.T) {
 	require.Len(t, avaChain, 1)
 	ctx := context.Background()
 	avalancheChain := avaChain[0].(*avalanche.AvalancheChain)
+	avaName := avalancheChain.Config().Name
+	fmt.Printf("Name: %s\n", avaName)
 
 	err = avalancheChain.Initialize(ctx, t.Name(), client, network)
 	require.NoError(t, err, "failed to initialize avalanche chain")
@@ -284,8 +375,8 @@ func TestConfigureAvalanche(t *testing.T) {
 	require.Equal(t, expectedMailbox, originMailboxB)
 	avalancheRpcEndpoint := avalancheChain.GetChainRPCAddress(0)
 
-	valJson, err = preconfigureAvalancheValidator(t, valAvalanche, val2TmpDir, AVA_FUNDED_TEST_KEY, avalancheChain.Config().ChainID,
-		avalancheChain.Config().Name, avalancheRpcEndpoint, prefixedMailboxHex, avalancheDomain)
+	_, err = preconfigureAvalancheValidator(t, valAvalanche, val2TmpDir, AVA_FUNDED_TEST_KEY,
+		avalancheChain.Config().Name, avalancheRpcEndpoint, avalancheMailboxAddrHex, avalancheAnnounceAddrHex, avalancheDomain)
 	require.NoError(t, err)
 	simd1ValidatorSignaturesDir := filepath.Join(val1TmpDir, "signatures-"+chains[0].Config().Name)          //${val_dir}/signatures-${chainName}
 	avalancheValidatorSignaturesDir := filepath.Join(val2TmpDir, "signatures-"+avalancheChain.Config().Name) //${val_dir}/signatures-${chainName}
