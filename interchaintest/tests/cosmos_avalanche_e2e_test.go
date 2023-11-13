@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"math/big"
 	"net/http"
 	"path/filepath"
 	"runtime"
@@ -25,6 +26,7 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/tests/ethcontracts/announce"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/tests/ethcontracts/ism/legacy_multisig"
 	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/tests/ethcontracts/mailbox"
+	"github.com/strangelove-ventures/hyperlane-cosmos/interchaintest/tests/ethcontracts/recipient"
 	icv7 "github.com/strangelove-ventures/interchaintest/v7"
 	interchaintest "github.com/strangelove-ventures/interchaintest/v7"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/avalanche"
@@ -134,6 +136,16 @@ func TestAvalancheConfigs(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestGetAddress(t *testing.T) {
+	avaPrivKey := "8166f546bab6da521a8369cab06c5d2b9e46670292d85c875ee9ec20e84ffb61"
+	avaPrivateKey1, _ := crypto.HexToECDSA(avaPrivKey)
+	avaPrivateKey2, _ := crypto.HexToECDSA(AVA_FUNDED_TEST_KEY)
+	avalancheAddr1 := crypto.PubkeyToAddress(avaPrivateKey1.PublicKey)
+	avalancheAddr2 := crypto.PubkeyToAddress(avaPrivateKey2.PublicKey)
+	fmt.Printf("Address 1: %s\n", avalancheAddr1.Hex())
+	fmt.Printf("Address 2: %s\n", avalancheAddr2.Hex())
+}
+
 // Set up the solidity smart contracts on our Avalanche node
 // IMPORTANT NOTE: there is currently a bug in the Avalanche chain cleanup.
 // After you run a test, containers/volumes won't be cleaned up and it will cause future tests to fail.
@@ -215,8 +227,11 @@ func TestConfigureAvalanche(t *testing.T) {
 	// Get the validator key for the agents. We also need this key to configure the chain ISM.
 	valSimd1PrivKey, err := getHyperlaneBaseValidatorKey(valSimd1)
 	require.NoError(t, err)
-	valSimd2PrivKey, err := getHyperlaneBaseValidatorKey(valAvalanche)
+	valAvalanchePrivKey, err := getHyperlaneBaseValidatorKey(valAvalanche)
 	require.NoError(t, err)
+
+	avaAnnouncePrivateKey, _ := crypto.HexToECDSA(valAvalanchePrivKey)
+	avaAnnounceAddr := crypto.PubkeyToAddress(avaAnnouncePrivateKey.PublicKey)
 
 	// Set up one Cosmos chain (with our hyperlane modules) for the test.
 	// The image must be in our local registry so we skip image pull.
@@ -250,6 +265,7 @@ func TestConfigureAvalanche(t *testing.T) {
 
 	t.Cleanup(func() {
 		_ = ic.Close()
+		avalancheChain.Close(ctx)
 	})
 
 	// End setup for Docker network
@@ -275,22 +291,31 @@ func TestConfigureAvalanche(t *testing.T) {
 	// The private key used here MUST be the one from the validator config file.
 	simd1IsmValidator := counterchain.CreateEmperorValidator(t, simd1Domain, counterchain.LEGACY_MULTISIG, valSimd1PrivKey)
 	// Create counter chain 2 with val set signing legacy multisig
-	avaIsmValidator := counterchain.CreateEmperorValidator(t, avalancheDomain, counterchain.LEGACY_MULTISIG, valSimd2PrivKey)
+	avaIsmValidator := counterchain.CreateEmperorValidator(t, avalancheDomain, counterchain.LEGACY_MULTISIG, valAvalanchePrivKey)
 
 	// Set default isms for counter chains
 	helpers.SetDefaultIsm(t, ctx, simd1, userSimd1.KeyName(), avaIsmValidator)
 
 	ec, err := avalancheNode.GetSubnetEvmClient(ctx, 0)
 	require.NoError(t, err)
-	testKeyEthAddr := crypto.PubkeyToAddress(avaPrivateKey.PublicKey)
+
+	announceFundAmount := new(big.Int)
+	announceFundAmount = announceFundAmount.SetInt64(54195900000000000)
 
 	// Check the balance is what we expected
-	balanceC, err := ec.BalanceAt(ctx, testKeyEthAddr, nil)
+	balanceC, err := ec.BalanceAt(ctx, avalancheAddr, nil)
 	require.NoError(t, err)
 	fmt.Printf("Address: 0x%s, subnet-evm balance: %s\n", AVA_FUNDED_TEST_KEY, balanceC.String())
 	testKeyFundingExpected, err := hexutil.DecodeBig("0x" + TEST_KEY_GENESIS_FUNDING)
 	require.NoError(t, err)
 	require.EqualValues(t, testKeyFundingExpected, balanceC)
+
+	// Fund the validator announce address
+	fundTx, err := SendFunds(ec, ctx, avaPrivateKey, ibc.WalletAmount{Address: avaAnnounceAddr.Hex(), Amount: announceFundAmount.Int64()})
+	require.NoError(t, err)
+	fundTxReceipt, err := awaitAvalancheTx(ctx, ec, fundTx)
+	require.NoError(t, err)
+	require.Equal(t, fundTxReceipt.Status, types.ReceiptStatusSuccessful)
 
 	// Record the current subnet-evm block
 	_, err = ec.BlockNumber(ctx)
@@ -357,10 +382,15 @@ func TestConfigureAvalanche(t *testing.T) {
 	avalancheMailboxAddrHex := hexutil.Encode(mailboxAddr.Bytes())
 	avalancheAnnounceAddrHex := hexutil.Encode(announceAddr.Bytes())
 
-	var avaRecipientContract common.Address
+	// Deploy the test recipient contract and wait for the deployment to succeed
+	avaRecipientContract, avaRecipientTx, _, err := recipient.DeployRecipient(auth, ec)
+	require.NoError(t, err)
+	avaRecipientTxReceipt, err := awaitAvalancheTx(ctx, ec, avaRecipientTx)
+	require.NoError(t, err)
+	require.Equal(t, avaRecipientTxReceipt.Status, types.ReceiptStatusSuccessful)
+
 	recipientDispatch := hexutil.Encode(avaRecipientContract.Bytes())
-	fmt.Printf("Recipient dispatch addr hex: %s", recipientDispatch)
-	logger.Info("Preconfiguring Hyperlane (getting configs)")
+	logger.Info("Recipient dispatch", zap.String("hex address", recipientDispatch))
 
 	valJson, err := preconfigureHyperlaneValidator(t, valSimd1, val1TmpDir, mnemonicPrivKey, chains[0].Config().ChainID, chains[0].Config().Name, chains[0].GetRPCAddress(), "http://"+chains[0].GetGRPCAddress(), prefixedMailboxHex, 23456)
 	require.NoError(t, err)
@@ -475,16 +505,32 @@ func avalancheProcessMsg(
 	require.NoError(t, err)
 	message, _ := validator.CreateMessage(dispatchSender, originDomain, destDomain, bech32Recipient, string(b))
 	messageId := validator.GetMessageId(message)
-	require.Equal(t, dispatchedMsgId, hexutil.Encode(messageId))
+	msgIdHex := hexutil.Encode(messageId)
+	require.Equal(t, dispatchedMsgId, msgIdHex)
+	fmt.Printf("Awaiting message delivery to Avalanche for message ID: %s\n", msgIdHex)
 
 	return Await(func() (bool, error) {
 		var msg [32]byte
-		copy(msg[:], message)
+		copy(msg[:], messageId)
 		ctx := context.Background()
 		ctx, _ = context.WithTimeout(ctx, 5*time.Second)
+		iter, err := mailboxContract.FilterProcessId(&bind.FilterOpts{}, nil)
+		if err == nil && iter.Event != nil {
+			id := hexutil.Encode(iter.Event.MessageId[:])
+			fmt.Printf("Found delivered message with ID: %s\n", id)
+		}
+		if err == nil {
+			for ok := true; ok; ok = iter.Next() {
+				if err == nil && iter.Event != nil {
+					id := hexutil.Encode(iter.Event.MessageId[:])
+					fmt.Printf("Found delivered message with ID: %s\n", id)
+				}
+			}
+		}
+
 		return mailboxContract.Delivered(
 			&bind.CallOpts{}, msg)
-	}, 10*time.Minute, 5*time.Second)
+	}, 30*time.Minute, 5*time.Second)
 }
 
 // GetDefaultChainURI returns the default chain URI for a given blockchainID
