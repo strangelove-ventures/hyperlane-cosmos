@@ -13,10 +13,12 @@ import (
 	mbtypes "github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/strangelove-ventures/interchaintest/v7/chain/cosmos"
 	"github.com/strangelove-ventures/interchaintest/v7/testutil"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc"
 )
 
 // simd tx hyperlane-mailbox process <metadata> <message>
@@ -245,4 +247,19 @@ func GetMailboxAddress() (string, []byte) {
 
 	mailboxAddrBytes, _ := hex.DecodeString(mailboxAddr)
 	return mailboxAddr, mailboxAddrBytes
+}
+
+func QueryRecipientsIsmId(t *testing.T, ctx context.Context, chain *cosmos.CosmosChain, recipient string) uint32 {
+	grpcAddress := chain.GetHostGRPCAddress()
+	conn, err := grpc.Dial(grpcAddress, grpc.WithInsecure())
+	require.NoError(t, err)
+	defer conn.Close()
+
+	queryClient := mbtypes.NewQueryClient(conn)
+	recipientBz, err := sdk.AccAddressFromBech32(recipient)
+	require.NoError(t, err)
+	res, err := queryClient.RecipientsIsmId(ctx, &mbtypes.QueryRecipientsIsmIdRequest{Recipient: recipientBz})
+	require.NoError(t, err)
+
+	return res.IsmId
 }

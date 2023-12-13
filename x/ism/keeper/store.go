@@ -10,6 +10,13 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 )
 
+func (k Keeper) getIsm(ctx sdk.Context, ismId, origin uint32) (types.AbstractIsm, error) {
+	if ismId == 0 {
+		return k.getDefaultIsm(ctx, origin)
+	}
+	return k.getCustomIsm(ctx, ismId)
+}
+
 // getDefaultIsm returns the default ISM
 func (k Keeper) getDefaultIsm(ctx sdk.Context, origin uint32) (types.AbstractIsm, error) {
 	store := ctx.KVStore(k.storeKey)
@@ -37,20 +44,20 @@ func (k Keeper) getAllDefaultIsms(ctx sdk.Context) ([]*types.DefaultIsm, error) 
 		if err != nil {
 			return nil, err
 		}
-		
+
 		var ism types.AbstractIsm
 		err = k.cdc.UnmarshalInterface(iterator.Value(), &ism)
 		if err != nil {
 			return nil, err
 		}
-		
+
 		ismAny, err := types.PackAbstractIsm(ism)
 		if err != nil {
 			return nil, err
 		}
 
 		defaultIsms = append(defaultIsms, &types.DefaultIsm{
-			Origin: uint32(origin64),
+			Origin:      uint32(origin64),
 			AbstractIsm: ismAny,
 		})
 	}
@@ -98,20 +105,20 @@ func (k Keeper) getAllCustomIsms(ctx sdk.Context) ([]*types.CustomIsm, error) {
 		if err != nil {
 			return nil, err
 		}
-		
+
 		var ism types.AbstractIsm
 		err = k.cdc.UnmarshalInterface(iterator.Value(), &ism)
 		if err != nil {
 			return nil, err
 		}
-		
+
 		ismAny, err := types.PackAbstractIsm(ism)
 		if err != nil {
 			return nil, err
 		}
 
 		customIsms = append(customIsms, &types.CustomIsm{
-			Index: uint32(index64),
+			Index:       uint32(index64),
 			AbstractIsm: ismAny,
 		})
 	}

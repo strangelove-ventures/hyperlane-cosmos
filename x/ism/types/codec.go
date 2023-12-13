@@ -1,10 +1,9 @@
 package types
 
 import (
-	"fmt"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	sdkerrors "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
 	proto "github.com/cosmos/gogoproto/proto"
 )
@@ -49,13 +48,11 @@ func MustPackAbstractIsm(ism AbstractIsm) *codectypes.Any {
 
 func UnpackAbstractIsm(any *codectypes.Any) (AbstractIsm, error) {
 	if any == nil {
-		fmt.Println("Panic2")
 		return nil, sdkerrors.Wrap(ErrUnpackAny, "protobuf Any message cannot be nil")
 	}
 
 	ism, ok := any.GetCachedValue().(AbstractIsm)
 	if !ok {
-		fmt.Println("Panic3")
 		return nil, sdkerrors.Wrapf(ErrUnpackAny, "cannot unpack Any into Ism %T", any)
 	}
 
@@ -65,7 +62,6 @@ func UnpackAbstractIsm(any *codectypes.Any) (AbstractIsm, error) {
 func MustUnpackAbstractIsm(any *codectypes.Any) AbstractIsm {
 	ism, err := UnpackAbstractIsm(any)
 	if err != nil {
-		fmt.Println("Panic1")
 		panic(err)
 	}
 	return ism

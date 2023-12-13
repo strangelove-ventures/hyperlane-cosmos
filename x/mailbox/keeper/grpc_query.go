@@ -77,3 +77,22 @@ func (k Keeper) MsgDelivered(c context.Context, req *types.QueryMsgDeliveredRequ
 		Delivered: delivered,
 	}, nil
 }
+
+// RecipientsIsmId implements to Query/RecipientsIsmId gRPC method
+func (k Keeper) RecipientsIsmId(c context.Context, req *types.QueryRecipientsIsmIdRequest) (*types.QueryRecipientsIsmIdResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	
+	ctx := sdk.UnwrapSDKContext(c)
+
+	recipient := sdk.MustBech32ifyAddressBytes(sdk.GetConfig().GetBech32AccountAddrPrefix(), req.Recipient)
+	ismId, err := k.getReceiversIsm(ctx, recipient)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.QueryRecipientsIsmIdResponse{
+		IsmId: ismId,
+	}, nil
+}

@@ -17,4 +17,5 @@ var (
 	ErrMsgProcessInvalidSender     = sdkerrors.Register(ModuleName, 12, "invalid sender in msg process")
 	ErrMsgProcessInvalidMetadata   = sdkerrors.Register(ModuleName, 13, "invalid metadata in msg process")
 	ErrMsgProcessInvalidMessage    = sdkerrors.Register(ModuleName, 14, "invalid message in msg process")
+	ErrInvalidRecipient            = sdkerrors.Register(ModuleName, 15, "invalid recipient")
 )

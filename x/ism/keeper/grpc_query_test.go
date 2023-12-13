@@ -121,13 +121,12 @@ func (suite *KeeperTestSuite) TestQueryAllDefaultIsms() {
 	}
 }
 
-
 func (suite *KeeperTestSuite) TestQueryCustomIsm() {
 	var req *types.QueryCustomIsmRequest
 	var index uint32
 
 	signer := authtypes.NewModuleAddress(govtypes.ModuleName).String()
-	
+
 	testCases := []struct {
 		name     string
 		malleate func()
@@ -185,7 +184,6 @@ func (suite *KeeperTestSuite) TestQueryCustomIsm() {
 
 	for _, tc := range testCases {
 		suite.Run(tc.name, func() {
-			
 			tc.malleate()
 			res, err := suite.queryClient.CustomIsm(suite.ctx, req)
 
@@ -223,7 +221,7 @@ func (suite *KeeperTestSuite) TestQueryAllCustomIsms() {
 			suite.SetupTest()
 
 			signer := authtypes.NewModuleAddress(govtypes.ModuleName).String()
-			
+
 			msg := types.NewMsgCreateIsm(signer, defaultIsms[0].AbstractIsm)
 			resp1, err := suite.keeper.CreateIsm(suite.ctx, msg)
 			suite.Require().NoError(err)
@@ -259,4 +257,3 @@ func (suite *KeeperTestSuite) TestQueryAllCustomIsms() {
 		})
 	}
 }
-

@@ -44,7 +44,6 @@ func (suite *KeeperTestSuite) SetupTest() {
 		encCfg.Codec,
 		key,
 		nil,
-		nil,
 	)
 	suite.keeper.SetDomain(ctx, testOriginDomain)
 

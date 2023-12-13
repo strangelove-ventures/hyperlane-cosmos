@@ -21,6 +21,9 @@ pub enum ExecuteMsg {
     ChangeContractOwner {
         new_owner: String,
     },
+    SetIsmId {
+        ism_id: u32,
+    }
 }
 
 #[cw_serde]
@@ -29,9 +32,16 @@ pub enum QueryMsg {
     /// Owner returns the owner of the contract. Response: OwnerResponse
     #[returns(OwnerResponse)]
     Owner {},
+    #[returns(IsmResponse)]
+    Ism {},
 }
 
 #[cw_serde]
 pub struct OwnerResponse {
     pub address: String,
+}
+
+#[cw_serde]
+pub struct IsmResponse {
+    pub ism_id: u32,
 }

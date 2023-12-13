@@ -89,7 +89,6 @@ func (i *MessageIdMultiSig) VerifyValidatorSignatures(metadata []byte, message [
 		if err != nil {
 			return false
 		}
-		// fmt.Println("Signer: ", hex.EncodeToString(signer))
 		signerAddress := crypto.PubkeyToAddress(*signer)
 		// Loop through remaining validators until we find a match
 		for validatorIndex < validatorCount {

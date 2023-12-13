@@ -16,6 +16,7 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/imt"
 	common "github.com/strangelove-ventures/hyperlane-cosmos/x/common"
 	ismkeeper "github.com/strangelove-ventures/hyperlane-cosmos/x/ism/keeper"
+	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/receiver"
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/mailbox/types"
 )
 
@@ -33,6 +34,8 @@ type Keeper struct {
 	authority   string
 	mailboxAddr sdk.AccAddress
 	version     byte
+
+	receivers []receiver.Receiver
 }
 
 type ReadOnlyMailboxKeeper interface {
@@ -50,20 +53,29 @@ func (k Keeper) GetMailboxAddress() []byte {
 	return mailboxAddr
 }
 
-func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, cwKeeper *cosmwasm.Keeper, ismKeeper *ismkeeper.Keeper) Keeper {
+func NewKeeper(cdc codec.BinaryCodec, key storetypes.StoreKey, ismKeeper *ismkeeper.Keeper) Keeper {
 	// governance authority
 	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
 
 	return Keeper{
 		cdc:         cdc,
 		storeKey:    key,
-		cwKeeper:    cwKeeper,
 		ismKeeper:   ismKeeper,
 		authority:   authority.String(),
 		mailboxAddr: authtypes.NewModuleAddress(types.ModuleName),
 		version:     0,
-		pcwKeeper:   cosmwasm.NewDefaultPermissionKeeper(cwKeeper),
+		pcwKeeper:   nil,
+		receivers:   []receiver.Receiver{},
 	}
+}
+
+func (k *Keeper) AddReceiver(receiver *receiver.Receiver) {
+	k.receivers = append(k.receivers, *receiver)
+}
+
+func (k *Keeper) AddWasmReceiver(cwKeeper *cosmwasm.Keeper) {
+	k.cwKeeper = cwKeeper
+	k.pcwKeeper = cosmwasm.NewDefaultPermissionKeeper(cwKeeper)
 }
 
 func (k *Keeper) SetDomain(c context.Context, domain uint32) {

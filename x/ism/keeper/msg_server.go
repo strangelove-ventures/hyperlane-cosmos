@@ -4,7 +4,7 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	sdkerrors "cosmossdk.io/errors"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
@@ -36,10 +36,10 @@ func (k Keeper) SetDefaultIsm(goCtx context.Context, msg *types.MsgSetDefaultIsm
 			return &types.MsgSetDefaultIsmResponse{}, err
 		}
 
-		events.AppendEvent(ism.DefaultIsmEvent(originIsm.Origin))
+		events = events.AppendEvent(ism.DefaultIsmEvent(originIsm.Origin))
 	}
 
-	events.AppendEvent(sdk.NewEvent(
+	events = events.AppendEvent(sdk.NewEvent(
 		sdk.EventTypeMessage,
 		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 	))
@@ -68,9 +68,9 @@ func (k Keeper) CreateIsm(goCtx context.Context, msg *types.MsgCreateIsm) (*type
 	}
 
 	events := sdk.Events{}
-    events.AppendEvent(ism.CustomIsmEvent(ismId))
+	events = events.AppendEvent(ism.CustomIsmEvent(ismId))
 
-	events.AppendEvent(sdk.NewEvent(
+	events = events.AppendEvent(sdk.NewEvent(
 		sdk.EventTypeMessage,
 		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 	))

@@ -2,7 +2,6 @@ package keeper_test
 
 import (
 	"encoding/binary"
-	"fmt"
 	"strconv"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -174,8 +173,6 @@ func (suite *KeeperTestSuite) TestDispatch() {
 
 			suite.Require().NoError(err)
 			suite.Require().NotNil(res)
-
-			fmt.Println("ID: ", res.MessageId)
 
 			// zero-pad the sender w/ appropriate hyperlane byte length
 			senderB, _ := hexutil.Decode(senderHex)

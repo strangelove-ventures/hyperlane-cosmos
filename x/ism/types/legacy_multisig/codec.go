@@ -6,7 +6,7 @@ import (
 	"github.com/strangelove-ventures/hyperlane-cosmos/x/ism/types"
 )
 
-// RegisterInterfaces registers the hyperlane mailbox
+// RegisterInterfaces registers the LegacyMultiSig
 // implementations and interfaces.
 func RegisterInterfaces(registry codectypes.InterfaceRegistry) {
 	registry.RegisterImplementations(

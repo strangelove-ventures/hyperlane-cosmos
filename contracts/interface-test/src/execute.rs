@@ -1,6 +1,6 @@
 use crate::{
     error::ContractError,
-    state::OWNER,
+    state::{OWNER, ISM},
     hyperlane_bindings::HyperlaneMsg,
 };
 use cosmwasm_std::{Addr, Deps, DepsMut, MessageInfo, Response, CosmosMsg};
@@ -75,4 +75,21 @@ pub fn check_is_contract_owner(deps: Deps, sender: Addr) -> Result<(), ContractE
     } else {
         Ok(())
     }
+}
+
+pub fn set_ism(
+    deps: DepsMut,
+    info: MessageInfo,
+    ism_id: u32,
+) -> Result<Response<HyperlaneMsg>, ContractError> {
+    // Only allow current contract owner to change owner
+    check_is_contract_owner(deps.as_ref(), info.sender)?;
+
+    // update ism id
+    ISM.save(deps.storage, &ism_id)?;
+
+    // return OK
+    Ok(Response::new()
+        .add_attribute("action", "set_ism")
+        .add_attribute("ism_id", ism_id.to_string()))
 }

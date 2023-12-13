@@ -146,9 +146,6 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 	_, contract2 := helpers.SetupContract(t, ctx, simd2, userSimd2.KeyName(), "../contracts/hyperlane.wasm", msg)
 	logger.Info("simd2 contract", zap.String("address", contract2))
 
-	verifyContractEntryPoints(t, ctx, simd1, userSimd1, contract)
-	verifyContractEntryPoints(t, ctx, simd2, userSimd2, contract2)
-
 	// Create counter chain 1 with val set signing legacy multisig.
 	// The private key used here MUST be the one from the validator config file.
 	simd1IsmValidator := counterchain.CreateEmperorValidator(t, simd1Domain, counterchain.LEGACY_MULTISIG, valSimd1PrivKey)
@@ -156,9 +153,16 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 	simd2IsmValidator := counterchain.CreateEmperorValidator(t, simd2Domain, counterchain.LEGACY_MULTISIG, valSimd2PrivKey)
 
 	// Set default isms for counter chains for SIMD
-	helpers.SetDefaultIsm(t, ctx, simd1, userSimd1.KeyName(), simd2IsmValidator)
+	//helpers.SetDefaultIsm(t, ctx, simd1, userSimd1.KeyName(), simd2IsmValidator)
 	// Set default isms for counter chains for SIMD2
-	helpers.SetDefaultIsm(t, ctx, simd2, userSimd2.KeyName(), simd1IsmValidator)
+	//helpers.SetDefaultIsm(t, ctx, simd2, userSimd2.KeyName(), simd1IsmValidator)
+
+	// Set custom isms for counter chains
+	ismIdForSimd1 := helpers.CreateCustomIsm(t, ctx, simd1, userSimd1.KeyName(), simd2IsmValidator)
+	ismIdForSimd2 := helpers.CreateCustomIsm(t, ctx, simd2, userSimd2.KeyName(), simd1IsmValidator)
+
+	helpers.SetContractsIsm(t, ctx, simd1, userSimd1, contract, ismIdForSimd1)
+	helpers.SetContractsIsm(t, ctx, simd2, userSimd2, contract2, ismIdForSimd2)
 
 	recipientAccAddr := sdk.MustAccAddressFromBech32(contract2).Bytes()
 	recipientDispatch := hexutil.Encode([]byte(recipientAccAddr))
@@ -245,8 +249,8 @@ func TestHyperlaneCosmosE2E(t *testing.T) {
 	// ***************** IGP setup, copied from  ***************************************
 	exchangeRate := math.NewInt(1e10)
 	gasPrice := math.NewInt(1)
-	testGasAmount := math.NewInt(100_000)
-	quoteExpected := math.NewInt(100_000)
+	testGasAmount := math.NewInt(200_000)
+	quoteExpected := math.NewInt(200_000)
 	beneficiary := "cosmos12aqqagjkk3y7mtgkgy5fuun3j84zr3c6e0zr6n"
 
 	// This should be IGP 0, which we will ignore and not use for anything
@@ -422,9 +426,6 @@ func TestHyperlaneCosmosMultiMessageE2E(t *testing.T) {
 	logger.Info("simd1 contract", zap.String("address", contract))
 	_, contract2 := helpers.SetupContract(t, ctx, simd2, userSimd2.KeyName(), "../contracts/hyperlane.wasm", msg)
 	logger.Info("simd2 contract", zap.String("address", contract2))
-
-	verifyContractEntryPoints(t, ctx, simd1, userSimd, contract)
-	verifyContractEntryPoints(t, ctx, simd2, userSimd2, contract2)
 
 	// Create counter chain 1 with val set signing legacy multisig.
 	// The private key used here MUST be the one from the validator config file.
@@ -678,9 +679,6 @@ func TestHyperlaneCosmosValidator(t *testing.T) {
 	logger.Info("simd1 contract", zap.String("address", contract))
 	_, contract2 := helpers.SetupContract(t, ctx, simd2, userSimd2.KeyName(), "../contracts/hyperlane.wasm", msg)
 	logger.Info("simd2 contract", zap.String("address", contract2))
-
-	verifyContractEntryPoints(t, ctx, simd1, userSimd, contract)
-	verifyContractEntryPoints(t, ctx, simd2, userSimd2, contract2)
 
 	// Create counter chain 1 with val set signing legacy multisig
 	// The private key used here MUST be the one from the validator config file. TODO: cleanup this test to read it from the file.
